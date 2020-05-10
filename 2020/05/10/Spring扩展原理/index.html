@@ -27,13 +27,13 @@
 <meta property="og:site_name" content="binshow的Java学习">
 <meta property="og:description" content="Spring扩展原理">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="c:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1589077961313.png">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1589077961313.png">
 <meta property="article:published_time" content="2020-05-10T01:43:58.000Z">
 <meta property="article:modified_time" content="2020-05-10T04:54:17.488Z">
 <meta property="article:author" content="binshow">
 <meta property="article:tag" content="Spring">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="c:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1589077961313.png">
+<meta name="twitter:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1589077961313.png">
 
 <link rel="canonical" href="http://yoursite.com/2020/05/10/Spring%E6%89%A9%E5%B1%95%E5%8E%9F%E7%90%86/">
 
@@ -250,7 +250,7 @@
 <h2 id="三、ApplicationListener"><a href="#三、ApplicationListener" class="headerlink" title="三、ApplicationListener"></a>三、ApplicationListener</h2><p>ApplicationListener：监听容器中发布的事件。事件驱动模型开发；</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ApplicationListener</span>&lt;<span class="title">E</span> <span class="keyword">extends</span> <span class="title">ApplicationEvent</span>&gt;</span></span><br><span class="line"><span class="class">//是一个接口，可以写其实现类来监听 <span class="title">ApplicationEvent</span> 及其下面的子事件</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1589077961313.png" alt="1589077961313"></p>
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1589077961313.png" alt="1589077961313"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyApplicationListener</span> <span class="keyword">implements</span> <span class="title">ApplicationListener</span>&lt;<span class="title">ApplicationEvent</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//当容器中发布此事件以后，方法触发</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onApplicationEvent</span><span class="params">(ApplicationEvent event)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">		System.out.println(<span class="string">"收到事件："</span>+event);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">测试：容器刷新完成的时候会发布事件</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Test</span><span class="comment">//默认的事件有哪些</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test02</span><span class="params">()</span></span>&#123;</span><br><span class="line">        AnnotationConfigApplicationContext applicationContext =</span><br><span class="line">                <span class="keyword">new</span> AnnotationConfigApplicationContext(ExtConfig<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">		<span class="comment">//发布事件</span></span><br><span class="line">        applicationContext.publishEvent(<span class="keyword">new</span> ApplicationEvent(<span class="keyword">new</span> String(<span class="string">"我发布的事件"</span>)) &#123;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        applicationContext.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">postProcessBeanDefinitionRegistry...bean的数量：<span class="number">10</span></span><br><span class="line">MyBeanDefinitionRegistryPostProcessor...bean的数量：<span class="number">11</span></span><br><span class="line">MyBeanFactoryPostProcessor...postProcessBeanFactory...</span><br><span class="line">当前BeanFactory中有<span class="number">11</span> 个Bean</span><br><span class="line">[org.springframework.context.annotation.internalConfigurationAnnotationProcessor, org.springframework.context.annotation.internalAutowiredAnnotationProcessor, org.springframework.context.annotation.internalCommonAnnotationProcessor, org.springframework.context.event.internalEventListenerProcessor, org.springframework.context.event.internalEventListenerFactory, extConfig, myApplicationListener, myBeanDefinitionRegistryPostProcessor, myBeanFactoryPostProcessor, blue, hello]</span><br><span class="line">blue...constructor</span><br><span class="line">blue...constructor</span><br><span class="line">收到事件：org.springframework.context.event.ContextRefreshedEvent[source=org.springframework.context.annotation.AnnotationConfigApplicationContext@<span class="number">5f</span>8ed237, started on Sun May <span class="number">10</span> <span class="number">10</span>:<span class="number">33</span>:<span class="number">15</span> GMT+<span class="number">08</span>:<span class="number">00</span> <span class="number">2020</span>]<span class="comment">//容器刷新事件</span></span><br><span class="line">收到事件：MyTest$<span class="number">1</span>[source=鎴戝彂甯冪殑浜嬩欢]</span><br><span class="line">收到事件：org.springframework.context.event.ContextClosedEvent[source=org.springframework.context.annotation.AnnotationConfigApplicationContext@<span class="number">5f</span>8ed237, started on Sun May <span class="number">10</span> <span class="number">10</span>:<span class="number">33</span>:<span class="number">15</span> GMT+<span class="number">08</span>:<span class="number">00</span> <span class="number">2020</span>]<span class="comment">//容器关闭事件</span></span><br></pre></td></tr></table></figure>
@@ -367,14 +367,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

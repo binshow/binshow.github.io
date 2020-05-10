@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="mySQL基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mySQL基础语法">
+<meta property="og:url" content="http://yoursite.com/2020/05/10/mySQL%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="mySQL基础">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-10T06:43:06.000Z">
+<meta property="article:modified_time" content="2020-05-10T09:09:09.859Z">
+<meta property="article:author" content="binshow">
+<meta property="article:tag" content="mySQL">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/10/mySQL%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mySQL基础语法 | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/10/mySQL%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mySQL基础语法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-10 14:43:06 / 修改时间：17:09:09" itemprop="dateCreated datePublished" datetime="2020-05-10T14:43:06+08:00">2020-05-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="mySQL基础"><a href="#mySQL基础" class="headerlink" title="mySQL基础"></a>mySQL基础</h1><a id="more"></a>
+
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><h2 id="1-数据库的好处"><a href="#1-数据库的好处" class="headerlink" title="1. 数据库的好处"></a>1. 数据库的好处</h2><p>​    1.持久化数据到本地<br>​    2.可以实现结构化查询，方便管理<br>​    </p>
+<h2 id="2-数据库相关概念"><a href="#2-数据库相关概念" class="headerlink" title="2. 数据库相关概念"></a>2. 数据库相关概念</h2><p>​    1、DB：数据库，保存一组有组织的数据的容器<br>​    2、DBMS：数据库管理系统，又称为数据库软件（产品），用于管理DB中的数据<br>​    3、SQL:结构化查询语言(Structured Query Language)，用于和DBMS通信的语言</p>
+<h2 id="3-数据库存储数据的特点"><a href="#3-数据库存储数据的特点" class="headerlink" title="3. 数据库存储数据的特点"></a>3. 数据库存储数据的特点</h2><p>​    1、将数据放到表中，表再放到库中<br>​    2、一个数据库中可以有多个表，每个表都有一个的名字，用来标识自己。表名具有唯一性。<br>​    3、表具有一些特性，这些特性定义了数据在表中如何存储，类似java中 “类”的设计。<br>​    4、表由列组成，我们也称为字段。所有表都是由一个或多个列组成的，每一列类似java 中的”属性”<br>​    5、表中的数据是按行存储的，每一行类似于java中的“对象”。</p>
+<h2 id="4-SQL的语言分类"><a href="#4-SQL的语言分类" class="headerlink" title="4. SQL的语言分类"></a>4. SQL的语言分类</h2><p>​    DQL（Data Query Language）：数据查询语言<br>​        select<br>​    DML(Data Manipulate Language):数据操作语言<br>​        insert 、update、delete<br>​    DDL（Data Define Languge）：数据定义语言<br>​        create、drop、alter<br>​    TCL（Transaction Control Language）：事务控制语言<br>​        commit、rollback</p>
+<h2 id="5-数据库三范式"><a href="#5-数据库三范式" class="headerlink" title="5.数据库三范式"></a>5.数据库三范式</h2><ul>
+<li>第一范式：1NF是对属性的原子性约束，要求字段具有原子性，不可再分解；(只要是关系型数据库都满足1NF)</li>
+<li>第二范式：2NF是在满足第一范式的前提下，非主键字段不能出现部分依赖主键；解决：消除复合主键就可避免出现部分以来，可增加单列关键字。</li>
+<li>第三范式：3NF是在满足第二范式的前提下，非主键字段不能出现传递依赖，比如某个字段a依赖于主键，而一些字段依赖字段a，这就是传递依赖。解决：将一个实体信息的数据放在一个表内实现。</li>
+</ul>
+<h2 id="6-常见命令"><a href="#6-常见命令" class="headerlink" title="6.常见命令"></a>6.常见命令</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1.查看当前所有的数据库</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">databases</span>;</span><br><span class="line">2.打开指定的库</span><br><span class="line"><span class="keyword">use</span> 库名</span><br><span class="line"><span class="number">3.</span>查看当前库的所有表</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">tables</span>;</span><br><span class="line">4.查看其它库的所有表</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">tables</span> <span class="keyword">from</span> 库名;</span><br><span class="line">5.创建表</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> 表名(</span><br><span class="line">	列名 列类型,</span><br><span class="line">	列名 列类型，</span><br><span class="line">	。。。</span><br><span class="line">);</span><br><span class="line">6.查看表结构</span><br><span class="line">desc 表名;</span><br><span class="line"></span><br><span class="line"><span class="comment">#例如：</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span></span><br><span class="line"><span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> <span class="string">`myemployees`</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、DQL语言"><a href="#二、DQL语言" class="headerlink" title="二、DQL语言"></a>二、DQL语言</h2><h2 id="1-创建表"><a href="#1-创建表" class="headerlink" title="1.创建表"></a>1.创建表</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> mytable (</span><br><span class="line">  <span class="comment"># int 类型，不为空，自增</span></span><br><span class="line">  <span class="keyword">id</span> <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="comment"># int 类型，不可为空，默认值为 1，不为空</span></span><br><span class="line">  col1 <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="number">1</span>,</span><br><span class="line">  <span class="comment"># 变长字符串类型，最长为 45 个字符，可以为空</span></span><br><span class="line">  col2 <span class="built_in">VARCHAR</span>(<span class="number">45</span>) <span class="literal">NULL</span>,</span><br><span class="line">  <span class="comment"># 日期类型，可为空</span></span><br><span class="line">  col3 <span class="built_in">DATE</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="comment"># 设置主键为 id</span></span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>));</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-插入"><a href="#1-插入" class="headerlink" title="1. 插入"></a>1. 插入</h2><p>普通插入</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> mytable(col1, col2)</span><br><span class="line"><span class="keyword">VALUES</span>(val1, val2);</span><br></pre></td></tr></table></figure>
+
+<p>插入检索出来的数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> mytable1(col1, col2)</span><br><span class="line"><span class="keyword">SELECT</span> col1, col2</span><br><span class="line"><span class="keyword">FROM</span> mytable2;</span><br></pre></td></tr></table></figure>
+
+<p>将一个表的内容插入到一个新表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> newtable <span class="keyword">AS</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> mytable;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-更新"><a href="#2-更新" class="headerlink" title="2. 更新"></a>2. 更新</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> mytable</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">col</span> = val</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-删除"><a href="#3-删除" class="headerlink" title="3. 删除"></a>3. 删除</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="delete、drop、truncate区别"><a href="#delete、drop、truncate区别" class="headerlink" title="delete、drop、truncate区别"></a>delete、drop、truncate区别</h3><ul>
+<li>truncate 和 delete只删除数据，不删除表结构 ,drop删除表结构，并且释放所占的空间。</li>
+<li><strong>删除数据的速度，</strong>drop&gt; truncate &gt; delete</li>
+<li>delete属于DML语言，需要事务管理，commit之后才能生效。drop和truncate属于DDL语言，操作立刻生效，不可回滚。</li>
+<li><strong>使用场合：</strong><ul>
+<li>当你不再需要该表时， 用 drop;</li>
+<li>当你仍要保留该表，但要删除所有记录时， 用 truncate;</li>
+<li>当你要删除部分记录时（always with a where clause), 用 delete.</li>
+</ul>
+</li>
+</ul>
+<p><strong>注意：</strong> 对于<strong>有主外键关系的表</strong>，不能使用truncate而应该<strong>使用不带where子句的delete语句</strong>，由于truncate不记录在日志中，不能够激活触发器</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">TRUNCATE</span> <span class="keyword">TABLE</span>  可以清空表，也就是删除所有行。</span><br></pre></td></tr></table></figure>
+
+<p>使用更新和删除操作时一定要用 WHERE 子句，不然会把整张表的数据都破坏。可以先用 SELECT 语句进行测试，防止错误删除。</p>
+<h2 id="4-查询"><a href="#4-查询" class="headerlink" title="4. 查询"></a>4. 查询</h2><h3 id="DISTINCT"><a href="#DISTINCT" class="headerlink" title="DISTINCT"></a>DISTINCT</h3><p>相同值只会出现一次。它作用于所有列，也就是说所有列的值都相同才算相同。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> col1, col2</span><br><span class="line"><span class="keyword">FROM</span> mytable;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LIMIT"><a href="#LIMIT" class="headerlink" title="LIMIT"></a>LIMIT</h3><p>限制返回的行数。可以有两个参数，第一个参数为起始行，从 0 开始；第二个参数为返回的总行数。</p>
+<p>返回前 5 行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">LIMIT</span> <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">LIMIT</span> <span class="number">0</span>, <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+
+<p>返回第 3 ~ 5 行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">LIMIT</span> <span class="number">2</span>, <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5、排序"><a href="#5、排序" class="headerlink" title="5、排序"></a>5、排序</h2><ul>
+<li><strong>ASC</strong>  ：升序（默认）</li>
+<li><strong>DESC</strong>  ：降序</li>
+</ul>
+<p>可以按多个列进行排序，并且为每个列指定不同的排序方式：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> col1 <span class="keyword">DESC</span>, col2 <span class="keyword">ASC</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6、过滤"><a href="#6、过滤" class="headerlink" title="6、过滤"></a>6、过滤</h2><p>不进行过滤的数据非常大，导致通过网络传输了多余的数据，从而浪费了网络带宽。因此尽量使用 SQL 语句来过滤不必要的数据，而不是传输所有的数据到客户端中然后由客户端进行过滤。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">col</span> <span class="keyword">IS</span> <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+
+<p>下表显示了 WHERE 子句可用的操作符</p>
+<table>
+<thead>
+<tr>
+<th align="center">操作符</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">=</td>
+<td align="center">等于</td>
+</tr>
+<tr>
+<td align="center">&lt;</td>
+<td align="center">小于</td>
+</tr>
+<tr>
+<td align="center">&gt;</td>
+<td align="center">大于</td>
+</tr>
+<tr>
+<td align="center">&lt;&gt; !=</td>
+<td align="center">不等于</td>
+</tr>
+<tr>
+<td align="center">&lt;= !&gt;</td>
+<td align="center">小于等于</td>
+</tr>
+<tr>
+<td align="center">&gt;= !&lt;</td>
+<td align="center">大于等于</td>
+</tr>
+<tr>
+<td align="center">BETWEEN</td>
+<td align="center">在两个值之间</td>
+</tr>
+<tr>
+<td align="center">IS NULL</td>
+<td align="center">为 NULL 值</td>
+</tr>
+</tbody></table>
+<p>应该注意到，NULL 与 0、空字符串都不同。</p>
+<p><strong>AND 和 OR</strong>   用于连接多个过滤条件。优先处理 AND，当一个过滤表达式涉及到多个 AND 和 OR 时，可以使用 () 来决定优先级，使得优先级关系更清晰。</p>
+<p><strong>IN</strong>   操作符用于匹配一组值，其后也可以接一个 SELECT 子句，从而匹配子查询得到的一组值。</p>
+<p><strong>NOT</strong>   操作符用于否定一个条件。</p>
+<h2 id="7、通配符"><a href="#7、通配符" class="headerlink" title="7、通配符"></a>7、通配符</h2><p>通配符也是用在过滤语句中，但它只能用于文本字段。</p>
+<ul>
+<li><strong>%</strong>   匹配 &gt;=0 个任意字符；</li>
+<li><strong>_</strong>   匹配 ==1 个任意字符；</li>
+<li><strong>[ ]</strong>   可以匹配集合内的字符，例如 [ab] 将匹配字符 a 或者 b。用脱字符 ^ 可以对其进行否定，也就是不匹配集合内的字符。</li>
+</ul>
+<p>使用 Like 来进行通配符匹配。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> mytable</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">col</span> <span class="keyword">LIKE</span> <span class="string">'[^AB]%'</span>; <span class="comment">-- 不以 A 和 B 开头的任意文本</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>不要滥用通配符，通配符位于开头处匹配会非常慢。</strong></p>
+<h2 id="8-分组查询"><a href="#8-分组查询" class="headerlink" title="8. 分组查询"></a>8. 分组查询</h2>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mySQL/" rel="tag"># mySQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/10/servlet/" rel="prev" title="servlet">
+      <i class="fa fa-chevron-left"></i> servlet
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/10/Java%E9%9B%86%E5%90%88/" rel="next" title="Java容器">
+      Java容器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#mySQL基础"><span class="nav-number">1.</span> <span class="nav-text">mySQL基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、概述"><span class="nav-number">1.1.</span> <span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-数据库的好处"><span class="nav-number">1.2.</span> <span class="nav-text">1. 数据库的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-数据库相关概念"><span class="nav-number">1.3.</span> <span class="nav-text">2. 数据库相关概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-数据库存储数据的特点"><span class="nav-number">1.4.</span> <span class="nav-text">3. 数据库存储数据的特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-SQL的语言分类"><span class="nav-number">1.5.</span> <span class="nav-text">4. SQL的语言分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-数据库三范式"><span class="nav-number">1.6.</span> <span class="nav-text">5.数据库三范式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-常见命令"><span class="nav-number">1.7.</span> <span class="nav-text">6.常见命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、DQL语言"><span class="nav-number">1.8.</span> <span class="nav-text">二、DQL语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-创建表"><span class="nav-number">1.9.</span> <span class="nav-text">1.创建表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-插入"><span class="nav-number">1.10.</span> <span class="nav-text">1. 插入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-更新"><span class="nav-number">1.11.</span> <span class="nav-text">2. 更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-删除"><span class="nav-number">1.12.</span> <span class="nav-text">3. 删除</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#delete、drop、truncate区别"><span class="nav-number">1.12.1.</span> <span class="nav-text">delete、drop、truncate区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-查询"><span class="nav-number">1.13.</span> <span class="nav-text">4. 查询</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DISTINCT"><span class="nav-number">1.13.1.</span> <span class="nav-text">DISTINCT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LIMIT"><span class="nav-number">1.13.2.</span> <span class="nav-text">LIMIT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5、排序"><span class="nav-number">1.14.</span> <span class="nav-text">5、排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6、过滤"><span class="nav-number">1.15.</span> <span class="nav-text">6、过滤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7、通配符"><span class="nav-number">1.16.</span> <span class="nav-text">7、通配符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-分组查询"><span class="nav-number">1.17.</span> <span class="nav-text">8. 分组查询</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+</body>
+</html>
