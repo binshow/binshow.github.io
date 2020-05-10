@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Spring容器创建过程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring容器创建过程">
+<meta property="og:url" content="http://yoursite.com/2020/05/10/Spring%E5%AE%B9%E5%99%A8%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="Spring容器创建过程">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-10T03:01:57.000Z">
+<meta property="article:modified_time" content="2020-05-10T03:52:13.166Z">
+<meta property="article:author" content="binshow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/10/Spring%E5%AE%B9%E5%99%A8%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring容器创建过程 | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/10/Spring%E5%AE%B9%E5%99%A8%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring容器创建过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-10 11:01:57 / 修改时间：11:52:13" itemprop="dateCreated datePublished" datetime="2020-05-10T11:01:57+08:00">2020-05-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Spring容器创建过程"><a href="#Spring容器创建过程" class="headerlink" title="Spring容器创建过程"></a>Spring容器创建过程</h1><a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br></pre></td><td class="code"><pre><span class="line">Spring容器的refresh()【创建刷新】;</span><br><span class="line">1、prepareRefresh()刷新前的预处理;</span><br><span class="line">   1）、initPropertySources()初始化一些属性设置;现在为空给子类自定义个性化的属性设置方法；</span><br><span class="line">   2）、getEnvironment().validateRequiredProperties();检验属性的合法等</span><br><span class="line">   3）、earlyApplicationEvents&#x3D; new LinkedHashSet&lt;ApplicationEvent&gt;();保存容器中的一些早期的事件；</span><br><span class="line">2、obtainFreshBeanFactory();获取BeanFactory；</span><br><span class="line">   1）、refreshBeanFactory();刷新【创建】BeanFactory；</span><br><span class="line">         创建了一个this.beanFactory &#x3D; new DefaultListableBeanFactory();</span><br><span class="line">         设置id；</span><br><span class="line">   2）、getBeanFactory();返回刚才GenericApplicationContext创建的BeanFactory对象；</span><br><span class="line">   3）、将创建的BeanFactory【DefaultListableBeanFactory】返回；</span><br><span class="line">3、prepareBeanFactory(beanFactory);BeanFactory的预准备工作（BeanFactory进行一些设置）；</span><br><span class="line">   1）、设置BeanFactory的类加载器、支持表达式解析器...</span><br><span class="line">   2）、添加部分BeanPostProcessor【ApplicationContextAwareProcessor】</span><br><span class="line">   3）、设置忽略的自动装配的接口EnvironmentAware、EmbeddedValueResolverAware、xxx；</span><br><span class="line">   4）、注册可以解析的自动装配；我们能直接在任何组件中自动注入：</span><br><span class="line">         BeanFactory、ResourceLoader、ApplicationEventPublisher、ApplicationContext</span><br><span class="line">   5）、添加BeanPostProcessor【ApplicationListenerDetector】</span><br><span class="line">   6）、添加编译时的AspectJ；</span><br><span class="line">   7）、给BeanFactory中注册一些能用的组件；</span><br><span class="line">      environment【ConfigurableEnvironment】、</span><br><span class="line">      systemProperties【Map&lt;String, Object&gt;】、</span><br><span class="line">      systemEnvironment【Map&lt;String, Object&gt;】</span><br><span class="line">4、postProcessBeanFactory(beanFactory);BeanFactory准备工作完成后进行的后置处理工作；</span><br><span class="line">   1）、子类通过重写这个方法来在BeanFactory创建并预准备完成以后做进一步的设置</span><br><span class="line"></span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;以上是BeanFactory的创建及预准备工作&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">5、invokeBeanFactoryPostProcessors(beanFactory);执行BeanFactoryPostProcessor的方法；</span><br><span class="line">   BeanFactoryPostProcessor：BeanFactory的后置处理器。在BeanFactory标准初始化之后执行的；</span><br><span class="line">   两个接口：BeanFactoryPostProcessor、BeanDefinitionRegistryPostProcessor</span><br><span class="line">   1）、执行BeanFactoryPostProcessor的方法；</span><br><span class="line">      先执行BeanDefinitionRegistryPostProcessor</span><br><span class="line">      1）、获取所有的BeanDefinitionRegistryPostProcessor；</span><br><span class="line">      2）、看先执行实现了PriorityOrdered优先级接口的BeanDefinitionRegistryPostProcessor、</span><br><span class="line">         postProcessor.postProcessBeanDefinitionRegistry(registry)</span><br><span class="line">      3）、在执行实现了Ordered顺序接口的BeanDefinitionRegistryPostProcessor；</span><br><span class="line">         postProcessor.postProcessBeanDefinitionRegistry(registry)</span><br><span class="line">      4）、最后执行没有实现任何优先级或者是顺序接口的BeanDefinitionRegistryPostProcessors；</span><br><span class="line">         postProcessor.postProcessBeanDefinitionRegistry(registry)</span><br><span class="line">         </span><br><span class="line">      </span><br><span class="line">      再执行BeanFactoryPostProcessor的方法</span><br><span class="line">      1）、获取所有的BeanFactoryPostProcessor</span><br><span class="line">      2）、看先执行实现了PriorityOrdered优先级接口的BeanFactoryPostProcessor、</span><br><span class="line">         postProcessor.postProcessBeanFactory()</span><br><span class="line">      3）、在执行实现了Ordered顺序接口的BeanFactoryPostProcessor；</span><br><span class="line">         postProcessor.postProcessBeanFactory()</span><br><span class="line">      4）、最后执行没有实现任何优先级或者是顺序接口的BeanFactoryPostProcessor；</span><br><span class="line">         postProcessor.postProcessBeanFactory()</span><br><span class="line"></span><br><span class="line">6、registerBeanPostProcessors(beanFactory);注册BeanPostProcessor（Bean的后置处理器）【 拦截bean的创建过程】</span><br><span class="line">      不同接口类型的BeanPostProcessor；在Bean创建前后的执行时机是不一样的</span><br><span class="line">      BeanPostProcessor、</span><br><span class="line">      DestructionAwareBeanPostProcessor、</span><br><span class="line">      InstantiationAwareBeanPostProcessor、</span><br><span class="line">      SmartInstantiationAwareBeanPostProcessor、</span><br><span class="line">      MergedBeanDefinitionPostProcessor【internalPostProcessors】、</span><br><span class="line">      </span><br><span class="line">      1）、获取所有的 BeanPostProcessor;后置处理器都默认可以通过PriorityOrdered、Ordered接口来执行优先级</span><br><span class="line">      2）、先注册PriorityOrdered优先级接口的BeanPostProcessor；</span><br><span class="line">         把每一个BeanPostProcessor；添加到BeanFactory中</span><br><span class="line">         beanFactory.addBeanPostProcessor(postProcessor);</span><br><span class="line">      3）、再注册Ordered接口的</span><br><span class="line">      4）、最后注册没有实现任何优先级接口的</span><br><span class="line">      5）、最终注册MergedBeanDefinitionPostProcessor；</span><br><span class="line">      6）、注册一个ApplicationListenerDetector；来在Bean创建完成后检查是否是ApplicationListener，如果是</span><br><span class="line">         applicationContext.addApplicationListener((ApplicationListener&lt;?&gt;) bean);</span><br><span class="line"></span><br><span class="line">7、initMessageSource();初始化MessageSource组件（做国际化功能；消息绑定，消息解析）；</span><br><span class="line">      1）、获取BeanFactory</span><br><span class="line">      2）、看容器中是否有id为messageSource的，类型是MessageSource的组件</span><br><span class="line">         如果有赋值给messageSource，如果没有自己创建一个DelegatingMessageSource；</span><br><span class="line">            MessageSource：取出国际化配置文件中的某个key的值；能按照区域信息获取；</span><br><span class="line">      3）、把创建好的MessageSource注册在容器中，以后获取国际化配置文件的值的时候，可以自动注入MessageSource；</span><br><span class="line">         beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);   </span><br><span class="line">         MessageSource.getMessage(String code, Object[] args, String defaultMessage, Locale locale);</span><br><span class="line">8、initApplicationEventMulticaster();初始化事件派发器；</span><br><span class="line">      1）、获取BeanFactory</span><br><span class="line">      2）、从BeanFactory中获取applicationEventMulticaster的ApplicationEventMulticaster；</span><br><span class="line">      3）、如果上一步没有配置；创建一个SimpleApplicationEventMulticaster</span><br><span class="line">      4）、将创建的ApplicationEventMulticaster添加到BeanFactory中，以后其他组件直接自动注入</span><br><span class="line">9、onRefresh();留给子容器（子类）</span><br><span class="line">      1、子类重写这个方法，在容器刷新的时候可以自定义逻辑；</span><br><span class="line">10、registerListeners();给容器中将所有项目里面的ApplicationListener注册进来；</span><br><span class="line">      1、从容器中拿到所有的ApplicationListener</span><br><span class="line">      2、将每个监听器添加到事件派发器中；</span><br><span class="line">         getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);</span><br><span class="line">      3、派发之前步骤产生的事件；</span><br><span class="line">11、finishBeanFactoryInitialization(beanFactory);初始化所有剩下的单实例bean；</span><br><span class="line">   1、beanFactory.preInstantiateSingletons();初始化后剩下的单实例bean</span><br><span class="line">      1）、获取容器中的所有Bean，依次进行初始化和创建对象</span><br><span class="line">      2）、获取Bean的定义信息；RootBeanDefinition</span><br><span class="line">      3）、Bean不是抽象的，是单实例的，是懒加载；</span><br><span class="line">         1）、判断是否是FactoryBean；是否是实现FactoryBean接口的Bean；</span><br><span class="line">         2）、不是工厂Bean。利用getBean(beanName);创建对象</span><br><span class="line">            0、getBean(beanName)； ioc.getBean();</span><br><span class="line">            1、doGetBean(name, null, null, false);</span><br><span class="line">            2、先获取缓存中保存的单实例Bean。如果能获取到说明这个Bean之前被创建过（所有创建过的单实例Bean都会被缓存起来）</span><br><span class="line">               从private final Map&lt;String, Object&gt; singletonObjects &#x3D; new ConcurrentHashMap&lt;String, Object&gt;(256);获取的</span><br><span class="line">            3、缓存中获取不到，开始Bean的创建对象流程；</span><br><span class="line">            4、标记当前bean已经被创建</span><br><span class="line">            5、获取Bean的定义信息；</span><br><span class="line">            6、【获取当前Bean依赖的其他Bean;如果有按照getBean()把依赖的Bean先创建出来；】</span><br><span class="line">            7、启动单实例Bean的创建流程；</span><br><span class="line">               1）、createBean(beanName, mbd, args);</span><br><span class="line">               2）、Object bean &#x3D; resolveBeforeInstantiation(beanName, mbdToUse);让BeanPostProcessor先拦截返回代理对象；</span><br><span class="line">                  【InstantiationAwareBeanPostProcessor】：提前执行；</span><br><span class="line">                  先触发：postProcessBeforeInstantiation()；</span><br><span class="line">                  如果有返回值：触发postProcessAfterInitialization()；</span><br><span class="line">               3）、如果前面的InstantiationAwareBeanPostProcessor没有返回代理对象；调用4）</span><br><span class="line">               4）、Object beanInstance &#x3D; doCreateBean(beanName, mbdToUse, args);创建Bean</span><br><span class="line">                   1）、【创建Bean实例】；createBeanInstance(beanName, mbd, args);</span><br><span class="line">                     利用工厂方法或者对象的构造器创建出Bean实例；</span><br><span class="line">                   2）、applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);</span><br><span class="line">                     调用MergedBeanDefinitionPostProcessor的postProcessMergedBeanDefinition(mbd, beanType, beanName);</span><br><span class="line">                   3）、【Bean属性赋值】populateBean(beanName, mbd, instanceWrapper);</span><br><span class="line">                     赋值之前：</span><br><span class="line">                     1）、拿到InstantiationAwareBeanPostProcessor后置处理器；</span><br><span class="line">                        postProcessAfterInstantiation()；</span><br><span class="line">                     2）、拿到InstantiationAwareBeanPostProcessor后置处理器；</span><br><span class="line">                        postProcessPropertyValues()；</span><br><span class="line">                     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;赋值之前：&#x3D;&#x3D;&#x3D;</span><br><span class="line">                     3）、应用Bean属性的值；为属性利用setter方法等进行赋值；</span><br><span class="line">                        applyPropertyValues(beanName, mbd, bw, pvs);</span><br><span class="line">                   4）、【Bean初始化】initializeBean(beanName, exposedObject, mbd);</span><br><span class="line">                     1）、【执行Aware接口方法】invokeAwareMethods(beanName, bean);执行xxxAware接口的方法</span><br><span class="line">                        BeanNameAware\BeanClassLoaderAware\BeanFactoryAware</span><br><span class="line">                     2）、【执行后置处理器初始化之前】applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);</span><br><span class="line">                        BeanPostProcessor.postProcessBeforeInitialization（）;</span><br><span class="line">                     3）、【执行初始化方法】invokeInitMethods(beanName, wrappedBean, mbd);</span><br><span class="line">                        1）、是否是InitializingBean接口的实现；执行接口规定的初始化；</span><br><span class="line">                        2）、是否自定义初始化方法；</span><br><span class="line">                     4）、【执行后置处理器初始化之后】applyBeanPostProcessorsAfterInitialization</span><br><span class="line">                        BeanPostProcessor.postProcessAfterInitialization()；</span><br><span class="line">                   5）、注册Bean的销毁方法（先不调用，等容器关闭的时候再调用）；</span><br><span class="line">               5）、将创建的Bean添加到缓存中singletonObjects；</span><br><span class="line">            ioc容器就是这些Map；很多的Map里面保存了单实例Bean，环境信息。。。。；</span><br><span class="line">      所有Bean都利用getBean创建完成以后；</span><br><span class="line">         检查所有的Bean是否是SmartInitializingSingleton接口的；如果是；就执行afterSingletonsInstantiated()；</span><br><span class="line">12、finishRefresh();完成BeanFactory的初始化创建工作；IOC容器就创建完成；</span><br><span class="line">      1）、initLifecycleProcessor();初始化和生命周期有关的后置处理器；LifecycleProcessor</span><br><span class="line">         默认从容器中找是否有lifecycleProcessor的组件【LifecycleProcessor】；如果没有new DefaultLifecycleProcessor();</span><br><span class="line">         加入到容器；</span><br><span class="line">         </span><br><span class="line">         写一个LifecycleProcessor的实现类，可以在BeanFactory</span><br><span class="line">            void onRefresh();</span><br><span class="line">            void onClose();    </span><br><span class="line">      2）、    getLifecycleProcessor().onRefresh();</span><br><span class="line">         拿到前面定义的生命周期处理器（BeanFactory）；回调onRefresh()；</span><br><span class="line">      3）、publishEvent(new ContextRefreshedEvent(this));发布容器刷新完成事件；</span><br><span class="line">      4）、liveBeansView.registerApplicationContext(this);</span><br><span class="line">   </span><br><span class="line">   &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;总结&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">   1）、Spring容器在启动的时候，先会保存所有注册进来的Bean的定义信息；</span><br><span class="line">      1）、xml注册bean；&lt;bean&gt;</span><br><span class="line">      2）、注解注册Bean；@Service、@Component、@Bean、xxx</span><br><span class="line">   2）、Spring容器会合适的时机创建这些Bean</span><br><span class="line">      1）、用到这个bean的时候；利用getBean创建bean；创建好以后保存在容器中；</span><br><span class="line">      2）、统一创建剩下所有的bean的时候；finishBeanFactoryInitialization()；</span><br><span class="line">   3）、后置处理器；BeanPostProcessor</span><br><span class="line">      1）、每一个bean创建完成，都会使用各种后置处理器进行处理；来增强bean的功能；</span><br><span class="line">         AutowiredAnnotationBeanPostProcessor:处理自动注入</span><br><span class="line">         AnnotationAwareAspectJAutoProxyCreator:来做AOP功能；</span><br><span class="line">         xxx....</span><br><span class="line">         增强的功能注解：</span><br><span class="line">         AsyncAnnotationBeanPostProcessor</span><br><span class="line">         ....</span><br><span class="line">   4）、事件驱动模型；</span><br><span class="line">      ApplicationListener；事件监听；</span><br><span class="line">      ApplicationEventMulticaster；事件派发：</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/10/Spring%E6%89%A9%E5%B1%95%E5%8E%9F%E7%90%86/" rel="prev" title="spring扩展原理">
+      <i class="fa fa-chevron-left"></i> spring扩展原理
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring容器创建过程"><span class="nav-number">1.</span> <span class="nav-text">Spring容器创建过程</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+</body>
+</html>
