@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Java基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java基础">
+<meta property="og:url" content="http://yoursite.com/2020/05/10/java%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="Java基础">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cs-notes-1256109796.cos.ap-guangzhou.myqcloud.com/image-20191210004132894.png">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1587043479127.png">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1588556130708.png">
+<meta property="article:published_time" content="2020-05-10T14:15:18.000Z">
+<meta property="article:modified_time" content="2020-05-11T08:30:23.553Z">
+<meta property="article:author" content="binshow">
+<meta property="article:tag" content="Java基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cs-notes-1256109796.cos.ap-guangzhou.myqcloud.com/image-20191210004132894.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/10/java%E5%9F%BA%E7%A1%80/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>java基础 | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/10/java%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ruiwen.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          java基础
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-10 22:15:18" itemprop="dateCreated datePublished" datetime="2020-05-10T22:15:18+08:00">2020-05-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-11 16:30:23" itemprop="dateModified" datetime="2020-05-11T16:30:23+08:00">2020-05-11</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Java基础"><a href="#Java基础" class="headerlink" title="Java基础"></a>Java基础</h1><a id="more"></a>
+
+
+
+<h1 id="1-Java的四大特性"><a href="#1-Java的四大特性" class="headerlink" title="1. Java的四大特性"></a>1. Java的四大特性</h1><ol>
+<li>抽象：将一类对象的共同特征总结出来构造类的过程。抽象只关注对象有哪些属性和行为，并不关心细节</li>
+<li>继承：从已有类得到继承信息创建新类的过程。继承使得变化的软件系统有延续性。</li>
+<li>封装：将数据和操作数据的方法绑定起来。</li>
+<li>多态：允许不同子类型的对象对同一消息做出不同的响应</li>
+</ol>
+<p>多态的实现方式：</p>
+<ol>
+<li>方法重载，编译时 多态性，前绑定</li>
+<li>方法重写，运行时 多态性，后绑定</li>
+</ol>
+<p>实现多态：方法重写（子类继承父类重写父类中已有的方法），用父类型引用引用子类型对象。</p>
+<p>多态举例：订购客户和售卖客户都可用登录系统，有相同的login接口，但登录的页面不同</p>
+<h1 id="2-面向对象和面对过程的区别"><a href="#2-面向对象和面对过程的区别" class="headerlink" title="2.面向对象和面对过程的区别"></a>2.面向对象和面对过程的区别</h1><p>面向过程是一种以事件为中心的编程思想，就是分析出解决问题所需的步骤，然后用函数将这些步骤实现，并按顺序调用，而面向对象是以对象为中心的编程思想。</p>
+<h1 id="3-重载和重写的区别"><a href="#3-重载和重写的区别" class="headerlink" title="3. 重载和重写的区别"></a>3. 重载和重写的区别</h1><p>方法的重载和重写都是实现多态的方式，区别在于前者实现的是编译时的多态性，而后者实现的是运行时的多态性。重载发生在一个类中，同名的方法如果有不同的参数列表（参数类型不同、参数个数不同或者二者都不同）则视为重载；重写发生在子类与父类之间，重写要求子类被重写方法与父类被重写方法有相同的参数列表，有兼容的返回类型，比父类被重写方法更好访问，不能比父类被重写方法声明更多的异常（里氏代换原则）。重载对返回类型没有特殊的要求，不能根据返回类型进行区分。</p>
+<h1 id="4-面向对象的5大基本原则"><a href="#4-面向对象的5大基本原则" class="headerlink" title="4.面向对象的5大基本原则"></a>4.面向对象的5大基本原则</h1><h3 id="1、单一职责原则（SRP）"><a href="#1、单一职责原则（SRP）" class="headerlink" title="　　1、单一职责原则（SRP）"></a>　　1、单一职责原则（SRP）</h3><p>　　一个类应该有且只有一个去改变它的理由，这意味着一个类应该只有一项工作。</p>
+<p>　　比如在职员类里，将工程师、销售人员、销售经理这些情况都放在职员类里考虑，其结果将会非常混乱，在这个假设下，职员类里的每个方法都要if else判断是哪种情况，从类结构上来说将会十分臃肿。</p>
+<h3 id="2、开放封闭原则（OCP）"><a href="#2、开放封闭原则（OCP）" class="headerlink" title="　　2、开放封闭原则（OCP）"></a>　　2、开放封闭原则（OCP）</h3><p>　　对象或实体应该对扩展开放，对修改封闭。</p>
+<p>　　更改封闭即是在我们对模块进行扩展时，勿需对源有程序代码和DLL进行修改或重新编译文件！这个原则对我们在设计类的时候很有帮助，坚持这个原则就必须尽量考虑接口封装，抽象机制和多态技术！</p>
+<h3 id="3、里氏替换原则（LSP）"><a href="#3、里氏替换原则（LSP）" class="headerlink" title="　　3、里氏替换原则（LSP）"></a>　　3、里氏替换原则（LSP）</h3><p>　　在对象 x 为类型 T 时 q(x) 成立，那么当 S 是 T 的子类时，对象 y 为类型 S 时 q(y) 也应成立。（即对父类的调用同样适用于子类）</p>
+<h3 id="4、依赖倒置原则（DIP）"><a href="#4、依赖倒置原则（DIP）" class="headerlink" title="　　4、依赖倒置原则（DIP）"></a>　　4、依赖倒置原则（DIP）</h3><p>　　高层次的模块不应该依赖于低层次的模块，他们都应该依赖于抽象。具体实现应该依赖于抽象，而不是抽象依赖于实现。</p>
+<p>　　可以这样理解，上面我举例子的时候先说了兔子和绵羊，然后才推出食草动物。但如果我们继续认识了牛、马等食草动物，我们会发现我们需要不断调整食草动物的描述，这样程序会变得僵化，所以我们不应该让子类依赖于实体，不应该让父类模块依赖于子类模块。所以我们需要将食草动物设计为抽象类，即<strong>抽象类或接口</strong>。这样下层只需要实现相应的细节而不会影响父类。</p>
+<h3 id="5、接口隔离原则（ISP）"><a href="#5、接口隔离原则（ISP）" class="headerlink" title="　　5、接口隔离原则（ISP）"></a>　　5、接口隔离原则（ISP）</h3><p>　　不应强迫客户端实现一个它用不上的接口，或是说客户端不应该被迫依赖它们不使用的方法，使用多个专门的接口比使用单个接口要好的多！</p>
+<p>　　比如，为了减少接口的定义，将许多类似的方法都放在一个接口中，最后会发现，维护和实现接口的时候花了太多精力，而接口所定义的操作相当于对客户端的一种承诺，这种承诺当然是越少越好，越精练越好，过多的承诺带来的就是你的大量精力和时间去维护！</p>
+<h1 id="5-static-和final的用途和区别"><a href="#5-static-和final的用途和区别" class="headerlink" title="5.static 和final的用途和区别"></a>5.static 和final的用途和区别</h1><p>Static<br>修饰变量：静态变量随着类加载时被完成初始化，内存中只有一个，且JVM也只会为它分配一次内存，所有类共享静态变量。<br>修饰方法：在类加载的时候就存在，不依赖任何实例；static方法必须实现，不能用abstract修饰。<br>修饰代码块：在类加载完之后就会执行代码块中的内容。<br>父类静态代码块-&gt;子类静态代码块-&gt;父类非静态代码块-&gt;父类构造方法-&gt;子类非静态代码块-&gt;子类构造方法<br>Final<br>修饰变量：<br>    编译期常量：类加载的过程完成初始化，编译后带入到任何计算式中。只能是基本类型。<br>    运行时常量：基本数据类型或引用数据类型。引用不可变，但引用的对象内容可变。<br>修饰方法：不能被继承，不能被子类修改。<br>修饰类：不能被继承。<br>修饰形参：final形参不可变</p>
+<h1 id="6-hashMap和hashtable的区别，是线程安全的吗"><a href="#6-hashMap和hashtable的区别，是线程安全的吗" class="headerlink" title="6.hashMap和hashtable的区别，是线程安全的吗"></a>6.hashMap和hashtable的区别，是线程安全的吗</h1><h1 id="7-hashMap和concurrentHashMap的区别"><a href="#7-hashMap和concurrentHashMap的区别" class="headerlink" title="7.hashMap和concurrentHashMap的区别"></a>7.hashMap和concurrentHashMap的区别</h1><h1 id="8-String-StringBuffer-and-StringBuilder"><a href="#8-String-StringBuffer-and-StringBuilder" class="headerlink" title="8.String, StringBuffer and StringBuilder"></a>8.String, StringBuffer and StringBuilder</h1><p><strong>1. 可变性</strong>  </p>
+<ul>
+<li>String 声明的是不可变的对象，每次操作都会生成新的String 对象，然后将指针指向新的 String 对象</li>
+<li>StringBuffer 和 StringBuilder 可以在原有对象的基础上进行操作</li>
+<li>所以在经常改变字符串内容的情况下最好不要使用 String。</li>
+</ul>
+<p><strong>2. 线程安全</strong>  </p>
+<ul>
+<li>String 不可变，因此是线程安全的</li>
+<li>StringBuilder 不是线程安全的</li>
+<li>StringBuffer 是线程安全的，内部使用 synchronized 进行同步</li>
+</ul>
+<p>3.<strong>执行速度</strong></p>
+<p>执行速度StringBuilder &gt; StringBuffer &gt; String</p>
+<h1 id="9-String类不可变的理解"><a href="#9-String类不可变的理解" class="headerlink" title="9.String类不可变的理解"></a>9.String类不可变的理解</h1><h2 id="为什么不可变"><a href="#为什么不可变" class="headerlink" title="为什么不可变"></a>为什么不可变</h2><ul>
+<li>String类被final修饰，不可被继承。</li>
+<li>String的成员变量char数组value被final修饰，初始化后不可更改引用。</li>
+<li>String的成员变量value访问修饰符为private，不对外界提供修改value数组值的方法。</li>
+</ul>
+<h2 id="不可变的好处"><a href="#不可变的好处" class="headerlink" title="不可变的好处"></a>不可变的好处</h2><p><strong>1. 可以缓存 hash 值</strong>  </p>
+<p>因为 String 的 hash 值经常被使用，例如 String 用做 HashMap 的 key。不可变的特性可以使得 hash 值也不可变，因此只需要进行一次计算。</p>
+<p><strong>2. String Pool 的需要</strong>  </p>
+<p>如果一个 String 对象已经被创建过了，那么就会从 String Pool 中取得引用。只有 String 是不可变的，才可能使用 String Pool。</p>
+<div align="center"> <img src="https://cs-notes-1256109796.cos.ap-guangzhou.myqcloud.com/image-20191210004132894.png"> </div><br>
+
+<p><strong>3. 安全性</strong>  </p>
+<p>String 经常作为参数，String 不可变性可以保证参数不可变。例如在作为网络连接参数的情况下如果 String 是可变的，那么在网络连接过程中，String 被改变，改变 String 的那一方以为现在连接的是其它主机，而实际情况却不一定是。</p>
+<p><strong>4. 线程安全</strong>  </p>
+<p>String 不可变性天生具备线程安全，可以在多个线程中安全地使用。</p>
+<h2 id="号原理"><a href="#号原理" class="headerlink" title="+号原理"></a>+号原理</h2><p>Java中使用”+”连接字符串对象时，本质上会创建一个StringBuilder()对象，并调用append()方法将数据拼接，最后调用toString()方法返回拼接好的字符串。</p>
+<h1 id="10-String-Pool-字符串常量池"><a href="#10-String-Pool-字符串常量池" class="headerlink" title="10.String Pool 字符串常量池"></a>10.String Pool 字符串常量池</h1><p>在Java的内存分配中，总共3种常量池，分别是Class常量池、运行时常量池、字符串常量池。</p>
+<p>JVM为了提高性能和减少内存的开销，在实例化字符串的时候进行了一些优化：</p>
+<p>使用字符串常量池。每当创建字符串常量时，JVM会首先检查字符串常量池，如果该字符串已经存在常量池中，那么就直接返回常量池中的实例引用。如果字符串不存在常量池中，就会实例化该字符串并且将其放到常量池中。<strong>由于String字符串的不可变性，常量池中一定不存在两个相同的字符串</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 字符串常量池中的字符串只存在一份！</span></span><br><span class="line"><span class="comment"> * 运行结果为true</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">String s1 = <span class="string">"hello world!"</span>;</span><br><span class="line">String s2 = <span class="string">"hello world!"</span>;</span><br><span class="line">System.out.println(s1 == s2);<span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
+<p>在HotSpot VM中字符串常量池是通过一个StringTable类实现的，它是一个Hash表，默认值大小长度是1009；这个StringTable在每个HotSpot VM的实例中只有一份，被所有的类共享；字符串常量由一个一个字符组成，放在了StringTable上。要注意的是，如果放进String Pool的String非常多，就会造成Hash冲突严重，从而导致链表会很长，而链表长了后直接会造成的影响就是当调用String.intern时性能会大幅下降（因为要一个一个找）。</p>
+<h1 id="11-字符串常量池在jdk6和7的区别"><a href="#11-字符串常量池在jdk6和7的区别" class="headerlink" title="11.字符串常量池在jdk6和7的区别"></a>11.字符串常量池在jdk6和7的区别</h1><p>在JDK6及之前，字符串常量池是放在Perm Gen区(也就是方法区)中的，StringTable的长度是固定的；</p>
+<p>在JDK7版本中，字符串常量池被移到了堆中，StringTable的长度可以通过<strong>-XX:StringTableSize=66666</strong>参数指定。至于JDK7为什么把常量池移动到堆上实现，原因可能是由于方法区的内存空间太小且不方便扩展，而堆的内存空间比较大且扩展方便。</p>
+<p>在JDK6及之前版本中，String Pool里放的都是字符串常量；</p>
+<p>在JDK7.0中，由于String.intern()发生了改变，因此String Pool中也可以存放放于堆内的字符串对象的引用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="string">"AB"</span>;</span><br><span class="line">String s2 = <span class="string">"AB"</span>;</span><br><span class="line">String s3 = <span class="keyword">new</span> String(<span class="string">"AB"</span>);</span><br><span class="line">System.out.println(s1 == s2);<span class="comment">//true</span></span><br><span class="line">System.out.println(s1 == s3);<span class="comment">//false</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">由于常量池中不存在两个相同的对象，所以s1和s2都是指向JVM字符串常量池中的<span class="string">"AB"</span>对象。</span><br><span class="line"><span class="keyword">new</span>关键字一定会产生一个对象，并且这个对象存储在堆中。所以String s3 = <span class="keyword">new</span> String(“AB”);产生了两个对象：保存在栈中的s3和保存堆中的String对象。</span><br></pre></td></tr></table></figure>
+
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1587043479127.png" alt="1587043479127"></p>
+<p>字符串常量池（String Pool）保存着所有字符串字面量（literal strings），这些字面量在编译时期就确定。不仅如此，还可以使用 String 的 intern() 方法在运行过程将字符串添加到 String Pool 中。</p>
+<h1 id="12-intern方法"><a href="#12-intern方法" class="headerlink" title="12.intern方法"></a>12.intern方法</h1><p>直接使用双引号声明出来的String对象会直接存储在字符串常量池中，如果不是用双引号声明的String对象，可以使用String提供的intern方法。intern 方法是一个native方法，intern方法会从字符串常量池中查询当前字符串是否存在，如果存在，就直接返回当前字符串；如果不存在就会将当前字符串放入常量池中，之后再返回。</p>
+<p>JDK1.7的改动：</p>
+<p>将String常量池 从 Perm 区移动到了 Java Heap区<br>String.intern() 方法时，如果存在堆中的对象，会直接保存对象的引用，而不会重新创建对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    String s1 = <span class="string">"AB"</span>;</span><br><span class="line">    String s2 = <span class="keyword">new</span> String(<span class="string">"AB"</span>);</span><br><span class="line">    String s3 = <span class="string">"A"</span>;</span><br><span class="line">    String s4 = <span class="string">"B"</span>;</span><br><span class="line">    String s5 = <span class="string">"A"</span> + <span class="string">"B"</span>;</span><br><span class="line">    String s6 = s3 + s4;</span><br><span class="line">    System.out.println(s1 == s2);<span class="comment">//false</span></span><br><span class="line">    System.out.println(s1 == s5);<span class="comment">//true</span></span><br><span class="line">    System.out.println(s1 == s6);<span class="comment">//false</span></span><br><span class="line">    System.out.println(s1 == s6.intern());<span class="comment">//true</span></span><br><span class="line">    System.out.println(s2 == s2.intern());<span class="comment">//false</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>）直接使用双引号声明出来的String对象会直接存储在常量池中；</span><br><span class="line"><span class="number">2</span>）String对象的intern方法会得到字符串对象在常量池中对应的引用，如果常量池中没有对应的字符串，则该字符串将被添加到常量池中，然后返回常量池中字符串的引用；</span><br><span class="line"><span class="number">3</span>） 字符串的+操作其本质是创建了StringBuilder对象进行append操作，然后将拼接后的StringBuilder对象用toString方法处理成String对象，这一点可以用javap -c命令获得<span class="class"><span class="keyword">class</span>文件对应的<span class="title">JVM</span>字节码指令就可以看出来。</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>当一个字符串调用 intern() 方法时，如果 String Pool 中已经存在一个字符串和该字符串值相等（使用 equals() 方法进行确定），那么就会返回 String Pool 中字符串的引用；否则，就会在 String Pool 中添加一个新的字符串，并返回这个新字符串的引用。</p>
+<p>下面示例中，s1 和 s2 采用 new String() 的方式新建了两个不同字符串，而 s3 和 s4 是通过 s1.intern() 方法取得同一个字符串引用。intern() 首先把 s1 引用的字符串放到 String Pool 中，然后返回这个字符串引用。因此 s3 和 s4 引用的是同一个字符串。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">"aaa"</span>);</span><br><span class="line">String s2 = <span class="keyword">new</span> String(<span class="string">"aaa"</span>);</span><br><span class="line">System.out.println(s1 == s2);           <span class="comment">// false</span></span><br><span class="line">String s3 = s1.intern();</span><br><span class="line">String s4 = s1.intern();</span><br><span class="line">System.out.println(s3 == s4);           <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>如果是采用 “bbb” 这种字面量的形式创建字符串，会自动地将字符串放入 String Pool 中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String s5 = <span class="string">"bbb"</span>;</span><br><span class="line">String s6 = <span class="string">"bbb"</span>;</span><br><span class="line">System.out.println(s5 == s6);  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>在 Java 7 之前，String Pool 被放在运行时常量池中，它属于永久代。而在 Java 7，String Pool 被移到堆中。这是因为永久代的空间有限，在大量使用字符串的场景下会导致 OutOfMemoryError 错误。</p>
+<h2 id="new-String-“abc”"><a href="#new-String-“abc”" class="headerlink" title="new String(“abc”)"></a>new String(“abc”)</h2><p>使用这种方式一共会创建两个字符串对象（前提是 String Pool 中还没有 “abc” 字符串对象）。</p>
+<ul>
+<li>“abc” 属于字符串字面量，因此编译时期会在 String Pool 中创建一个字符串对象，指向这个 “abc” 字符串字面量；</li>
+<li>而使用 new 的方式会在堆中创建一个字符串对象。</li>
+</ul>
+<p>创建一个测试类，其 main 方法中使用这种方式来创建字符串对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NewStringTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String s = <span class="keyword">new</span> String(<span class="string">"abc"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 javap -verbose 进行反编译，得到以下内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">Constant pool:</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">   #2 = Class              #18            // java/lang/String</span><br><span class="line">   #3 = String             #19            // abc</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">  #18 = Utf8               java/lang/String</span><br><span class="line">  #19 = Utf8               abc</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span></span>;</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">3</span>, locals=<span class="number">2</span>, args_size=<span class="number">1</span></span><br><span class="line">         0: new           #2                  // class java/lang/String</span><br><span class="line">         <span class="number">3</span>: dup</span><br><span class="line">         4: ldc           #3                  // String abc</span><br><span class="line">         6: invokespecial #4                  // Method java/lang/String."&lt;init&gt;":(Ljava/lang/String;)V</span><br><span class="line">         <span class="number">9</span>: astore_1</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+
+<p>在 Constant Pool 中，#19 存储这字符串字面量 “abc”，#3 是 String Pool 的字符串对象，它指向 #19 这个字符串字面量。在 main 方法中，0: 行使用 new #2 在堆中创建一个字符串对象，并且使用 ldc #3 将 String Pool 中的字符串对象作为 String 构造函数的参数。</p>
+<p>以下是 String 构造函数的源码，可以看到，在将一个字符串对象作为另一个字符串对象的构造函数参数时，并不会完全复制 value 数组内容，而是都会指向同一个 value 数组。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">String</span><span class="params">(String original)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.value = original.value;</span><br><span class="line">    <span class="keyword">this</span>.hash = original.hash;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>String str=”i”的方式，java 虚拟机会将其分配到常量池中；</p>
+<p>而 String str=new String(“i”) 则会被分到堆内存中。</p>
+<h1 id="13-为什么重写equals方法的同时也要重写hashCode-方法"><a href="#13-为什么重写equals方法的同时也要重写hashCode-方法" class="headerlink" title="13.为什么重写equals方法的同时也要重写hashCode()方法"></a>13.为什么重写equals方法的同时也要重写hashCode()方法</h1><p>hashCode() 返回哈希值，而 equals() 是用来判断两个对象是否等价。等价的两个对象散列值一定相同，但是散列值相同的两个对象不一定等价，这是因为计算哈希值具有随机性，两个值不同的对象可能计算出相同的哈希值。</p>
+<p>在覆盖 equals() 方法时应当总是覆盖 hashCode() 方法，保证等价的两个对象哈希值也相等。</p>
+<h1 id="14-Error-和-Exception的区别"><a href="#14-Error-和-Exception的区别" class="headerlink" title="14.Error 和 Exception的区别"></a>14.Error 和 <strong>Exception</strong>的区别</h1><p>Throwable 可以用来表示任何可以作为异常抛出的类，分为两种：  <strong>Error</strong>   和 <strong>Exception</strong>。其中 Error 用来表示 JVM 无法处理的错误，Exception 分为两种：</p>
+<ul>
+<li><strong>受检异常</strong>  ：需要用 try…catch… 语句捕获并进行处理，并且可以从异常中恢复；</li>
+<li><strong>非受检异常</strong>  ：是程序运行时错误，例如除 0 会引发 Arithmetic Exception，此时程序崩溃并且无法恢复。</li>
+</ul>
+<h1 id="15-和equals的区别"><a href="#15-和equals的区别" class="headerlink" title="15.==和equals的区别"></a>15.==和equals的区别</h1><p>对于==来说：</p>
+<ul>
+<li><p>基本类型：比较的是值是否相同；</p>
+</li>
+<li><p>引用类型：比较的是引用是否相同；</p>
+</li>
+</ul>
+<p>对于equals()方法来说：底层就是==，只是不同的类重写了equals方法，比如 String、Integer 等把它变成了值比较，所以一般情况下 equals 比较的是值是否相等</p>
+<h1 id="16-普通类和抽象类有哪些区别？"><a href="#16-普通类和抽象类有哪些区别？" class="headerlink" title="16.普通类和抽象类有哪些区别？"></a>16.普通类和抽象类有哪些区别？</h1><ul>
+<li>普通类不能包含抽象方法，抽象类可以包含抽象方法。</li>
+<li>抽象类不能直接实例化，普通类可以直接实例化。</li>
+</ul>
+<h1 id="17-java代码输出hello-world-字符串的整个过程"><a href="#17-java代码输出hello-world-字符串的整个过程" class="headerlink" title="17.java代码输出hello world 字符串的整个过程"></a>17.java代码输出hello world 字符串的整个过程</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;    </span><br><span class="line">            String  s ;             <span class="comment">//定义一个String类型的变量 s</span></span><br><span class="line">              s = “Hello World!”;  <span class="comment">//定义字符串 s</span></span><br><span class="line">          System.out.println(s); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>编译器编译，找到里面多少个类就生成多少个.class字节码文件（只有一个类能被public修饰）</li>
+<li>JVM装载.class文件，main方法找到程序入口，三个允许（static静态绑定类，用public确定方法，再用void确定不处理返回值）验证后执行程序</li>
+<li>主方法在栈内开辟空间，String[] ,String , System标准字节输入输出流，Object等这几个类的字节码文件加载到方法区</li>
+<li>在堆区创建一个空（String[ ]）数组对象从栈区把args传过来到堆的空数组对象String[ ]中。</li>
+<li>因为String s 是成员变量所以在主方法的工作区间创建String类型的 s 变量。</li>
+<li>定义了一个”Hello world ！”常量对象存放在方法区的常量值数据区并且会创建相应的toString()方法，栈区的s变量指向了 这个方法区的常量。</li>
+<li>最后执行输出语句输出其实是s的地址，但是s指向（存储）的是“Hello world ！”常对象的地址，而且该常对象覆盖重写了父类的toString()方法，所以最后输出的结果是：Hello world ！</li>
+</ol>
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1588556130708.png" alt="1588556130708"></p>
+<p>产生了一个.java源文件.<br>字节码文件：至少5个（HelloWorld.class，String[].class, string.class, object.class, System.class）还有其他的一些深入的;<br>对象：5个 ；String[ ]空数组对象，流对象三个，（helloworld)常量对象在方法区的常量区；</p>
+<p>几个方法：3个；main方法，print，toString()；<br>几个变量：2个 args，s （在主方法的栈帧中）</p>
+<h1 id="18-接口和抽象类有什么区别？"><a href="#18-接口和抽象类有什么区别？" class="headerlink" title="18.接口和抽象类有什么区别？"></a>18.接口和抽象类有什么区别？</h1><ul>
+<li>实现：抽象类的子类使用 extends 来继承；接口必须使用 implements 来实现接口。</li>
+<li>构造函数：抽象类可以有构造函数；接口不能有。</li>
+<li>main 方法：抽象类可以有 main 方法，并且我们能运行它；接口不能有 main 方法。</li>
+<li>实现数量：类可以实现很多个接口；但是只能继承一个抽象类。</li>
+<li>访问修饰符：接口中的方法默认使用 public 修饰；抽象类中的方法可以是任意访问修饰符。</li>
+</ul>
+<h1 id="19-private、protected-以及-public的区别"><a href="#19-private、protected-以及-public的区别" class="headerlink" title="19.private、protected 以及 public的区别"></a>19.private、protected 以及 public的区别</h1><p>Java 中有三个访问权限修饰符：private、protected 以及 public，如果不加访问修饰符，表示包级可见。</p>
+<p>可以对类或类中的成员（字段和方法）加上访问修饰符。</p>
+<ul>
+<li>类可见表示其它类可以用这个类创建实例对象。</li>
+<li>成员可见表示其它类可以用这个类的实例对象访问到该成员；</li>
+</ul>
+<p>protected 用于修饰成员，表示在继承体系中成员对于子类可见，但是这个访问修饰符对于类没有意义。</p>
+<h1 id="20-JRE-or-JDK的区别"><a href="#20-JRE-or-JDK的区别" class="headerlink" title="20.JRE or JDK的区别"></a>20.JRE or JDK的区别</h1><ul>
+<li>JRE：Java Runtime Environment，java运行环境的简称，为java的运行提供了所需的环境。主要包括了JVM的标准实现和一些java基本类库。</li>
+<li>JDK：Java Development Kit，java开发工具包，提供了java的开发及运行环境。JDK是java开发的核心，集成了JRE以及一些其他的工具，还包含了很多 java 程序调试和分析的工具，比如编译 java 源码的编译器 javac等。</li>
+<li>因此可以这样认为：JDK&gt;JRE&gt;JVM，JRE支持了java程序的运行，而JDK则同时支持了java程序的开发。</li>
+</ul>
+<h1 id="21-八大基本类型及字节数"><a href="#21-八大基本类型及字节数" class="headerlink" title="21.八大基本类型及字节数"></a>21.八大基本类型及字节数</h1><p>Java中最小的单位是字节，1字节=8位(bit)</p>
+<p>整型：byte/8 ,    short/16,    int/32,        long/64</p>
+<p>字符型: char/16</p>
+<p>浮点型：float/32，    double/64</p>
+<p>布尔型：boolean/~</p>
+<h1 id="22-float-与-double的区别"><a href="#22-float-与-double的区别" class="headerlink" title="22.float 与 double的区别"></a>22.float 与 double的区别</h1><p>double表示的数值精度（15）是float（6-7）的两倍，故称之为双精度数值</p>
+<p>默认为double，如果是float的话加后缀F ：3.402F</p>
+<h1 id="23-包装类和基本类型的区别"><a href="#23-包装类和基本类型的区别" class="headerlink" title="23.包装类和基本类型的区别"></a>23.包装类和基本类型的区别</h1><ol>
+<li>基本类型只有值，而包装类型是对象</li>
+<li>封装了系统最大值，最小值等</li>
+<li>包装类是引用传递，而基本类型是值传递</li>
+<li>ArrayList，hashMap等中只能放入包装类型</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer g =<span class="keyword">new</span> Integer(<span class="number">0</span>);</span><br><span class="line">Integer h =<span class="keyword">new</span> Integer(<span class="number">0</span>);</span><br><span class="line">g==h</span><br></pre></td></tr></table></figure>
+
+<h1 id="24-数据类型之间的基本转换类型"><a href="#24-数据类型之间的基本转换类型" class="headerlink" title="24.数据类型之间的基本转换类型"></a>24.数据类型之间的基本转换类型</h1><p>无精度丢失的类型转换</p>
+<p>byte→short→int→long  </p>
+<p>int→double</p>
+<p>char→int</p>
+<p>有精度丢失的类型转换</p>
+<p>int→float</p>
+<p>long→float/double</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java%E5%9F%BA%E7%A1%80/" rel="tag"># Java基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="prev" title="计算机网络">
+      <i class="fa fa-chevron-left"></i> 计算机网络
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/11/JVM/" rel="next" title="JVM">
+      JVM <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java基础"><span class="nav-number">1.</span> <span class="nav-text">Java基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Java的四大特性"><span class="nav-number">2.</span> <span class="nav-text">1. Java的四大特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-面向对象和面对过程的区别"><span class="nav-number">3.</span> <span class="nav-text">2.面向对象和面对过程的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-重载和重写的区别"><span class="nav-number">4.</span> <span class="nav-text">3. 重载和重写的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-面向对象的5大基本原则"><span class="nav-number">5.</span> <span class="nav-text">4.面向对象的5大基本原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、单一职责原则（SRP）"><span class="nav-number">5.0.1.</span> <span class="nav-text">　　1、单一职责原则（SRP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、开放封闭原则（OCP）"><span class="nav-number">5.0.2.</span> <span class="nav-text">　　2、开放封闭原则（OCP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、里氏替换原则（LSP）"><span class="nav-number">5.0.3.</span> <span class="nav-text">　　3、里氏替换原则（LSP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、依赖倒置原则（DIP）"><span class="nav-number">5.0.4.</span> <span class="nav-text">　　4、依赖倒置原则（DIP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、接口隔离原则（ISP）"><span class="nav-number">5.0.5.</span> <span class="nav-text">　　5、接口隔离原则（ISP）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-static-和final的用途和区别"><span class="nav-number">6.</span> <span class="nav-text">5.static 和final的用途和区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-hashMap和hashtable的区别，是线程安全的吗"><span class="nav-number">7.</span> <span class="nav-text">6.hashMap和hashtable的区别，是线程安全的吗</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-hashMap和concurrentHashMap的区别"><span class="nav-number">8.</span> <span class="nav-text">7.hashMap和concurrentHashMap的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-String-StringBuffer-and-StringBuilder"><span class="nav-number">9.</span> <span class="nav-text">8.String, StringBuffer and StringBuilder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-String类不可变的理解"><span class="nav-number">10.</span> <span class="nav-text">9.String类不可变的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么不可变"><span class="nav-number">10.1.</span> <span class="nav-text">为什么不可变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不可变的好处"><span class="nav-number">10.2.</span> <span class="nav-text">不可变的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#号原理"><span class="nav-number">10.3.</span> <span class="nav-text">+号原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-String-Pool-字符串常量池"><span class="nav-number">11.</span> <span class="nav-text">10.String Pool 字符串常量池</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-字符串常量池在jdk6和7的区别"><span class="nav-number">12.</span> <span class="nav-text">11.字符串常量池在jdk6和7的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12-intern方法"><span class="nav-number">13.</span> <span class="nav-text">12.intern方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#new-String-“abc”"><span class="nav-number">13.1.</span> <span class="nav-text">new String(“abc”)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#13-为什么重写equals方法的同时也要重写hashCode-方法"><span class="nav-number">14.</span> <span class="nav-text">13.为什么重写equals方法的同时也要重写hashCode()方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-Error-和-Exception的区别"><span class="nav-number">15.</span> <span class="nav-text">14.Error 和 Exception的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#15-和equals的区别"><span class="nav-number">16.</span> <span class="nav-text">15.&#x3D;&#x3D;和equals的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#16-普通类和抽象类有哪些区别？"><span class="nav-number">17.</span> <span class="nav-text">16.普通类和抽象类有哪些区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#17-java代码输出hello-world-字符串的整个过程"><span class="nav-number">18.</span> <span class="nav-text">17.java代码输出hello world 字符串的整个过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#18-接口和抽象类有什么区别？"><span class="nav-number">19.</span> <span class="nav-text">18.接口和抽象类有什么区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#19-private、protected-以及-public的区别"><span class="nav-number">20.</span> <span class="nav-text">19.private、protected 以及 public的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#20-JRE-or-JDK的区别"><span class="nav-number">21.</span> <span class="nav-text">20.JRE or JDK的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#21-八大基本类型及字节数"><span class="nav-number">22.</span> <span class="nav-text">21.八大基本类型及字节数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#22-float-与-double的区别"><span class="nav-number">23.</span> <span class="nav-text">22.float 与 double的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#23-包装类和基本类型的区别"><span class="nav-number">24.</span> <span class="nav-text">23.包装类和基本类型的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#24-数据类型之间的基本转换类型"><span class="nav-number">25.</span> <span class="nav-text">24.数据类型之间的基本转换类型</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="binshow"
+      src="/images/ruiwen.gif">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
