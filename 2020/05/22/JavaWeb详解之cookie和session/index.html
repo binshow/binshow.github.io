@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-center-circle.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="会话技术">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaWeb详解之cookie和session">
+<meta property="og:url" content="http://yoursite.com/2020/05/22/JavaWeb%E8%AF%A6%E8%A7%A3%E4%B9%8Bcookie%E5%92%8Csession/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="会话技术">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-22T08:33:20.000Z">
+<meta property="article:modified_time" content="2020-05-22T09:55:18.245Z">
+<meta property="article:author" content="binshow">
+<meta property="article:tag" content="JavaWeb">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/22/JavaWeb%E8%AF%A6%E8%A7%A3%E4%B9%8Bcookie%E5%92%8Csession/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JavaWeb详解之cookie和session | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/22/JavaWeb%E8%AF%A6%E8%A7%A3%E4%B9%8Bcookie%E5%92%8Csession/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ruiwen.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JavaWeb详解之cookie和session
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-22 16:33:20 / 修改时间：17:55:18" itemprop="dateCreated datePublished" datetime="2020-05-22T16:33:20+08:00">2020-05-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>会话技术</p>
+<a id="more"></a>
+
+<h2 id="1-什么是会话技术"><a href="#1-什么是会话技术" class="headerlink" title="1.什么是会话技术"></a>1.什么是会话技术</h2><p>会话：一次会话包含多次请求和响应</p>
+<p>一次会话指浏览器第一次给服务器资源发送请求，会话建立，直到一方断开为止</p>
+<p>会话技术就是解决的在一次会话范围内的多次请求响应之间共享技术</p>
+<p>比如说：不同的商品加入到购物车分别都是请求，去购物车结算也是一次请求，但这次请求可以共享到之前请求的数据。</p>
+<h2 id="2-Cookie"><a href="#2-Cookie" class="headerlink" title="2.Cookie"></a>2.Cookie</h2><p>客户端会话技术</p>
+<h3 id="2-1-快速入门"><a href="#2-1-快速入门" class="headerlink" title="2.1 快速入门"></a>2.1 快速入门</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@WebServlet</span>(urlPatterns = <span class="string">"/cookie"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CookieTest01</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.doPost(req,resp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        <span class="comment">//1.创建cookie对象</span></span><br><span class="line">        Cookie cookie = <span class="keyword">new</span> Cookie(<span class="string">"msg"</span>, <span class="string">"hello"</span>);</span><br><span class="line">        <span class="comment">//2.发送cookie</span></span><br><span class="line">        resp.addCookie(cookie);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@WebServlet</span>(urlPatterns = <span class="string">"/cookie02"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CookieTest02</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.doPost(req,resp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        <span class="comment">//3.获取Cookie</span></span><br><span class="line">        Cookie[] cookies = req.getCookies();</span><br><span class="line">        <span class="keyword">if</span> (cookies!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">for</span> (Cookie cookie : cookies) &#123;</span><br><span class="line">                String name = cookie.getName();</span><br><span class="line">                String value = cookie.getValue();</span><br><span class="line">                System.out.println(name+<span class="string">"====="</span>+value);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试：先发送cookie，后测试/cookie02，后台打印了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">_ga=====GA1.1.811266960.1589090858</span><br><span class="line">JSESSIONID=====A4A0D4C2EC23F4EE63883B1460FECB89</span><br><span class="line">msg=====hello</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-cookie原理"><a href="#2-2-cookie原理" class="headerlink" title="2.2 cookie原理"></a>2.2 cookie原理</h3><p>浏览器第一次发送请求给服务器的时候：</p>
+<p>请求头中没有其他消息</p>
+<p>响应头中有set-cookie字段</p>
+<p>浏览器以后再次发送请求给服务器的时候，会自动把这个cookie加入到请求头当中，此时服务器就知道了。</p>
+<h3 id="2-3-cookie的相关问题"><a href="#2-3-cookie的相关问题" class="headerlink" title="2.3 cookie的相关问题"></a>2.3 cookie的相关问题</h3><ol>
+<li>一次能不能发送多个cookie? ——-可以</li>
+</ol>
+<p>可以，创建多个cookie对象，使用response调用多次addCookie方法发送即可。</p>
+<ol start="2">
+<li>cookie在浏览器中保存多长时间</li>
+</ol>
+<p>默认情况下，当浏览器关闭后，cookie就会被销毁</p>
+<p>设置cookie的生命周期，使得可以持久化存储setMaxAge（int seconds）</p>
+<ol start="2">
+<li>cookie能不能存中文</li>
+</ol>
+<p>tomcat8只会可以直接存中文数据</p>
+<ol start="2">
+<li><p>cookie的共享问题</p>
+</li>
+<li><p>假设在同一个Tomcat服务器中部署了多个web项目，那么这些web项目中cookie默认是不能共享的，不过可以通过设置setPath(String path)来设置cookie的共享范围</p>
+</li>
+<li><p>不同的tomcat服务器中setDomain（）方法中国如果设置一级域名相同，则多个服务器之间可以共享</p>
+</li>
+</ol>
+<h3 id="2-4-cookie的作用和特点"><a href="#2-4-cookie的作用和特点" class="headerlink" title="2.4 cookie的作用和特点"></a>2.4 cookie的作用和特点</h3><p>1.存储在客户端浏览器中</p>
+<p>2.浏览器对单个cookie的大小有限制4KB，以及在同一域名下的总cookie数量也有限制20个</p>
+<p>作用：</p>
+<p>cookie一般用于存储少量的不太敏感的数据</p>
+<p>在不登录的情况下，完成服务器对客户端的身份识别。</p>
+<h2 id="3-Session"><a href="#3-Session" class="headerlink" title="3.Session"></a>3.Session</h2><p>服务器端会话技术，在一次会话的多次请求间共享数据，将数据保存在服务器端的对象中</p>
+<h3 id="3-1-Session原理"><a href="#3-1-Session原理" class="headerlink" title="3.1 Session原理"></a>3.1 Session原理</h3><p>当访问服务器否个网页的时候，会在服务器端的内存里开辟一块内存，这块内存就叫做session，而这个内存是跟浏览器关联在一起的。这个浏览器指的是浏览器窗口，或者是浏览器的子窗口，意思就是，只允许当前这个session对应的浏览器访问，就算是在同一个机器上新启的浏览器也是无法访问的。而另外一个浏览器也需要记录session的话，就会再启一个属于自己的session</p>
+<p>原理：HTTP协议是非连接性的，取完当前浏览器的内容，然后关闭浏览器后，链接就断开了，而没有任何机制去记录取出后的信息。而当需要访问同一个网站的另外一个页面时(就好比如在第一个页面选择购买的商品后，跳转到第二个页面去进行付款)这个时候取出来的信息，就读不出来了。所以必须要有一种机制让页面知道原理页面的session内容。</p>
+<p>问题：如何知道浏览器和这个服务器中的session是一一对应的呢？又如何保证不会去访问其它的session呢？</p>
+<p>原理解答：就是当访问一个页面的时候给浏览器创建一个独一无二的号码，也给同时创建的session赋予同样的号码。这样就可以在打开同一个网站的第二个页面时获取到第一个页面中session保留下来的对应信息（理解：当访问第二个页面时将号码同时传递到第二个页面。找到对应的session。）。这个号码也叫sessionID，session的ID号码，session的独一无二号码。</p>
+<h3 id="3-2-Session的实现方式"><a href="#3-2-Session的实现方式" class="headerlink" title="3.2 Session的实现方式"></a>3.2 Session的实现方式</h3><h4 id="通过cookies实现"><a href="#通过cookies实现" class="headerlink" title="通过cookies实现"></a><strong>通过cookies实现</strong></h4><p>就是把session的id 放在cookie里面（为什么是使用cookies存放呢，因为cookie有临时的，也有定时的，临时的就是当前浏览器什么时候关掉即消失，也就是说session本来就是当浏览器关闭即消失的，所以可以用临时的cookie存放。保存再cookie里的sessionID一定不会重复，因为是独一无二的。），当允许浏览器使用cookie的时候，session就会依赖于cookies，当浏览器不支持cookie后，就可以通过第二种方式获取session内存中的数据资源。</p>
+<h4 id="URL重写来实现"><a href="#URL重写来实现" class="headerlink" title="URL重写来实现"></a><strong>URL重写来实现</strong></h4><p>如何重写URL：通过response.encodeURL()方法</p>
+<p>encodeURL()的两个作用</p>
+<p> 第一个作用：转码（说明：转中文的编码，或者一些其他特殊的编码。就好比如网页的链接中存在中文字符，就会转换成为一些百分号或者其他的符号代替。）</p>
+<p>第二个作用：URL后面加入sessionID，当不支持cookie的时候，可以使用encodeURL()方法，encodeUTL()后面跟上sessionID，这样的话，在禁用cookie的浏览器中同时也可以使用session了。但是需要自己编程，只要链接支持，想用session就必须加上encodeURL()。</p>
+<p>提示：若想程序中永远支持session，那就必须加上encodeURL()，当别人禁用了cookie，一样可以使用session。</p>
+<p>如果浏览器支持cookie，创建session多大的时候，会被sessionID保存再cookie里。只要允许cookie，session就不会改变，如果不允许使用cookie，每刷新一次浏览器就会换一个session（因为浏览器以为这是一个新的链接）<br>如果不支持cookie，必须自己编程使用URL重写的方式实现session<br>Session不像cookie一样拥有路径访问的问题，同一个application下的servlet/jsp都可以共享同一个session，前提下是同一个客户端窗口。</p>
+<h3 id="3-3-Session的期限"><a href="#3-3-Session的期限" class="headerlink" title="3.3 Session的期限"></a>3.3 Session的期限</h3><p>当一个网站的第一个窗口关掉了，而没有继续接着访问第二个页面，就没有使用到session。那么session会在中断程序后立刻关闭session吗？这个时候session就需要给它保留的时间，当最近一次访问的时候开始计时，每刷新一次重写开始计时。当隔了这么久的时间，没有访问这个session后，对不起，要关闭这个session了。session有过期时间，session什么时候过期，要看配置，</p>
+<h3 id="3-4-session能干什么"><a href="#3-4-session能干什么" class="headerlink" title="3.4 session能干什么"></a>3.4 session能干什么</h3><p>session就是服务器里面的一块内存，内存里面能放任何东西，只要是名值对就可以了。</p>
+<p><strong>session里面的名字永远都是String类型</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaWeb/" rel="tag"># JavaWeb</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/22/JavaWeb%E8%AF%A6%E8%A7%A3%E4%B9%8Bservlet/" rel="prev" title="JavaWeb详解之servlet">
+      <i class="fa fa-chevron-left"></i> JavaWeb详解之servlet
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-什么是会话技术"><span class="nav-number">1.</span> <span class="nav-text">1.什么是会话技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Cookie"><span class="nav-number">2.</span> <span class="nav-text">2.Cookie</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-快速入门"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 快速入门</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-cookie原理"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 cookie原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-cookie的相关问题"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 cookie的相关问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-cookie的作用和特点"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 cookie的作用和特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Session"><span class="nav-number">3.</span> <span class="nav-text">3.Session</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Session原理"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Session原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Session的实现方式"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 Session的实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过cookies实现"><span class="nav-number">3.2.1.</span> <span class="nav-text">通过cookies实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#URL重写来实现"><span class="nav-number">3.2.2.</span> <span class="nav-text">URL重写来实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Session的期限"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Session的期限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-session能干什么"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 session能干什么</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="binshow"
+      src="/images/ruiwen.gif">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-center-circle.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="InnoDB引擎">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mySQL详解之InnoDB引擎">
+<meta property="og:url" content="http://yoursite.com/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8BInnoDB%E5%BC%95%E6%93%8E/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="InnoDB引擎">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051382463.png">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051627611.png">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051808769.png">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051971190.png">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/RLmbWWew55F3opxnpoB8oddtgyoia7Yt5L11Q62nngFGjI1ZkhsQWE0f4wMXjnwI9YY480d17lG1wgfZib2gSaaw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2020-05-21T08:22:58.000Z">
+<meta property="article:modified_time" content="2020-05-21T12:22:12.548Z">
+<meta property="article:author" content="binshow">
+<meta property="article:tag" content="mySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051382463.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8BInnoDB%E5%BC%95%E6%93%8E/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mySQL详解之InnoDB引擎 | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8BInnoDB%E5%BC%95%E6%93%8E/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ruiwen.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mySQL详解之InnoDB引擎
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-21 16:22:58 / 修改时间：20:22:12" itemprop="dateCreated datePublished" datetime="2020-05-21T16:22:58+08:00">2020-05-21</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="InnoDB引擎"><a href="#InnoDB引擎" class="headerlink" title="InnoDB引擎"></a>InnoDB引擎</h2><a id="more"></a>
+
+<h2 id="1-InnoDB页简介"><a href="#1-InnoDB页简介" class="headerlink" title="1.InnoDB页简介"></a>1.InnoDB页简介</h2><p><code>InnoDB</code>是一个将表中的数据存储到磁盘上的存储引擎，所以即使关机后重启我们的数据还是存在的。</p>
+<p>处理数据的过程是在内存中发生，所以需要把磁盘中的数据加载到内存中。</p>
+<p>如果是写入或修改的操作话，操作完之后还需要把内存中的内容刷新到磁盘上。</p>
+<p>读写磁盘的速度比内存读写慢几个数量级，所以当我们想从表中获取某些记录时，<code>InnoDB</code>存储引擎需要一条一条的把记录从磁盘上读出来么？</p>
+<p>InnoDB采取的方式是：<strong>将数据划分为若干个页，以页作为磁盘和内存之间交互的基本单位，InnoDB中页的大小一般为 16KB</strong>。也就是在一般情况下，一次最少从磁盘中读取16KB的内容到内存中，一次最少把内存中的16KB内容刷新到磁盘中。</p>
+<h2 id="2-InnoDB行格式"><a href="#2-InnoDB行格式" class="headerlink" title="2.InnoDB行格式"></a>2.InnoDB行格式</h2><p>以记录为单位来向表中插入数据的，这些记录在磁盘上的存放方式也被称为<code>行格式</code>或者<code>记录格式</code></p>
+<h3 id="2-1-compact"><a href="#2-1-compact" class="headerlink" title="2.1 compact"></a>2.1 compact</h3><p>行由两部分组成<strong>记录的额外信息</strong>和<strong>记录的真实数据</strong></p>
+<h4 id="记录的额外信息"><a href="#记录的额外信息" class="headerlink" title="记录的额外信息"></a>记录的额外信息</h4><p>这部分信息是服务器为了描述这条记录而不得不额外添加的一些信息，这些额外信息分为3类，分别是<code>变长字段长度列表</code>、<code>NULL值列表</code>和<code>记录头信息</code></p>
+<p>把所有变长类型的列的长度都存放在记录的开头部位形成一个列表，按照列的顺序逆序存放</p>
+<h3 id="2-2-Redundant行格式"><a href="#2-2-Redundant行格式" class="headerlink" title="2.2 Redundant行格式"></a>2.2 Redundant行格式</h3><h3 id="2-3Dynamic和Compressed行格式"><a href="#2-3Dynamic和Compressed行格式" class="headerlink" title="2.3Dynamic和Compressed行格式"></a>2.3Dynamic和Compressed行格式</h3><p>这两种行格式类似于<code>COMPACT行格式</code>，只不过在处理行溢出数据时有点儿分歧，它们不会在记录的真实数据处存储字符串的前768个字节，而是把所有的字节都存储到其他页面中，只在记录的真实数据处存储其他页面的地址。</p>
+<p>另外，<code>Compressed</code>行格式会把存储在其他页面中的数据压缩处理。</p>
+<h3 id="2-4-行溢出"><a href="#2-4-行溢出" class="headerlink" title="2.4 行溢出"></a>2.4 行溢出</h3><p>一个页一般是<code>16KB</code>，当记录中的数据太多，当前页放不下的时候，会把多余的数据存储到其他页中，这种现象称为<code>行溢出</code></p>
+<h2 id="3-InnoDB页结构"><a href="#3-InnoDB页结构" class="headerlink" title="3.InnoDB页结构"></a>3.InnoDB页结构</h2><ol>
+<li><p>InnoDB为了不同的目的而设计了不同类型的页，用于存放我么记录的页也叫做<code>数据页</code>。</p>
+</li>
+<li><p>一个数据页可以被分为7个部分，分别是</p>
+</li>
+<li><ul>
+<li><code>File Header</code>，表示文件头，占固定的38字节。</li>
+<li><code>Page Header</code>，表示页里的一些状态信息，占固定的56个字节。</li>
+<li><code>Infimum + Supremum</code>，两个虚拟的伪记录，分别表示页中的最小和最大记录，占固定的<code>26</code>个字节。</li>
+<li><code>User Records</code>：真实存储我们插入的记录的部分，大小不固定。</li>
+<li><code>Free Space</code>：页中尚未使用的部分，大小不确定。</li>
+<li><code>Page Directory</code>：页中的记录相对位置，也就是各个槽在页面中的地址偏移量，大小不固定，插入的记录越多，这个部分占用的空间越多。</li>
+<li><code>File Trailer</code>：用于检验页是否完整的部分，占用固定的8个字节。</li>
+</ul>
+</li>
+<li><p>每个记录的头信息中都有一个<code>next_record</code>属性，从而使页中的所有记录串联成一个<code>单链表</code>。</p>
+</li>
+<li><p><code>InnoDB</code>会为把页中的记录划分为若干个组，每个组的最后一个记录的地址偏移量作为一个<code>槽</code>，存放在<code>Page Directory</code>中，所以在一个页中根据主键查找记录是非常快的，分为两步：</p>
+</li>
+<li><ul>
+<li>通过二分法确定该记录所在的槽。</li>
+<li>通过记录的next_record属性组成的链表遍历查找该槽中的各个记录。</li>
+</ul>
+</li>
+<li><p>每个数据页的<code>File Header</code>部分都有上一个和下一个页的编号，所以所有的数据页会组成一个<code>双链表</code>。</p>
+</li>
+<li><p>为保证从内存中同步到磁盘的页的完整性，在页的首部和尾部都会存储页中数据的校验和和<code>LSN</code>值，如果首部和尾部的校验和和<code>LSN</code>值校验不成功的话，就说明同步过程出现了问题。</p>
+</li>
+</ol>
+<h2 id="4-索引"><a href="#4-索引" class="headerlink" title="4.索引"></a>4.索引</h2><p><code>InnoDB</code>数据页的7个组成部分，知道了各个数据页可以组成一个<code>双向链表</code>，而每个数据页中的记录又可以组成一个<code>单向链表</code>，每个数据页都会为存储在它里边儿的记录生成一个<code>页目录</code>，在通过主键查找某条记录的时候可以在<code>页目录</code>中使用二分法快速定位到对应的槽，然后再遍历该槽对应分组中的记录即可快速找到指定的记录</p>
+<p>注：每行记录记录头信息中有以下两个属性：</p>
+<ul>
+<li><code>record_type</code>：记录头信息的一项属性，表示记录的类型，<code>0</code>表示普通记录、<code>2</code>表示最小记录、<code>3</code>表示最大记录、<code>1</code>表示是否是叶子节点</li>
+<li><code>next_type</code>：记录头信息的一项属性，表示下一条地址的偏移量，为了方便大家理解，我们都会用箭头来表明下一条记录是谁。</li>
+</ul>
+<h3 id="没有索引的查找"><a href="#没有索引的查找" class="headerlink" title="没有索引的查找"></a>没有索引的查找</h3><h4 id="单页内的查询"><a href="#单页内的查询" class="headerlink" title="单页内的查询"></a>单页内的查询</h4><p>假设目前表中的记录比较少，所有的记录都可以被存放到一个页中，在查找记录的时候可以根据搜索条件的不同分为两种情况：</p>
+<ul>
+<li><p>以主键为搜索条件</p>
+<p>这个查找过程我们已经很熟悉了，可以在<code>页目录</code>中使用二分法快速定位到对应的槽，然后再遍历该槽对应分组中的记录即可快速找到指定的记录。</p>
+</li>
+<li><p>以其他列作为搜索条件</p>
+<p>对非主键列的查找的过程可就不这么幸运了，因为在数据页中并没有对非主键列建立所谓的<code>页目录</code>，所以我们无法通过二分法快速定位相应的<code>槽</code>。这种情况下只能从<code>最小记录</code>开始依次遍历单链表中的每条记录，然后对比每条记录是不是符合搜索条件。很显然，这种查找的效率是非常低的。</p>
+</li>
+</ul>
+<h4 id="多页中的查询"><a href="#多页中的查询" class="headerlink" title="多页中的查询"></a>多页中的查询</h4><p>大部分情况下我们表中存放的记录都是非常多的，需要好多的数据页来存储这些记录。在很多页中查找记录的话可以分为两个步骤：</p>
+<ol>
+<li>定位到记录所在的页。</li>
+<li>从所在的页内中查找相应的记录。</li>
+</ol>
+<p>不论是根据主键列或者其他列的值进行查找，由于我们并不能快速的定位到记录所在的页，所以只能从第一个页沿着双向链表一直往下找，在每一个页中根据我们上边已经唠叨过的查找方式去查找指定的记录。因为要遍历所有的数据页，所以这种方式显然是超级耗时的，如果一个表有一亿条记录，使用这种方式去查找记录那要等到猴年马月才能等到查找结果。</p>
+<h3 id="建立索引满足的条件"><a href="#建立索引满足的条件" class="headerlink" title="建立索引满足的条件"></a>建立索引满足的条件</h3><ol>
+<li>下一个数据页的主键值必须大于上一个页中的主键值。</li>
+</ol>
+<p>在对页中的记录进行增删改操作的过程中，我们必须通过一些诸如记录移动的操作来始终保证这个状态一直成立</p>
+<ol start="2">
+<li>给所有的页建立一个目录项</li>
+</ol>
+<ul>
+<li><p>每个页对应一个目录项，每个目录项包括下边两个部分：</p>
+</li>
+<li><ul>
+<li>页的用户记录中最小的主键值，我们用<code>key</code>来表示。</li>
+<li>页号，我们用<code>page_no</code>表示。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051382463.png" alt="1590051382463"></p>
+<h3 id="建立索引后的查找"><a href="#建立索引后的查找" class="headerlink" title="建立索引后的查找"></a>建立索引后的查找</h3><p>先根据主键值二分查找找到对应的页数，再进行单页内的查询</p>
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051627611.png" alt="1590051627611"></p>
+<ul>
+<li>如果<code>B+</code>树只有1层，也就是只有1个用于存放用户记录的节点，最多能存放<code>1000</code>条记录。</li>
+<li>如果<code>B+</code>树有2层，最多能存放<code>1000×1000=1000000</code>条记录。</li>
+<li>如果<code>B+</code>树有3层，最多能存放<code>1000×1000×1000=1000000000</code>条记录。</li>
+<li>如果<code>B+</code>树有4层，最多能存放<code>1000×1000×1000×1000=1000000000000</code>条记录。</li>
+</ul>
+<h2 id="5-聚簇索引"><a href="#5-聚簇索引" class="headerlink" title="5.聚簇索引"></a>5.聚簇索引</h2><p>我们上边介绍的<code>B+</code>树本身就是一个目录，或者说本身就是一个索引。它有两个特点：</p>
+<ol>
+<li><p>使用记录主键值的大小进行记录和页的排序，这包括三个方面的含义：</p>
+</li>
+<li><ul>
+<li>页内的记录是按照主键的大小顺序排成一个单向链表。</li>
+<li>各个存放<strong>用户记录</strong>的页也是根据页中记录的主键大小顺序排成一个双向链表。</li>
+<li>各个存放<strong>目录项</strong>的页也是根据页中记录的主键大小顺序排成一个双向链表。</li>
+</ul>
+</li>
+<li><p><code>B+</code>树的叶子节点存储的是完整的用户记录。</p>
+<p>所谓完整的用户记录，就是指这个记录中存储了所有列的值。</p>
+</li>
+</ol>
+<p>我们把具有这两种特性的<code>B+</code>树称为<code>聚簇索引</code>，所有完整的用户记录都存放在这个<code>聚簇索引</code>的叶子节点处。这种<code>聚簇索引</code>并不需要我们在<code>MySQL</code>语句中显式的去创建，<code>InnoDB</code>存储引擎会自动的为我们创建聚簇索引。另外有趣的一点是，在<code>InnoDB</code>存储引擎中，<code>聚簇索引</code>就是数据的存储方式（所有的用户记录都存储在了<code>叶子节点</code>），也就是所谓的索引即数据。</p>
+<h2 id="6-二级索引"><a href="#6-二级索引" class="headerlink" title="6.二级索引"></a>6.二级索引</h2><p><code>聚簇索引</code>只能在搜索条件是主键值时才能发挥作用，因为<code>B+</code>树中的数据都是按照主键进行排序的。那如果我们想以别的列作为搜索条件该咋办呢？难道只能从头到尾沿着链表依次遍历记录么？</p>
+<p>不，我们可以多建几棵<code>B+</code>树，不同的<code>B+</code>树中的数据采用不同的排序规则。</p>
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051808769.png" alt="1590051808769"></p>
+<p>这个<code>B+</code>树与上边介绍的聚簇索引有几处不同：</p>
+<ul>
+<li><p>使用记录<code>c2</code>列的大小进行记录和页的排序，这包括三个方面的含义：</p>
+</li>
+<li><ul>
+<li>页内的记录是按照<code>c2</code>列的大小顺序排成一个单向链表。</li>
+<li>各个存放用户记录的页也是根据页中记录的<code>c2</code>列大小顺序排成一个双向链表。</li>
+<li>各个存放目录项的页也是根据页中记录的<code>c2</code>列大小顺序排成一个双向链表。</li>
+</ul>
+</li>
+<li><p><code>B+</code>树的叶子节点存储的并不是完整的用户记录，而只是<code>c2列+主键</code>这两个列的值。</p>
+</li>
+<li><p>目录项记录中不再是<code>主键+页号</code>的搭配，而变成了<code>c2列+页号</code>的搭配。</p>
+</li>
+</ul>
+<p>所以如果我们现在想通过<code>c2</code>列的值查找某些记录的话就可以使用我们刚刚建好的这个<code>B+</code>树了，以查找<code>c2</code>列的值为<code>4</code>的记录为例，查找过程如下：</p>
+<ol>
+<li><p>确定<code>目录项记录</code>页</p>
+<p>根据<code>根页面</code>，也就是<code>页44</code>，可以快速定位到<code>目录项记录</code>所在的页为<code>页42</code>（因为<code>2 &lt; 4 &lt; 9</code>）。</p>
+</li>
+<li><p>通过<code>目录项记录</code>页确定用户记录真实所在的页。</p>
+<p>在<code>页42</code>中可以快速定位到实际存储用户记录的页，但是由于<code>c2</code>列并没有唯一性约束，所以<code>c2</code>列值为<code>4</code>的记录可能分布在多个数据页中，又因为<code>2 &lt; 4 ≤ 4</code>，所以确定实际存储用户记录的页在<code>页34</code>和<code>页35</code>中。</p>
+</li>
+<li><p>在真实存储用户记录的页中定位到具体的记录。</p>
+<p>到<code>页34</code>和<code>页35</code>中定位到具体的记录。</p>
+</li>
+<li><p>但是这个<code>B+</code>树的叶子节点中的记录只存储了<code>c2</code>和<code>c1</code>（也就是<code>主键</code>）两个列，所以我们必须再根据主键值去聚簇索引中再查找一遍完整的用户记录。</p>
+</li>
+</ol>
+<p>叶子节点存的是主键的值，需要通过主键的值再去聚簇索引中再查找一遍完整的用户记录。</p>
+<p>我们根据这个以<code>c2</code>列大小排序的<code>B+</code>树只能确定我们要查找记录的主键值，所以如果我们想根据<code>c2</code>列的值查找到完整的用户记录的话，仍然需要到<code>聚簇索引</code>中再查一遍，这个过程也被称为<code>回表</code>。也就是根据<code>c2</code>列的值查询一条完整的用户记录需要使用到<code>2``棵``B+</code>树！！！</p>
+<p>为什么我们还需要一次<code>回表</code>操作呢？直接把完整的用户记录放到<code>叶子节点</code>不就好了么？你说的对，如果把完整的用户记录放到<code>叶子节点</code>是可以不用<code>回表</code>，但是太占地方了呀～相当于每建立一棵<code>B+</code>树都需要把所有的用户记录再都拷贝一遍，这就有点太浪费存储空间了。因为这种按照<code>非主键列</code>建立的<code>B+</code>树需要一次<code>回表</code>操作才可以定位到完整的用户记录，所以这种<code>B+</code>树也被称为<code>二级索引</code>（英文名<code>secondary index</code>），或者<code>辅助索引</code>。由于我们使用的是<code>c2</code>列的大小作为<code>B+</code>树的排序规则，所以我们也称这个<code>B+</code>树为为c2列建立的索引。</p>
+<h2 id="7-联合索引"><a href="#7-联合索引" class="headerlink" title="7.联合索引"></a>7.联合索引</h2><p>我们也可以同时以多个列的大小作为排序规则，也就是同时为多个列建立索引，比方说我们想让<code>B+</code>树按照<code>c2</code>和<code>c3</code>列的大小进行排序，这个包含两层：</p>
+<ul>
+<li>先把各个记录和页按照<code>c2</code>列进行排序。</li>
+<li>在记录的<code>c2</code>列相同的情况下，采用<code>c3</code>列进行排序</li>
+</ul>
+<p>为<code>c2</code>和<code>c3</code>列建立的索引的示意图如下：</p>
+<p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590051971190.png" alt="1590051971190"></p>
+<p>如图所示，我们需要注意一下几点：</p>
+<ul>
+<li>每条<code>目录项记录</code>都由<code>c2</code>、<code>c3</code>、<code>页号</code>这三个部分组成，各条记录先按照<code>c2</code>列的值进行排序，如果记录的<code>c2</code>列相同，则按照<code>c3</code>列的值进行排序。</li>
+<li><code>B+</code>树叶子节点处的用户记录由<code>c2</code>、<code>c3</code>和主键<code>c1</code>列组成。</li>
+</ul>
+<p>千万要注意一点，以c2和c3列的大小为排序规则建立的<code>B+</code>树称为<code>联合索引</code>，它的意思与分别为c2和c3列建立索引的表述是不同的，不同点如下：</p>
+<ul>
+<li>建立<code>联合索引</code>只会建立如上图一样的1棵<code>B+</code>树。</li>
+<li>为c2和c3列建立索引会分别以<code>c2</code>和<code>c3</code>列的大小为排序规则建立2棵<code>B+</code>树。</li>
+</ul>
+<h2 id="8-MyISAM中的索引方案"><a href="#8-MyISAM中的索引方案" class="headerlink" title="8.MyISAM中的索引方案"></a>8.MyISAM中的索引方案</h2><p>至此，我们介绍的都是<code>InnoDB</code>存储引擎中的索引方案，为了内容的完整性，以及各位可能在面试的时候遇到这类的问题，我们有必要再简单介绍一下<code>MyISAM</code>存储引擎中的索引方案。我们知道<code>InnoDB</code>中索引即数据，也就是聚簇索引的那棵<code>B+</code>树的叶子节点中已经把所有完整的用户记录都包含了，而<code>MyISAM</code>的索引方案虽然也使用<code>B+</code>树，但是却将索引和数据分开存储：</p>
+<ul>
+<li><p>将表中的记录按照插入时间顺序的存储在一块存储空间上，我们可以通过行号而快速访问到一条记录（因为<code>index_demo</code>表的记录是定长的，所以可以使用行号来进行快速访问，对于变长的记录MyISAM有不同的处理方案，我们这里就不介绍了），如图所示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/RLmbWWew55F3opxnpoB8oddtgyoia7Yt5L11Q62nngFGjI1ZkhsQWE0f4wMXjnwI9YY480d17lG1wgfZib2gSaaw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="image_1cad0lhac1qq31jcf1t4oa2a5c5p.png-41.8kB"></p>
+</li>
+</ul>
+<p>  由于在插入数据的时候并没有刻意按照主键大小排序，所以我们并不能在这些数据上使用二分法进行查找。</p>
+<ul>
+<li><p><code>MyISAM</code>会单独为表的主键创建一个<code>B+</code>树索引，只不过在<code>B+</code>树的叶子节点中存储的不是完整的用户记录，而是<code>主键值 + 行号</code>的组合。也就是先通过索引找到对应的行号，再通过行号去找对应的记录！</p>
+<p>这一点和<code>InnoDB</code>是完全不相同的，在<code>InnoDB</code>存储引擎中，我们只需要根据主键值对<code>聚簇索引</code>进行一次查找能找到对应的记录，而在<code>MyISAM</code>中却需要进行一次<code>回表</code>操作，意味着<code>MyISAM</code>中建立的索引全部都是<code>二级索引</code>！</p>
+</li>
+<li><p>如果有需要的话，我们也可以对其它的列分别建立索引或者建立联合索引，原理和<code>InnoDB</code>中的索引是一样的，只不过在叶子节点处存储的是<code>相应的列 + 行号</code>而已。这些索引也全部都是<code>二级索引</code>。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mySQL/" rel="tag"># mySQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8B%E7%B4%A2%E5%BC%95/" rel="prev" title="mySQL详解之索引">
+      <i class="fa fa-chevron-left"></i> mySQL详解之索引
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8B%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6/" rel="next" title="mySQL详解之日志文件">
+      mySQL详解之日志文件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#InnoDB引擎"><span class="nav-number">1.</span> <span class="nav-text">InnoDB引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-InnoDB页简介"><span class="nav-number">2.</span> <span class="nav-text">1.InnoDB页简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-InnoDB行格式"><span class="nav-number">3.</span> <span class="nav-text">2.InnoDB行格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-compact"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 compact</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#记录的额外信息"><span class="nav-number">3.1.1.</span> <span class="nav-text">记录的额外信息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Redundant行格式"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 Redundant行格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3Dynamic和Compressed行格式"><span class="nav-number">3.3.</span> <span class="nav-text">2.3Dynamic和Compressed行格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-行溢出"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 行溢出</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-InnoDB页结构"><span class="nav-number">4.</span> <span class="nav-text">3.InnoDB页结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-索引"><span class="nav-number">5.</span> <span class="nav-text">4.索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#没有索引的查找"><span class="nav-number">5.1.</span> <span class="nav-text">没有索引的查找</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#单页内的查询"><span class="nav-number">5.1.1.</span> <span class="nav-text">单页内的查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多页中的查询"><span class="nav-number">5.1.2.</span> <span class="nav-text">多页中的查询</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#建立索引满足的条件"><span class="nav-number">5.2.</span> <span class="nav-text">建立索引满足的条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#建立索引后的查找"><span class="nav-number">5.3.</span> <span class="nav-text">建立索引后的查找</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-聚簇索引"><span class="nav-number">6.</span> <span class="nav-text">5.聚簇索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-二级索引"><span class="nav-number">7.</span> <span class="nav-text">6.二级索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-联合索引"><span class="nav-number">8.</span> <span class="nav-text">7.联合索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-MyISAM中的索引方案"><span class="nav-number">9.</span> <span class="nav-text">8.MyISAM中的索引方案</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="binshow"
+      src="/images/ruiwen.gif">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

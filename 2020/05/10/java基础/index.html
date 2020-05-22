@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1587043479127.png">
 <meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1588556130708.png">
 <meta property="article:published_time" content="2020-05-10T14:15:18.000Z">
-<meta property="article:modified_time" content="2020-05-16T15:11:25.204Z">
+<meta property="article:modified_time" content="2020-05-21T05:38:45.987Z">
 <meta property="article:author" content="binshow">
 <meta property="article:tag" content="Java基础">
 <meta name="twitter:card" content="summary">
@@ -197,7 +197,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-16 23:11:25" itemprop="dateModified" datetime="2020-05-16T23:11:25+08:00">2020-05-16</time>
+                <time title="修改时间：2020-05-21 13:38:45" itemprop="dateModified" datetime="2020-05-21T13:38:45+08:00">2020-05-21</time>
               </span>
 
           
@@ -222,6 +222,22 @@
 <li>多态：允许不同子类型的对象对同一消息做出不同的响应</li>
 </ol>
 <p>多态的实现方式：</p>
+<p><strong>实现多态的三个条件</strong></p>
+<ul>
+<li>继承的存在。继承是多态的基础，没有继承就没有多态</li>
+<li>子类重写父类的方法，JVM 会调用子类重写后的方法</li>
+<li>父类引用变量指向子类对象</li>
+</ul>
+<p><strong>向上转型：将一个父类的引用指向一个子类对象，自动进行类型转换。</strong></p>
+<ul>
+<li>通过父类引用变量调用的方法是子类覆盖或继承父类的方法，而不是父类的方法。</li>
+<li>通过父类引用变量无法调用子类特有的方法。</li>
+</ul>
+<p><strong>向下转型：将一个指向子类对象的引用赋给一个子类的引用，必须进行强制类型转换。</strong></p>
+<ul>
+<li>向下转型必须转换为父类引用指向的真实子类类型，不是任意的强制转换，否则会出现 ClassCastException</li>
+<li>向下转型时可以结合使用 instanceof 运算符进行判断</li>
+</ul>
 <ol>
 <li>方法重载，编译时 多态性，前绑定</li>
 <li>方法重写，运行时 多态性，后绑定</li>
@@ -239,7 +255,17 @@
 <p>　　可以这样理解，上面我举例子的时候先说了兔子和绵羊，然后才推出食草动物。但如果我们继续认识了牛、马等食草动物，我们会发现我们需要不断调整食草动物的描述，这样程序会变得僵化，所以我们不应该让子类依赖于实体，不应该让父类模块依赖于子类模块。所以我们需要将食草动物设计为抽象类，即<strong>抽象类或接口</strong>。这样下层只需要实现相应的细节而不会影响父类。</p>
 <h3 id="5、接口隔离原则（ISP）"><a href="#5、接口隔离原则（ISP）" class="headerlink" title="　　5、接口隔离原则（ISP）"></a>　　5、接口隔离原则（ISP）</h3><p>　　不应强迫客户端实现一个它用不上的接口，或是说客户端不应该被迫依赖它们不使用的方法，使用多个专门的接口比使用单个接口要好的多！</p>
 <p>　　比如，为了减少接口的定义，将许多类似的方法都放在一个接口中，最后会发现，维护和实现接口的时候花了太多精力，而接口所定义的操作相当于对客户端的一种承诺，这种承诺当然是越少越好，越精练越好，过多的承诺带来的就是你的大量精力和时间去维护！</p>
-<h1 id="5-static-和final的用途和区别"><a href="#5-static-和final的用途和区别" class="headerlink" title="5.static 和final的用途和区别"></a>5.static 和final的用途和区别</h1><p>Static<br>修饰变量：静态变量随着类加载时被完成初始化，内存中只有一个，且JVM也只会为它分配一次内存，所有类共享静态变量。<br>修饰方法：在类加载的时候就存在，不依赖任何实例；static方法必须实现，不能用abstract修饰。<br>修饰代码块：在类加载完之后就会执行代码块中的内容。<br>父类静态代码块-&gt;子类静态代码块-&gt;父类非静态代码块-&gt;父类构造方法-&gt;子类非静态代码块-&gt;子类构造方法<br>Final<br>修饰变量：<br>    编译期常量：类加载的过程完成初始化，编译后带入到任何计算式中。只能是基本类型。<br>    运行时常量：基本数据类型或引用数据类型。引用不可变，但引用的对象内容可变。<br>修饰方法：不能被继承，不能被子类修改。<br>修饰类：不能被继承。<br>修饰形参：final形参不可变</p>
+<h1 id="5-static-和final的用途和区别"><a href="#5-static-和final的用途和区别" class="headerlink" title="5.static 和final的用途和区别"></a>5.static 和final的用途和区别</h1><ul>
+<li>static 可以修饰变量、方法、代码块和内部类</li>
+<li>static 变量是这个类所有，由该类创建的所有对象共享同一个 static 属性</li>
+<li>可以通过创建的对象名.属性名 和 类名.属性名两种方式访问</li>
+<li>static 变量在内存中只有一份</li>
+<li>static 修饰的变量只能是类的成员变量</li>
+<li>static 方法可以通过对象名.方法名和类名.方法名两种方式来访问</li>
+<li>static 代码块在类被第一次加载时执行静态代码块，且只被执行一次，主要作用是实现 static 属性的初始化</li>
+<li>static 内部类属于整个外部类，而不属于外部类的每个对象，只可以访问外部类的静态变量和方法</li>
+</ul>
+<p>Static<br>修饰变量：静态变量随着类加载时被完成初始化，内存中只有一个，且JVM也只会为它分配一次内存，所有类共享静态变量。<br>修饰方法：在类加载的时候就存在，不依赖任何实例；static方法必须实现，不能用abstract修饰。<br>修饰代码块：在类加载完之后就会执行代码块中的内容。<br>父类静态代码块-&gt;子类静态代码块-&gt;父类非静态代码块-&gt;父类构造方法-&gt;子类非静态代码块-&gt;子类构造方法<br>Final<br>修饰变量：<br>    编译期常量：类加载的过程完成初始化，编译后带入到任何计算式中。只能是基本类型。<br>    运行时常量：基本数据类型或引用数据类型。引用不可变，但引用的对象内容可变。<br>修饰方法：不能被继承，不能被子类修改。<br>修饰类：不能被继承。<br>修饰形参：final形参不可变</p>
 <h1 id="6-hashMap和hashtable的区别，是线程安全的吗"><a href="#6-hashMap和hashtable的区别，是线程安全的吗" class="headerlink" title="6.hashMap和hashtable的区别，是线程安全的吗"></a>6.hashMap和hashtable的区别，是线程安全的吗</h1><h1 id="7-hashMap和concurrentHashMap的区别"><a href="#7-hashMap和concurrentHashMap的区别" class="headerlink" title="7.hashMap和concurrentHashMap的区别"></a>7.hashMap和concurrentHashMap的区别</h1><h1 id="8-String-StringBuffer-and-StringBuilder"><a href="#8-String-StringBuffer-and-StringBuilder" class="headerlink" title="8.String, StringBuffer and StringBuilder"></a>8.String, StringBuffer and StringBuilder</h1><p><strong>1. 可变性</strong>  </p>
 <ul>
 <li>String 声明的是不可变的对象，每次操作都会生成新的String 对象，然后将指针指向新的 String 对象</li>
@@ -316,14 +342,23 @@
 
 <p>String str=”i”的方式，java 虚拟机会将其分配到常量池中；</p>
 <p>而 String str=new String(“i”) 则会被分到堆内存中。</p>
-<h1 id="13-为什么重写equals方法的同时也要重写hashCode-方法"><a href="#13-为什么重写equals方法的同时也要重写hashCode-方法" class="headerlink" title="13.为什么重写equals方法的同时也要重写hashCode()方法"></a>13.为什么重写equals方法的同时也要重写hashCode()方法</h1><p>hashCode() 返回哈希值，而 equals() 是用来判断两个对象是否等价。等价的两个对象散列值一定相同，但是散列值相同的两个对象不一定等价，这是因为计算哈希值具有随机性，两个值不同的对象可能计算出相同的哈希值。</p>
+<h1 id="13-为什么重写equals方法的同时也要重写hashCode-方法"><a href="#13-为什么重写equals方法的同时也要重写hashCode-方法" class="headerlink" title="13.为什么重写equals方法的同时也要重写hashCode()方法"></a>13.为什么重写equals方法的同时也要重写hashCode()方法</h1><p>hashCode()相同，equals()不一定为true，反过来也是。</p>
+<p>关于 hashCode() 和 equals() 是方法是有一些 常规协定：</p>
+<p>1、两个对象用 equals() 比较返回true，那么两个对象的hashCode()方法必须返回相同的结果。</p>
+<p>2、两个对象用 equals() 比较返回false，不要求hashCode()方法也一定返回不同的值，但是最好返回不同值，以提搞哈希表性能。</p>
+<p>3、重写 equals() 方法，必须重写 hashCode() 方法，以保证 equals() 方法相等时两个对象 hashcode() 返回相同的值。</p>
+<p>hashCode() 返回哈希值，而 equals() 是用来判断两个对象是否等价。等价的两个对象散列值一定相同，但是散列值相同的两个对象不一定等价，这是因为计算哈希值具有随机性，两个值不同的对象可能计算出相同的哈希值。</p>
 <p>在覆盖 equals() 方法时应当总是覆盖 hashCode() 方法，保证等价的两个对象哈希值也相等。</p>
 <h1 id="14-Error-和-Exception的区别"><a href="#14-Error-和-Exception的区别" class="headerlink" title="14.Error 和 Exception的区别"></a>14.Error 和 <strong>Exception</strong>的区别</h1><p>Throwable 可以用来表示任何可以作为异常抛出的类，分为两种：  <strong>Error</strong>   和 <strong>Exception</strong>。其中 Error 用来表示 JVM 无法处理的错误，Exception 分为两种：</p>
 <ul>
 <li><strong>受检异常</strong>  ：需要用 try…catch… 语句捕获并进行处理，并且可以从异常中恢复；</li>
 <li><strong>非受检异常</strong>  ：是程序运行时错误，例如除 0 会引发 Arithmetic Exception，此时程序崩溃并且无法恢复。</li>
 </ul>
-<h1 id="15-和equals的区别"><a href="#15-和equals的区别" class="headerlink" title="15.==和equals的区别"></a>15.==和equals的区别</h1><p>对于==来说：</p>
+<h1 id="15-和equals的区别"><a href="#15-和equals的区别" class="headerlink" title="15.==和equals的区别"></a>15.==和equals的区别</h1><ul>
+<li>== 是关系运算符，equals() 是方法，结果都返回布尔值</li>
+<li>Object 的 == 和 equals() 比较的都是地址，作用相同</li>
+</ul>
+<p>对于==来说：</p>
 <ul>
 <li><p>基本类型：比较的是值是否相同；</p>
 </li>
@@ -331,9 +366,31 @@
 </li>
 </ul>
 <p>对于equals()方法来说：底层就是==，只是不同的类重写了equals方法，比如 String、Integer 等把它变成了值比较，所以一般情况下 equals 比较的是值是否相等</p>
+<h4 id="16-1基本类型和包装类型比较的结果"><a href="#16-1基本类型和包装类型比较的结果" class="headerlink" title="16.1基本类型和包装类型比较的结果"></a>16.1基本类型和包装类型比较的结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> Integer i1 = <span class="number">100</span>;</span><br><span class="line"> Integer i2 = <span class="number">100</span>;</span><br><span class="line"> Integer i3 = <span class="number">200</span>;</span><br><span class="line"> Integer i4 = <span class="number">200</span>;</span><br><span class="line">         </span><br><span class="line"> System.out.println(i1==i2); <span class="comment">//打印true</span></span><br><span class="line"> System.out.println(i3==i4); <span class="comment">//打印false</span></span><br><span class="line"></span><br><span class="line">基本类型 － 基本类型、基本类型 － 包装对象返回 <span class="keyword">true</span></span><br><span class="line">包装对象 － 包装对象返回 <span class="keyword">false</span></span><br><span class="line">缓存中取的包装对象比较返回 <span class="keyword">true</span>（原因是 JVM 缓存部分基本类型常用的包装类对象，如 Integer -<span class="number">128</span> ~ <span class="number">127</span> 是被缓存的）</span><br></pre></td></tr></table></figure>
+
+<p>使用 equals() 比较</p>
+<ul>
+<li>包装对象－基本类型返回 true</li>
+<li>包装对象－包装对象返回 true</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span> b1 = <span class="number">127</span>;</span><br><span class="line">Byte b2 = <span class="keyword">new</span> Byte(<span class="string">"127"</span>);</span><br><span class="line">Byte b3 = <span class="keyword">new</span> Byte(<span class="string">"127"</span>);</span><br><span class="line">System.out.println(<span class="string">"Byte 基本类型和包装对象使用 == 比较 : "</span> + (b1 == b2));</span><br><span class="line">System.out.println(<span class="string">"Byte 基本类型和包装对象使用 equals 比较 : "</span> + b2.equals(b1));</span><br><span class="line">System.out.println(<span class="string">"Byte 包装对象和包装对象使用 == 比较 : "</span> + (b2 == b3));</span><br><span class="line">System.out.println(<span class="string">"Byte 包装对象和包装对象使用 equals 比较 : "</span> + b2.equals(b3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">short</span> s1 = <span class="number">12</span>;</span><br><span class="line">Short s2 = <span class="keyword">new</span> Short(<span class="string">"12"</span>);</span><br><span class="line">Short s3 = <span class="keyword">new</span> Short(<span class="string">"12"</span>);</span><br><span class="line">System.out.println(<span class="string">"Short 基本类型和包装对象使用 == 比较 : "</span> + (s1 == s2));</span><br><span class="line">System.out.println(<span class="string">"Short 基本类型和包装对象使用 equals 比较 : "</span> + s2.equals(s1));</span><br><span class="line">System.out.println(<span class="string">"Short 包装对象和包装对象使用 == 比较 : "</span> + (s2 == s3));</span><br><span class="line">System.out.println(<span class="string">"Short 包装对象和包装对象使用 equals 比较 : "</span> + s2.equals(s3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span> c1 = <span class="string">'A'</span>;</span><br><span class="line">Character c2 = <span class="keyword">new</span> Character(<span class="string">'A'</span>);</span><br><span class="line">Character c3 = <span class="keyword">new</span> Character(<span class="string">'A'</span>);</span><br><span class="line">System.out.println(<span class="string">"Character 基本类型和包装对象使用 == 比较 : "</span> + (c1 == c2));</span><br><span class="line">System.out.println(<span class="string">"Character 基本类型和包装对象使用 equals 比较 : "</span> + c2.equals(c1));</span><br><span class="line">System.out.println(<span class="string">"Character 包装对象和包装对象使用 == 比较 : "</span> + (c2 == c3));</span><br><span class="line">System.out.println(<span class="string">"Character 包装对象和包装对象使用 equals 比较 : "</span> + c2.equals(c3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> i1 = <span class="number">10000</span>;</span><br><span class="line">Integer i2 = <span class="keyword">new</span> Integer(<span class="number">10000</span>);</span><br><span class="line">Integer i3 = <span class="keyword">new</span> Integer(<span class="number">10000</span>);</span><br><span class="line">System.out.println(<span class="string">"Integer 基本类型和包装对象使用 == 比较 : "</span> + (i1 == i2));</span><br><span class="line">System.out.println(<span class="string">"Integer 基本类型和包装对象使用 equals 比较 : "</span> + i2.equals(i1));</span><br><span class="line">System.out.println(<span class="string">"Integer 包装对象和包装对象使用 == 比较 : "</span> + (i2 == i3));</span><br><span class="line">System.out.println(<span class="string">"Integer 包装对象和包装对象使用 equals 比较 : "</span> + i2.equals(i3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">long</span> l1 = <span class="number">1000000000000000L</span>;</span><br><span class="line">Long l2 = <span class="keyword">new</span> Long(<span class="string">"1000000000000000"</span>);</span><br><span class="line">Long l3 = <span class="keyword">new</span> Long(<span class="string">"1000000000000000"</span>);</span><br><span class="line">System.out.println(<span class="string">"Long 基本类型和包装对象使用 == 比较 : "</span> + (l1 == l2));</span><br><span class="line">System.out.println(<span class="string">"Long 基本类型和包装对象使用 equals 比较 : "</span> + l2.equals(l1));</span><br><span class="line">System.out.println(<span class="string">"Long 包装对象和包装对象使用 == 比较 : "</span> + (l2 == l3));</span><br><span class="line">System.out.println(<span class="string">"Long 包装对象和包装对象使用 equals 比较 : "</span> + l2.equals(l3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">float</span> f1 = <span class="number">10000.111F</span>;</span><br><span class="line">Float f2 = <span class="keyword">new</span> Float(<span class="string">"10000.111"</span>);</span><br><span class="line">Float f3 = <span class="keyword">new</span> Float(<span class="string">"10000.111"</span>);</span><br><span class="line">System.out.println(<span class="string">"Float 基本类型和包装对象使用 == 比较 : "</span> + (f1 == f2));</span><br><span class="line">System.out.println(<span class="string">"Float 基本类型和包装对象使用 equals 比较 : "</span> + f2.equals(f1));</span><br><span class="line">System.out.println(<span class="string">"Float 包装对象和包装对象使用 == 比较 : "</span> + (f2 == f3));</span><br><span class="line">System.out.println(<span class="string">"Float 包装对象和包装对象使用 equals 比较 : "</span> + f2.equals(f3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">double</span> d1 = <span class="number">10000.111</span>;</span><br><span class="line">Double d2 = <span class="keyword">new</span> Double(<span class="string">"10000.111"</span>);</span><br><span class="line">Double d3 = <span class="keyword">new</span> Double(<span class="string">"10000.111"</span>);</span><br><span class="line">System.out.println(<span class="string">"Double 基本类型和包装对象使用 == 比较 : "</span> + (d1 == d2));</span><br><span class="line">System.out.println(<span class="string">"Double 基本类型和包装对象使用 equals 比较 : "</span> + d2.equals(d1));</span><br><span class="line">System.out.println(<span class="string">"Double 包装对象和包装对象使用 == 比较 : "</span> + (d2 == d3));</span><br><span class="line">System.out.println(<span class="string">"Double 包装对象和包装对象使用 equals 比较 : "</span> + d2.equals(d3));</span><br><span class="line">System.out.println();</span><br><span class="line"></span><br><span class="line"><span class="keyword">boolean</span> bl1 = <span class="keyword">true</span>;</span><br><span class="line">Boolean bl2 = <span class="keyword">new</span> Boolean(<span class="string">"true"</span>);</span><br><span class="line">Boolean bl3 = <span class="keyword">new</span> Boolean(<span class="string">"true"</span>);</span><br><span class="line">System.out.println(<span class="string">"Boolean 基本类型和包装对象使用 == 比较 : "</span> + (bl1 == bl2));</span><br><span class="line">System.out.println(<span class="string">"Boolean 基本类型和包装对象使用 equals 比较 : "</span> + bl2.equals(bl1));</span><br><span class="line">System.out.println(<span class="string">"Boolean 包装对象和包装对象使用 == 比较 : "</span> + (bl2 == bl3));</span><br><span class="line">System.out.println(<span class="string">"Boolean 包装对象和包装对象使用 equals 比较 : "</span> + bl2.equals(bl3));</span><br><span class="line"></span><br><span class="line">结果如下：</span><br><span class="line">Byte 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Byte 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Byte 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Byte 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Short 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Short 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Short 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Short 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Character 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Character 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Character 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Character 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Integer 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Integer 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Integer 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Integer 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Long 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Long 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Long 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Long 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Float 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Float 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Float 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Float 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Double 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Double 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Double 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Double 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line"> </span><br><span class="line">Boolean 基本类型和包装对象使用 == 比较 : <span class="keyword">true</span></span><br><span class="line">Boolean 基本类型和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br><span class="line">Boolean 包装对象和包装对象使用 == 比较 : <span class="keyword">false</span></span><br><span class="line">Boolean 包装对象和包装对象使用 equals 比较 : <span class="keyword">true</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
 <h1 id="16-普通类和抽象类有哪些区别？"><a href="#16-普通类和抽象类有哪些区别？" class="headerlink" title="16.普通类和抽象类有哪些区别？"></a>16.普通类和抽象类有哪些区别？</h1><ul>
 <li>普通类不能包含抽象方法，抽象类可以包含抽象方法。</li>
 <li>抽象类不能直接实例化，普通类可以直接实例化。</li>
+<li>抽象类不能被实例化</li>
+<li>抽象类可以有抽象方法，抽象方法只需申明，无需实现</li>
+<li>含有抽象方法的类必须申明为抽象类</li>
+<li>抽象类的子类必须实现抽象类中所有抽象方法，否则这个子类也是抽象类</li>
+<li>抽象方法不能被声明为静态</li>
+<li>抽象方法不能用 private 修饰<ul>
+<li>抽象方法不能用 final 修饰    </li>
+</ul>
+</li>
 </ul>
 <h1 id="17-java代码输出hello-world-字符串的整个过程"><a href="#17-java代码输出hello-world-字符串的整个过程" class="headerlink" title="17.java代码输出hello world 字符串的整个过程"></a>17.java代码输出hello world 字符串的整个过程</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;    </span><br><span class="line">            String  s ;             <span class="comment">//定义一个String类型的变量 s</span></span><br><span class="line">              s = “Hello World!”;  <span class="comment">//定义字符串 s</span></span><br><span class="line">          System.out.println(s); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -381,6 +438,16 @@
 <li>包装类是引用传递，而基本类型是值传递</li>
 <li>ArrayList，hashMap等中只能放入包装类型</li>
 </ol>
+<ul>
+<li>基本类型只有值，而包装类型则具有与它们的值不同的同一性（即值相同但不是同一个对象）</li>
+<li>包装类型比基本类型多了一个非功能值：null</li>
+<li>基本类型通常比包装类型更节省时间和空间，速度更快</li>
+<li>但有些情况包装类型的使用会更合理：</li>
+</ul>
+<ol>
+<li>泛型不支持基本类型，作为集合中的元素、键和值直接使用包装类（否则会发生基本类型的自动装箱消耗性能）。如：只能写 ArrayList<Integer>，不能写 List<int></int></Integer></li>
+<li>在进行反射方法的调用时</li>
+</ol>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer g =<span class="keyword">new</span> Integer(<span class="number">0</span>);</span><br><span class="line">Integer h =<span class="keyword">new</span> Integer(<span class="number">0</span>);</span><br><span class="line">g==h</span><br></pre></td></tr></table></figure>
 
 <h1 id="24-数据类型之间的基本转换类型"><a href="#24-数据类型之间的基本转换类型" class="headerlink" title="24.数据类型之间的基本转换类型"></a>24.数据类型之间的基本转换类型</h1><p>无精度丢失的类型转换</p>
@@ -392,6 +459,214 @@
 <p>long→float/double</p>
 <h1 id="25-浅拷贝和深拷贝的区别"><a href="#25-浅拷贝和深拷贝的区别" class="headerlink" title="25.浅拷贝和深拷贝的区别"></a>25.浅拷贝和深拷贝的区别</h1><p>浅拷贝只是复制了对象的引用地址，两个对象指向同一个内存地址，所以修改其中任意的值，另一个值都会随之变化，这就是浅拷贝（例：assign()）</p>
 <p>​           深拷贝是将对象及值复制过来，两个对象修改其中任意的值另一个值不会改变，这就是深拷贝（例：<strong>JSON.parse()和JSON.stringify()，但是此方法无法复制函数类型</strong>）</p>
+<h1 id="26-装箱和拆箱的执行流程"><a href="#26-装箱和拆箱的执行流程" class="headerlink" title="26.装箱和拆箱的执行流程"></a>26.装箱和拆箱的执行流程</h1><p>装箱：基本类型转变为包装器类型的过程。<br>拆箱：包装器类型转变为基本类型的过程。</p>
+<ul>
+<li>装箱是通过调用包装器类的 valueOf 方法实现的</li>
+<li>拆箱是通过调用包装器类的 xxxValue 方法实现的，xxx代表对应的基本数据类型。</li>
+<li>如int装箱的时候自动调用Integer的valueOf(int)方法；Integer拆箱的时候自动调用Integer的intValue方法。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Integer i1 = <span class="number">100</span>;</span><br><span class="line">Integer i2 = <span class="number">100</span>;</span><br><span class="line">Integer i3 = <span class="number">200</span>;</span><br><span class="line">Integer i4 = <span class="number">200</span>;</span><br><span class="line">System.out.println(i1 == i2);<span class="comment">//true</span></span><br><span class="line">System.out.println(i3 == i4);<span class="comment">//false</span></span><br><span class="line">        </span><br><span class="line">Double d1 = <span class="number">100.0</span>;</span><br><span class="line">Double d2 = <span class="number">100.0</span>;</span><br><span class="line">Double d3 = <span class="number">200.0</span>;</span><br><span class="line">Double d4 = <span class="number">200.0</span>;</span><br><span class="line">System.out.println(d1 == d2);<span class="comment">//false</span></span><br><span class="line">System.out.println(d3 == d4);<span class="comment">//false</span></span><br><span class="line">        </span><br><span class="line">Boolean b1 = <span class="keyword">false</span>;</span><br><span class="line">Boolean b2 = <span class="keyword">false</span>;</span><br><span class="line">Boolean b3 = <span class="keyword">true</span>;</span><br><span class="line">Boolean b4 = <span class="keyword">true</span>;</span><br><span class="line">System.out.println(b1 == b2);<span class="comment">//true</span></span><br><span class="line">System.out.println(b3 == b4);<span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="27-final-finally-finalize-区别"><a href="#27-final-finally-finalize-区别" class="headerlink" title="27.final finally finalize()区别"></a>27.final finally finalize()区别</h1><ul>
+<li>final 表示最终的、不可改变的。用于修饰类、方法和变量。final 变量必须在声明时给定初值，只能读取，不可修改。final 方法也同样只能使用，不能重写，但能够重载。final 修饰的对象，对象的引用地址不能变，但对象的属性值可以改变</li>
+<li>finally 异常处理的一部分，它只能用在 try/catch 语句中，表示希望 finally 语句块中的代码最后一定被执行（存在一些情况导致 finally 语句块不会被执行，如 jvm 结束）</li>
+<li>finalize() 是在 java.lang.Object 里定义的，Object 的 finalize() 方法什么都不做，对象被回收时 finalize() 方法会被调用。Java 技术允许使用 finalize() 方法在垃圾收集器将对象从内存中清除出去之前做必要清理工作，在垃圾收集器删除对象之前被调用的。一般情况下，此方法由JVM调用。特殊情况下，可重写 finalize() 方法，当对象被回收的时候释放一些资源，须调用 super.finalize() 。 </li>
+</ul>
+<h1 id="28-finally语句块一定执行吗？"><a href="#28-finally语句块一定执行吗？" class="headerlink" title="28.finally语句块一定执行吗？"></a>28.finally语句块一定执行吗？</h1><p>答案是不一定。存在很多特殊情况导致 finally 语句块不执行。如：</p>
+<ul>
+<li>直接返回未执行到 try-finally 语句块</li>
+<li>抛出异常未执行到 try-finally 语句块</li>
+<li>系统退出未执行到 finally 语句块</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	String str = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (i == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> str;<span class="comment">//直接返回未执行到finally语句块</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"try..."</span>);</span><br><span class="line">		<span class="keyword">return</span> str;</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"finally..."</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	String str = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">	i = i / <span class="number">0</span>;<span class="comment">//抛出异常未执行到finally语句块</span></span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"try..."</span>);</span><br><span class="line">		<span class="keyword">return</span> str;</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"finally..."</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">test3</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	String str = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"try..."</span>);</span><br><span class="line">		System.exit(<span class="number">0</span>);<span class="comment">//系统退出未执行到finally语句块</span></span><br><span class="line">		<span class="keyword">return</span> str;</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"finally..."</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="29-return与finally的执行顺序对返回值的影响"><a href="#29-return与finally的执行顺序对返回值的影响" class="headerlink" title="29.return与finally的执行顺序对返回值的影响"></a>29.return与finally的执行顺序对返回值的影响</h1><p>对于 try 和 finally 至少一个语句块包含 return 语句的情况：</p>
+<ul>
+<li>finally 语句块会执行</li>
+<li>finally 没有 return，finally 对 return 变量的<strong>重新赋值修改无效</strong></li>
+<li>try 和 finally 都包含return，return 值会以 finally 语句块 return 值为准</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		System.out.println(getString());</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		String str = <span class="string">"A"</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			str = <span class="string">"B"</span>;</span><br><span class="line">			<span class="keyword">return</span> str;</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			System.out.println(<span class="string">"finally change return string to C"</span>);</span><br><span class="line">			str = <span class="string">"C"</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="comment">//finally change return string to C</span></span><br><span class="line"><span class="comment">//B</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		System.out.println(getString());</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		String str = <span class="string">"A"</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			str = <span class="string">"B"</span>;</span><br><span class="line">			<span class="keyword">return</span> str;</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			System.out.println(<span class="string">"finally change return string to C"</span>);</span><br><span class="line">			str = <span class="string">"C"</span>;</span><br><span class="line">			<span class="keyword">return</span> str;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="comment">//finally change return string to C</span></span><br><span class="line"><span class="comment">//C</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="30-Math-round-1-5-等于多少？"><a href="#30-Math-round-1-5-等于多少？" class="headerlink" title="30.Math.round(-1.5) 等于多少？"></a>30.Math.round(-1.5) 等于多少？</h1><ul>
+<li>round() ：返回四舍五入，负 .5 小数返回较大整数，如 -1.5 返回 -1。</li>
+<li>ceil() ：返回小数所在两整数间的较大值，如 -1.5 返回 -1。</li>
+<li>floor() ：返回小数所在两整数间的较小值，如 -1.5 返回 -2。</li>
+</ul>
+<h1 id="31-String类的常用方法有哪些？"><a href="#31-String类的常用方法有哪些？" class="headerlink" title="31.String类的常用方法有哪些？"></a>31.String类的常用方法有哪些？</h1><p>String 类的常用方法： </p>
+<ul>
+<li>equals：字符串是否相同</li>
+<li>equalsIgnoreCase：忽略大小写后字符串是否相同</li>
+<li>compareTo：根据字符串中每个字符的Unicode编码进行比较</li>
+<li>compareToIgnoreCase：根据字符串中每个字符的Unicode编码进行忽略大小写比较</li>
+<li>indexOf：目标字符或字符串在源字符串中位置下标</li>
+<li>lastIndexOf：目标字符或字符串在源字符串中最后一次出现的位置下标</li>
+<li>valueOf：其他类型转字符串</li>
+<li>charAt：获取指定下标位置的字符</li>
+<li>codePointAt：指定下标的字符的Unicode编码</li>
+<li>concat：追加字符串到当前字符串</li>
+<li>isEmpty：字符串长度是否为0</li>
+<li>contains：是否包含目标字符串</li>
+<li>startsWith：是否以目标字符串开头</li>
+<li>endsWith：是否以目标字符串结束</li>
+<li>format：格式化字符串</li>
+<li>getBytes：获取字符串的字节数组</li>
+<li>getChars：获取字符串的指定长度字符数组</li>
+<li>toCharArray：获取字符串的字符数组</li>
+<li>join：以某字符串，连接某字符串数组</li>
+<li>length：字符串字符数</li>
+<li>matches：字符串是否匹配正则表达式</li>
+<li>replace：字符串替换</li>
+<li>replaceAll：带正则字符串替换</li>
+<li>replaceFirst：替换第一个出现的目标字符串</li>
+<li>split：以某正则表达式分割字符串</li>
+<li>substring：截取字符串</li>
+<li>toLowerCase：字符串转小写</li>
+<li>toUpperCase：字符串转大写</li>
+<li>trim：去字符串首尾空格</li>
+</ul>
+<h1 id="32-抽象类必须要有抽象方法吗？"><a href="#32-抽象类必须要有抽象方法吗？" class="headerlink" title="32.抽象类必须要有抽象方法吗？"></a>32.抽象类必须要有抽象方法吗？</h1><p>不一定</p>
+<h1 id="33-Java中的访问修饰符有哪些？"><a href="#33-Java中的访问修饰符有哪些？" class="headerlink" title="33.Java中的访问修饰符有哪些？"></a>33.Java中的访问修饰符有哪些？</h1><ul>
+<li>public</li>
+</ul>
+<p>​    被 public 修饰的成员变量和方法可以在任何类中都能被访问到。<br>​    被 public 修饰的类，在一个 java 源文件中只能有一个类被声明为 public ，而且一旦有一个类为 public ，那这个 java 源文件的文件名就必须要和这个被 public 所修饰的类的类名相同，否则编译不能通过。</p>
+<ul>
+<li>protected</li>
+</ul>
+<p>​    被 protected 修饰的成员会被位于同一 package 中的所有类访问到，也能被该类的所有子类继承下来。</p>
+<ul>
+<li>friendly</li>
+</ul>
+<p>​    默认，缺省的。在成员的前面不写访问修饰符的时候，默认就是友好的。<br>​    同一package中的所有类都能访问。<br>​    被 friendly 所修饰的成员只能被该类所在同一个 package 中的子类所继承下来。<br>​    </p>
+<ul>
+<li>private</li>
+</ul>
+<p>​    私有的。只能在当前类中被访问到。</p>
+<p>注：只有 public、abstract和默认的 3 种修饰符能够修饰 interface</p>
+<h1 id="34-Java中的-lt-lt-gt-gt-gt-gt-gt-是什么？"><a href="#34-Java中的-lt-lt-gt-gt-gt-gt-gt-是什么？" class="headerlink" title="34.Java中的 &lt;&lt; &gt;&gt; &gt;&gt;&gt; 是什么？"></a>34.Java中的 &lt;&lt; &gt;&gt; &gt;&gt;&gt; 是什么？</h1><ul>
+<li>&lt;&lt; 表示左移，不分正负数，低位补0</li>
+<li>&gt;&gt;  表示右移，如果该数为正，则高位补0，若为负数，则高位补1</li>
+<li>&gt;&gt;&gt; 表示无符号右移，也叫逻辑右移，即若该数为正，则高位补0，而若该数为负数，则右移后高位同样补0</li>
+<li>&lt;&lt;1  相当于乘以2</li>
+<li>&gt;&gt; 1  相当于除以2</li>
+<li>&gt;&gt;&gt; 不考虑高位的正负号，正数的 &gt;&gt;&gt; 等同于 &gt;&gt;</li>
+</ul>
+<h1 id="35-javap的作用是什么？"><a href="#35-javap的作用是什么？" class="headerlink" title="35.javap的作用是什么？"></a>35.javap的作用是什么？</h1><p>javap 是 Java class文件分解器，可以反编译，也可以查看 java 编译器生成的字节码等</p>
+<h1 id="36-try-catch-finally中哪个部分可以省略？"><a href="#36-try-catch-finally中哪个部分可以省略？" class="headerlink" title="36.try-catch-finally中哪个部分可以省略？"></a>36.try-catch-finally中哪个部分可以省略？</h1><p>catch 和 finally 语句块可以省略其中一个，否则编译会报错。</p>
+<h1 id="37-常见的异常类有哪些？"><a href="#37-常见的异常类有哪些？" class="headerlink" title="37.常见的异常类有哪些？"></a>37.常见的异常类有哪些？</h1><p>异常非常多，Throwable 是异常的根类。</p>
+<p>Throwable 包含子类 错误-Error 和 异常-Exception 。</p>
+<p>Exception 又分为 一般异常和运行时异常 RuntimeException。</p>
+<p>运行时异常不需要代码显式捕获处理。</p>
+<p>下图是常见异常类及其父子关系：<br>Throwable<br>|　　├ Error  </p>
+<p>|　　│ ├ IOError</p>
+<p>|　　│ ├ LinkageError</p>
+<p>|　　│ ├ ReflectionError</p>
+<p>|　　│ ├ ThreadDeath</p>
+<p>|　　│ └ VirtualMachineError</p>
+<p>|　　│ </p>
+<p>|　　├ Exception  </p>
+<p>|　　│ ├ CloneNotSupportedException</p>
+<p>|　　│ ├ DataFormatException</p>
+<p>|　　│ ├ InterruptedException</p>
+<p>|　　│ ├ IOException</p>
+<p>|　　│ ├ ReflectiveOperationException</p>
+<p>|　　│ ├ RuntimeException </p>
+<p>|　　│    ├ ArithmeticException</p>
+<p>|　　│    ├ ClassCastException</p>
+<p>|　　│    ├ ConcurrentModificationException</p>
+<p>|　　│    ├ IllegalArgumentException</p>
+<p>|　　│    ├ IndexOutOfBoundsException</p>
+<p>|　　│    ├ NoSuchElementException</p>
+<p>|　　│    ├ NullPointerException</p>
+<p>|　　│　└ SecurityException</p>
+<p>|　　│ └  SQLException</p>
+<h1 id="38-什么是反射"><a href="#38-什么是反射" class="headerlink" title="38.什么是反射"></a>38.什么是反射</h1><p>Java 反射，就是在运行状态中</p>
+<ul>
+<li>获取任意类的名称、package 信息、所有属性、方法、注解、类型、类加载器、modifiers（public、static）、父类、现实接口等</li>
+<li>获取任意对象的属性，并且能改变对象的属性</li>
+<li>调用任意对象的方法</li>
+<li>判断任意一个对象所属的类</li>
+<li>实例化任意一个类的对象</li>
+</ul>
+<p>Java 的动态就体现在反射。通过反射我们可以实现动态装配，降低代码的耦合度；动态代理等。反射的过度使用会严重消耗系统资源。</p>
+<p>JDK 中 java.lang.Class 类，就是为了实现反射提供的核心类之一。</p>
+<p>一个 jvm 中一种 Class 只会被加载一次。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>提高了 Java 程序的灵活性和扩展性，降低耦合性，提高自适应能力。</li>
+<li>允许程序创建和控制任何类的对象，无需提前硬编码目标类</li>
+<li>应用很广，测试工具、框架都用到了反射</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>性能问题：反射是一种解释操作，远慢于直接代码。因此反射机制主要用在对灵活性和扩展性要求很高的系统框架上,普通程序不建议使用</li>
+<li>模糊程序内部逻辑：反射绕过了源代码，无法再源代码中看到程序的逻辑，会带来维护问题</li>
+<li>增大了复杂性：反射代码比同等功能的直接代码更复杂</li>
+</ul>
+<h1 id="39-什么是动态代理，应用场景"><a href="#39-什么是动态代理，应用场景" class="headerlink" title="39.什么是动态代理，应用场景"></a>39.什么是动态代理，应用场景</h1><p><strong>动态代理：在运行时，创建目标类，可以调用和扩展目标类的方法。</strong></p>
+<p><strong>Java 中实现动态的方式：</strong></p>
+<ul>
+<li>JDK 中的动态代理 </li>
+<li>Java类库 CGLib</li>
+</ul>
+<p><strong>应用场景：</strong></p>
+<ul>
+<li>统计每个 api 的请求耗时</li>
+<li>统一的日志输出</li>
+<li>校验被调用的 api 是否已经登录和权限鉴定</li>
+<li>Spring的 AOP 功能模块就是采用动态代理的机制来实现切面编程</li>
+</ul>
+<h1 id="40-什么叫序列化和反序列化"><a href="#40-什么叫序列化和反序列化" class="headerlink" title="40.什么叫序列化和反序列化"></a>40.什么叫序列化和反序列化</h1><p><strong>序列化：将 Java 对象转换成字节流的过程。</strong></p>
+<p><strong>反序列化：将字节流转换成 Java 对象的过程。</strong></p>
+<p>当 Java 对象需要在网络上传输 或者 持久化存储到文件中时，就需要对 Java 对象进行序列化处理。</p>
+<p>序列化的实现：类实现 Serializable 接口，这个接口没有需要实现的方法。实现 Serializable 接口是为了告诉 jvm 这个类的对象可以被序列化。</p>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>某个类可以被序列化，则其子类也可以被序列化</li>
+<li>对象中的某个属性是对象类型，需要序列化也必须实现 Serializable 接口</li>
+<li>声明为 static 和 transient 的成员变量，不能被序列化。static 成员变量是描述类级别的属性，transient 表示临时数据</li>
+<li>反序列化读取序列化对象的顺序要保持一致</li>
+</ul>
+<h1 id="41-Java跨平台运行的原理"><a href="#41-Java跨平台运行的原理" class="headerlink" title="41.Java跨平台运行的原理"></a>41.Java跨平台运行的原理</h1><p>.java 源文件要先编译成与操作系统无关的 .class 字节码文件，然后字节码文件再通过 Java 虚拟机解释成机器码运行。</p>
+<p>2、.class 字节码文件面向虚拟机，不面向任何具体操作系统。</p>
+<p>3、不同平台的虚拟机是不同的，但它们给 JDK 提供了相同的接口。</p>
+<p>4、Java 的跨平台依赖于不同系统的 Java 虚拟机。</p>
+<h1 id="42-如何让计算机最高效的算出2乘以8？"><a href="#42-如何让计算机最高效的算出2乘以8？" class="headerlink" title="42.如何让计算机最高效的算出2乘以8？"></a>42.如何让计算机最高效的算出2乘以8？</h1><p>2 &lt;&lt;3</p>
+<ul>
+<li>位运算符 &lt;&lt;，是将一个数左移 n 位，相当于乘以了 2 的 n 次方</li>
+<li>一个数乘以 8 只要将其左移 3 位即可</li>
+<li>CPU 直接支持位运算，效率最高</li>
+</ul>
+<p>补充：当这个数接近Java基本整数类型的最大值时，左移位运算可能出现溢出，得出负值。</p>
+<h1 id="43-内存泄漏和内存溢出的区别"><a href="#43-内存泄漏和内存溢出的区别" class="headerlink" title="43.内存泄漏和内存溢出的区别"></a>43.内存泄漏和内存溢出的区别</h1><ul>
+<li>内存溢出(out of memory)：指程序在申请内存时，没有足够的内存空间供其使用，出现 out of memory。</li>
+<li>内存泄露(memory leak)：指程序在申请内存后，无法释放已申请的内存空间，内存泄露堆积会导致内存被占光。</li>
+<li>memory leak 最终会导致 out of memory。</li>
+</ul>
+<h1 id="44-创建对象的方式"><a href="#44-创建对象的方式" class="headerlink" title="44.创建对象的方式"></a>44.创建对象的方式</h1><ol>
+<li>用 new 语句创建对象</li>
+<li>运用反射，调用 java.lang.Class 或 java.lang.reflect.Constructor 类的 newInstance() 方法</li>
+<li>调用对象的 clone() 方法</li>
+<li>运用反序列化手段，调用 java.io.ObjectInputStream 对象的 readObject() 方法</li>
+</ol>
+<p>1、2 会调用构造函数<br>3、4 不会调用构造函数</p>
+<h1 id="45-Class类的getDeclaredFields-与getFields-方法的区别？"><a href="#45-Class类的getDeclaredFields-与getFields-方法的区别？" class="headerlink" title="45.Class类的getDeclaredFields()与getFields()方法的区别？"></a>45.Class类的getDeclaredFields()与getFields()方法的区别？</h1><ul>
+<li>getDeclaredFields(): 获取所有本类自己声明的属性, 不能获取父类和实现的接口中的属性</li>
+<li>getFields(): 只能获取所有 public 声明的属性, 包括获取父类和实现的接口中的属性</li>
+</ul>
+<h1 id="46-创建对象时构造器的调用顺序"><a href="#46-创建对象时构造器的调用顺序" class="headerlink" title="46.创建对象时构造器的调用顺序"></a>46.创建对象时构造器的调用顺序</h1><ul>
+<li>递归初始化父类静态成员和静态代码块，上层优先</li>
+<li>初始化本类静态成员和静态代码块</li>
+<li>递归父类构造器，上层优先</li>
+<li>调用自身构造器</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestConstructorPrint</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Parent parent = <span class="keyword">new</span> Child();</span><br><span class="line">		parent = <span class="keyword">new</span> Child();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> &#123;</span><br><span class="line">		System.out.print(<span class="string">"1"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Parent</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.print(<span class="string">"2"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span> <span class="keyword">extends</span> <span class="title">Parent</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> &#123;</span><br><span class="line">		System.out.print(<span class="string">"3"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Child</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.print(<span class="string">"4"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//132424</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="47-String-s-new-String-“xyz”-创建几个String对象？"><a href="#47-String-s-new-String-“xyz”-创建几个String对象？" class="headerlink" title="47.String s = new String(“xyz”);创建几个String对象？"></a>47.String s = new String(“xyz”);创建几个String对象？</h1><p>两个或一个</p>
+<ul>
+<li>第一次调用 new String(“xyz”); 时，会在堆内存中创建一个字符串对象，同时在字符串常量池中创建一个对象 “xyz”</li>
+<li>第二次调用 new String(“xyz”); 时，只会在堆内存中创建一个字符串对象，指向之前在字符串常量池中创建的 “xyz”</li>
+</ul>
 
     </div>
 
@@ -475,7 +750,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java基础"><span class="nav-number">1.</span> <span class="nav-text">Java基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Java的四大特性"><span class="nav-number">2.</span> <span class="nav-text">1. Java的四大特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-面向对象和面对过程的区别"><span class="nav-number">3.</span> <span class="nav-text">2.面向对象和面对过程的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-重载和重写的区别"><span class="nav-number">4.</span> <span class="nav-text">3. 重载和重写的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-面向对象的5大基本原则"><span class="nav-number">5.</span> <span class="nav-text">4.面向对象的5大基本原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、单一职责原则（SRP）"><span class="nav-number">5.0.1.</span> <span class="nav-text">　　1、单一职责原则（SRP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、开放封闭原则（OCP）"><span class="nav-number">5.0.2.</span> <span class="nav-text">　　2、开放封闭原则（OCP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、里氏替换原则（LSP）"><span class="nav-number">5.0.3.</span> <span class="nav-text">　　3、里氏替换原则（LSP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、依赖倒置原则（DIP）"><span class="nav-number">5.0.4.</span> <span class="nav-text">　　4、依赖倒置原则（DIP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、接口隔离原则（ISP）"><span class="nav-number">5.0.5.</span> <span class="nav-text">　　5、接口隔离原则（ISP）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-static-和final的用途和区别"><span class="nav-number">6.</span> <span class="nav-text">5.static 和final的用途和区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-hashMap和hashtable的区别，是线程安全的吗"><span class="nav-number">7.</span> <span class="nav-text">6.hashMap和hashtable的区别，是线程安全的吗</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-hashMap和concurrentHashMap的区别"><span class="nav-number">8.</span> <span class="nav-text">7.hashMap和concurrentHashMap的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-String-StringBuffer-and-StringBuilder"><span class="nav-number">9.</span> <span class="nav-text">8.String, StringBuffer and StringBuilder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-String类不可变的理解"><span class="nav-number">10.</span> <span class="nav-text">9.String类不可变的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么不可变"><span class="nav-number">10.1.</span> <span class="nav-text">为什么不可变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不可变的好处"><span class="nav-number">10.2.</span> <span class="nav-text">不可变的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#号原理"><span class="nav-number">10.3.</span> <span class="nav-text">+号原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-String-Pool-字符串常量池"><span class="nav-number">11.</span> <span class="nav-text">10.String Pool 字符串常量池</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-字符串常量池在jdk6和7的区别"><span class="nav-number">12.</span> <span class="nav-text">11.字符串常量池在jdk6和7的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12-intern方法"><span class="nav-number">13.</span> <span class="nav-text">12.intern方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#new-String-“abc”"><span class="nav-number">13.1.</span> <span class="nav-text">new String(“abc”)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#13-为什么重写equals方法的同时也要重写hashCode-方法"><span class="nav-number">14.</span> <span class="nav-text">13.为什么重写equals方法的同时也要重写hashCode()方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-Error-和-Exception的区别"><span class="nav-number">15.</span> <span class="nav-text">14.Error 和 Exception的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#15-和equals的区别"><span class="nav-number">16.</span> <span class="nav-text">15.&#x3D;&#x3D;和equals的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#16-普通类和抽象类有哪些区别？"><span class="nav-number">17.</span> <span class="nav-text">16.普通类和抽象类有哪些区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#17-java代码输出hello-world-字符串的整个过程"><span class="nav-number">18.</span> <span class="nav-text">17.java代码输出hello world 字符串的整个过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#18-接口和抽象类有什么区别？"><span class="nav-number">19.</span> <span class="nav-text">18.接口和抽象类有什么区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#19-private、protected-以及-public的区别"><span class="nav-number">20.</span> <span class="nav-text">19.private、protected 以及 public的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#20-JRE-or-JDK的区别"><span class="nav-number">21.</span> <span class="nav-text">20.JRE or JDK的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#21-八大基本类型及字节数"><span class="nav-number">22.</span> <span class="nav-text">21.八大基本类型及字节数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#22-float-与-double的区别"><span class="nav-number">23.</span> <span class="nav-text">22.float 与 double的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#23-包装类和基本类型的区别"><span class="nav-number">24.</span> <span class="nav-text">23.包装类和基本类型的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#24-数据类型之间的基本转换类型"><span class="nav-number">25.</span> <span class="nav-text">24.数据类型之间的基本转换类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#25-浅拷贝和深拷贝的区别"><span class="nav-number">26.</span> <span class="nav-text">25.浅拷贝和深拷贝的区别</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java基础"><span class="nav-number">1.</span> <span class="nav-text">Java基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Java的四大特性"><span class="nav-number">2.</span> <span class="nav-text">1. Java的四大特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-面向对象和面对过程的区别"><span class="nav-number">3.</span> <span class="nav-text">2.面向对象和面对过程的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-重载和重写的区别"><span class="nav-number">4.</span> <span class="nav-text">3. 重载和重写的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-面向对象的5大基本原则"><span class="nav-number">5.</span> <span class="nav-text">4.面向对象的5大基本原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、单一职责原则（SRP）"><span class="nav-number">5.0.1.</span> <span class="nav-text">　　1、单一职责原则（SRP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、开放封闭原则（OCP）"><span class="nav-number">5.0.2.</span> <span class="nav-text">　　2、开放封闭原则（OCP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、里氏替换原则（LSP）"><span class="nav-number">5.0.3.</span> <span class="nav-text">　　3、里氏替换原则（LSP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、依赖倒置原则（DIP）"><span class="nav-number">5.0.4.</span> <span class="nav-text">　　4、依赖倒置原则（DIP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、接口隔离原则（ISP）"><span class="nav-number">5.0.5.</span> <span class="nav-text">　　5、接口隔离原则（ISP）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-static-和final的用途和区别"><span class="nav-number">6.</span> <span class="nav-text">5.static 和final的用途和区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-hashMap和hashtable的区别，是线程安全的吗"><span class="nav-number">7.</span> <span class="nav-text">6.hashMap和hashtable的区别，是线程安全的吗</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-hashMap和concurrentHashMap的区别"><span class="nav-number">8.</span> <span class="nav-text">7.hashMap和concurrentHashMap的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-String-StringBuffer-and-StringBuilder"><span class="nav-number">9.</span> <span class="nav-text">8.String, StringBuffer and StringBuilder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-String类不可变的理解"><span class="nav-number">10.</span> <span class="nav-text">9.String类不可变的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么不可变"><span class="nav-number">10.1.</span> <span class="nav-text">为什么不可变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不可变的好处"><span class="nav-number">10.2.</span> <span class="nav-text">不可变的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#号原理"><span class="nav-number">10.3.</span> <span class="nav-text">+号原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-String-Pool-字符串常量池"><span class="nav-number">11.</span> <span class="nav-text">10.String Pool 字符串常量池</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-字符串常量池在jdk6和7的区别"><span class="nav-number">12.</span> <span class="nav-text">11.字符串常量池在jdk6和7的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12-intern方法"><span class="nav-number">13.</span> <span class="nav-text">12.intern方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#new-String-“abc”"><span class="nav-number">13.1.</span> <span class="nav-text">new String(“abc”)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#13-为什么重写equals方法的同时也要重写hashCode-方法"><span class="nav-number">14.</span> <span class="nav-text">13.为什么重写equals方法的同时也要重写hashCode()方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-Error-和-Exception的区别"><span class="nav-number">15.</span> <span class="nav-text">14.Error 和 Exception的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#15-和equals的区别"><span class="nav-number">16.</span> <span class="nav-text">15.&#x3D;&#x3D;和equals的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#16-1基本类型和包装类型比较的结果"><span class="nav-number">16.0.0.1.</span> <span class="nav-text">16.1基本类型和包装类型比较的结果</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#16-普通类和抽象类有哪些区别？"><span class="nav-number">17.</span> <span class="nav-text">16.普通类和抽象类有哪些区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#17-java代码输出hello-world-字符串的整个过程"><span class="nav-number">18.</span> <span class="nav-text">17.java代码输出hello world 字符串的整个过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#18-接口和抽象类有什么区别？"><span class="nav-number">19.</span> <span class="nav-text">18.接口和抽象类有什么区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#19-private、protected-以及-public的区别"><span class="nav-number">20.</span> <span class="nav-text">19.private、protected 以及 public的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#20-JRE-or-JDK的区别"><span class="nav-number">21.</span> <span class="nav-text">20.JRE or JDK的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#21-八大基本类型及字节数"><span class="nav-number">22.</span> <span class="nav-text">21.八大基本类型及字节数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#22-float-与-double的区别"><span class="nav-number">23.</span> <span class="nav-text">22.float 与 double的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#23-包装类和基本类型的区别"><span class="nav-number">24.</span> <span class="nav-text">23.包装类和基本类型的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#24-数据类型之间的基本转换类型"><span class="nav-number">25.</span> <span class="nav-text">24.数据类型之间的基本转换类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#25-浅拷贝和深拷贝的区别"><span class="nav-number">26.</span> <span class="nav-text">25.浅拷贝和深拷贝的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#26-装箱和拆箱的执行流程"><span class="nav-number">27.</span> <span class="nav-text">26.装箱和拆箱的执行流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#27-final-finally-finalize-区别"><span class="nav-number">28.</span> <span class="nav-text">27.final finally finalize()区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#28-finally语句块一定执行吗？"><span class="nav-number">29.</span> <span class="nav-text">28.finally语句块一定执行吗？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#29-return与finally的执行顺序对返回值的影响"><span class="nav-number">30.</span> <span class="nav-text">29.return与finally的执行顺序对返回值的影响</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#30-Math-round-1-5-等于多少？"><span class="nav-number">31.</span> <span class="nav-text">30.Math.round(-1.5) 等于多少？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#31-String类的常用方法有哪些？"><span class="nav-number">32.</span> <span class="nav-text">31.String类的常用方法有哪些？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#32-抽象类必须要有抽象方法吗？"><span class="nav-number">33.</span> <span class="nav-text">32.抽象类必须要有抽象方法吗？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#33-Java中的访问修饰符有哪些？"><span class="nav-number">34.</span> <span class="nav-text">33.Java中的访问修饰符有哪些？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#34-Java中的-lt-lt-gt-gt-gt-gt-gt-是什么？"><span class="nav-number">35.</span> <span class="nav-text">34.Java中的 &lt;&lt; &gt;&gt; &gt;&gt;&gt; 是什么？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#35-javap的作用是什么？"><span class="nav-number">36.</span> <span class="nav-text">35.javap的作用是什么？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#36-try-catch-finally中哪个部分可以省略？"><span class="nav-number">37.</span> <span class="nav-text">36.try-catch-finally中哪个部分可以省略？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#37-常见的异常类有哪些？"><span class="nav-number">38.</span> <span class="nav-text">37.常见的异常类有哪些？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#38-什么是反射"><span class="nav-number">39.</span> <span class="nav-text">38.什么是反射</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#39-什么是动态代理，应用场景"><span class="nav-number">40.</span> <span class="nav-text">39.什么是动态代理，应用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#40-什么叫序列化和反序列化"><span class="nav-number">41.</span> <span class="nav-text">40.什么叫序列化和反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#41-Java跨平台运行的原理"><span class="nav-number">42.</span> <span class="nav-text">41.Java跨平台运行的原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#42-如何让计算机最高效的算出2乘以8？"><span class="nav-number">43.</span> <span class="nav-text">42.如何让计算机最高效的算出2乘以8？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#43-内存泄漏和内存溢出的区别"><span class="nav-number">44.</span> <span class="nav-text">43.内存泄漏和内存溢出的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#44-创建对象的方式"><span class="nav-number">45.</span> <span class="nav-text">44.创建对象的方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#45-Class类的getDeclaredFields-与getFields-方法的区别？"><span class="nav-number">46.</span> <span class="nav-text">45.Class类的getDeclaredFields()与getFields()方法的区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#46-创建对象时构造器的调用顺序"><span class="nav-number">47.</span> <span class="nav-text">46.创建对象时构造器的调用顺序</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#47-String-s-new-String-“xyz”-创建几个String对象？"><span class="nav-number">48.</span> <span class="nav-text">47.String s &#x3D; new String(“xyz”);创建几个String对象？</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -491,7 +766,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
