@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-center-circle.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="常用命令">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux常用命令">
+<meta property="og:url" content="http://yoursite.com/2020/05/23/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="常用命令">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-23T10:22:06.000Z">
+<meta property="article:modified_time" content="2020-05-23T10:52:35.616Z">
+<meta property="article:author" content="binshow">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/23/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux常用命令 | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/23/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ruiwen.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux常用命令
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-23 18:22:06 / 修改时间：18:52:35" itemprop="dateCreated datePublished" datetime="2020-05-23T18:22:06+08:00">2020-05-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>常用命令</p>
+<a id="more"></a>
+
+<h2 id="1-ls命令"><a href="#1-ls命令" class="headerlink" title="1.ls命令"></a>1.ls命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ls 列出目录</span><br><span class="line">ls -a 列出目录所有文件，包含以.开始的隐藏文件</span><br><span class="line">ls -l /ll除了文件名之外，还将文件的权限、所有者、文件大小等信息详细列出来</span><br><span class="line">ls -t 以文件修改时间排序</span><br><span class="line">ls -S  反序排列</span><br><span class="line">ls -r 以文件大小排序</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-cd命令"><a href="#2-cd命令" class="headerlink" title="2.cd命令"></a>2.cd命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /</span><br><span class="line"><span class="built_in">cd</span> ~ 进入<span class="string">"home"</span>目录</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">cd</span> - 进入上一次工作路径</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-pwd命令"><a href="#3-pwd命令" class="headerlink" title="3.pwd命令"></a>3.pwd命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">pwd</span> 查看当前路径</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-mkdir命令"><a href="#4-mkdir命令" class="headerlink" title="4.mkdir命令"></a>4.mkdir命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir t 当前工作目录下创建名为t的文件夹</span><br><span class="line">mkdir -p /temp/<span class="built_in">test</span>/t1/t 在tmp目录下创建路径为<span class="built_in">test</span>/t1/t的目录，若不存在，则创建</span><br><span class="line">rmdir t 删除t文件夹 仅能删除空的目录，如果下面存在文件，需要先删除文件，递归删除多个目录 -p 参数即可</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-rm命令"><a href="#5-rm命令" class="headerlink" title="5.rm命令"></a>5.rm命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rm -f 忽略不存在的文件，不会出现警告，强制删除！</span><br><span class="line">rm -r 递归删除目录！</span><br><span class="line">rm -i 互动，删除询问是否删除</span><br><span class="line">rm -rf <span class="built_in">test</span> 删除<span class="built_in">test</span>子目录及子目录中所有档案删除,并且不用一一确认</span><br><span class="line"> rm -i *.<span class="built_in">log</span> 删除任何.<span class="built_in">log</span>文件；删除前逐一询问确认</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-mv命令"><a href="#6-mv命令" class="headerlink" title="6.mv命令"></a>6.mv命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">移动文件或修改文件名，根据第二参数类型（如目录，则移动文件；如为文件则重命令该文件）。   </span><br><span class="line">mv test.log test1.txt 将文件test.log重命名为test1.txt</span><br><span class="line">mv * ../ 移动当前文件夹下的所有文件到上一级目录</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-cp命令"><a href="#7-cp命令" class="headerlink" title="7.cp命令"></a>7.cp命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> 将源文件复制至目标文件，或将多个源文件复制至目标目录。</span><br><span class="line"></span><br><span class="line"> 注意：命令行复制，如果目标文件已经存在会提示是否覆盖，而在shell脚本中，如果不加-i参数，则不会提示，而是直接覆盖！</span><br><span class="line"></span><br><span class="line">-i 提示</span><br><span class="line">-r 复制目录及目录内所有项目</span><br><span class="line">-a 复制的文件与原文件时间一样</span><br><span class="line">cp -ai a.txt <span class="built_in">test</span> 复制a.txt到<span class="built_in">test</span>目录下，保持原文件时间,如果原文件存在提示是否覆盖</span><br><span class="line">cp -s a.txt link_a.txt 为a.txt建议一个链接（快捷方式）</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-cat命令"><a href="#8-cat命令" class="headerlink" title="8.cat命令"></a>8.cat命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="9-tail命令"><a href="#9-tail命令" class="headerlink" title="9.tail命令"></a>9.tail命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">显示指定文件末尾内容，不指定文件时，作为输入信息进行处理。常用查看日志文件。</span><br><span class="line"> -f 循环读取（常用于查看递增的日志文件）</span><br><span class="line"> -n&lt;行数&gt; 显示行数（从后向前）</span><br><span class="line"> </span><br><span class="line"> tail -f ping.log（查看日志）</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-tar命令"><a href="#10-tar命令" class="headerlink" title="10.tar命令"></a>10.tar命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用来压缩和解压文件。tar本身不具有压缩功能，只具有打包功能，有关压缩及解压是调用其它的功能来完成</span><br><span class="line">-c 建立新的压缩文件</span><br><span class="line">-f 指定压缩文件</span><br><span class="line">-r 添加文件到已经压缩文件包中</span><br><span class="line"> -u 添加改了和现有的文件到压缩包中</span><br><span class="line"> -x 从压缩包中抽取文件</span><br><span class="line"> -t 显示压缩文件中的内容</span><br><span class="line"> -z 支持gzip压缩</span><br><span class="line"> -j 支持bzip2压缩</span><br><span class="line"> -Z 支持compress解压文件</span><br><span class="line">  -v 显示操作过程</span><br></pre></td></tr></table></figure>
+
+<h2 id="11-df磁盘命令"><a href="#11-df磁盘命令" class="headerlink" title="11.df磁盘命令"></a>11.df磁盘命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-a 全部文件系统列表</span><br><span class="line">-h 以方便阅读的方式显示信息</span><br><span class="line">-i 显示inode信息</span><br><span class="line">-k 区块为1024字节</span><br><span class="line">-l 只显示本地磁盘</span><br><span class="line">-T 列出文件系统类型</span><br><span class="line"></span><br><span class="line">df -l 显示磁盘使用情况</span><br><span class="line">df -haT 以易读方式列出所有文件系统及其类型</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-date日期命令"><a href="#12-date日期命令" class="headerlink" title="12.date日期命令"></a>12.date日期命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">-d&lt;字符串&gt; 　显示字符串所指的日期与时间。字符串前后必须加上双引号。</span><br><span class="line">-s&lt;字符串&gt; 　根据字符串来设置日期与时间。字符串前后必须加上双引号。</span><br><span class="line">-u 　显示GMT。</span><br><span class="line">%H 小时(00-23)</span><br><span class="line">%I 小时(00-12)</span><br><span class="line">%M 分钟(以00-59来表示)</span><br><span class="line">%s 总秒数。起算时间为1970-01-01 00:00:00 UTC。</span><br><span class="line">%S 秒(以本地的惯用法来表示)</span><br><span class="line">%a 星期的缩写。</span><br><span class="line">%A 星期的完整名称。</span><br><span class="line">%d 日期(以01-31来表示)。</span><br><span class="line">%D 日期(含年月日)。</span><br><span class="line">%m 月份(以01-12来表示)。</span><br><span class="line">%y 年份(以00-99来表示)。</span><br><span class="line">%Y 年份(以四位数来表示)。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">date -d <span class="string">"nov 22"</span>  今年的 11 月 22 日是星期三</span><br><span class="line">date -d <span class="string">'2 weeks'</span> 2周后的日期</span><br><span class="line">date -d <span class="string">'next monday'</span> (下周一的日期)</span><br><span class="line">date -d next-day +%Y%m%d（明天的日期）或者：date -d tomorrow +%Y%m%d</span><br><span class="line">date -d last-day +%Y%m%d(昨天的日期) 或者：date -d yesterday +%Y%m%d</span><br><span class="line">date -d last-month +%Y%m(上个月是几月)</span><br><span class="line">date -d next-month +%Y%m(下个月是几月)</span><br></pre></td></tr></table></figure>
+
+<h2 id="13-grep命令"><a href="#13-grep命令" class="headerlink" title="13.grep命令"></a>13.grep命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">（1）查找指定进程</span><br><span class="line"> ps -ef | grep svn</span><br><span class="line">（2）查找指定进程个数</span><br><span class="line">ps -ef | grep svn -c</span><br></pre></td></tr></table></figure>
+
+<h2 id="14-wc命令"><a href="#14-wc命令" class="headerlink" title="14.wc命令"></a>14.wc命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> -c 统计字节数</span><br><span class="line"> -l 统计行数</span><br><span class="line"> -m 统计字符数</span><br><span class="line">-w 统计词数，一个字被定义为由空白、跳格或换行字符分隔的字符串</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line">1）查找文件的  行数 单词数 字节数 文件名</span><br><span class="line">wc text.txt 结果：7     8     70     test.txt</span><br><span class="line">（2）统计输出结果的行数</span><br><span class="line">cat test.txt | wc -l</span><br></pre></td></tr></table></figure>
+
+<h2 id="15-ps查看进程命令"><a href="#15-ps查看进程命令" class="headerlink" title="15.ps查看进程命令"></a>15.ps查看进程命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"> ps(process status)，用来查看当前运行的进程状态，一次性查看，如果需要动态连续结果使用top</span><br><span class="line"></span><br><span class="line">  linux上进程有5种状态:</span><br><span class="line">1. 运行(正在运行或在运行队列中等待)</span><br><span class="line">2. 中断(休眠中, 受阻, 在等待某个条件的形成或接受到信号)</span><br><span class="line">3. 不可中断(收到信号不唤醒和不可运行, 进程必须等待直到有中断发生)</span><br><span class="line">4. 僵死(进程已终止, 但进程描述符存在, 直到父进程调用wait4()系统调用后释放)</span><br><span class="line">5. 停止(进程收到SIGSTOP, SIGSTP, SIGTIN, SIGTOU信号后停止运行运行)</span><br><span class="line"></span><br><span class="line">         ps工具标识进程的5种状态码:</span><br><span class="line"></span><br><span class="line">         D 不可中断 uninterruptible sleep (usually IO)</span><br><span class="line">         R 运行 runnable (on run queue)</span><br><span class="line">         S 中断 sleeping</span><br><span class="line">         T 停止 traced or stopped</span><br><span class="line">         Z 僵死 a defunct (”zombie”) process</span><br><span class="line">         命令参数：</span><br><span class="line">         -A 显示所有进程</span><br><span class="line">         a 显示所有进程</span><br><span class="line">         -a 显示同一终端下所有进程</span><br><span class="line">         c 显示进程真实名称</span><br><span class="line">         e 显示环境变量</span><br><span class="line">         f 显示进程间的关系</span><br><span class="line">         r 显示当前终端运行的进程</span><br><span class="line">         -aux 显示所有包含其它使用的进程</span><br><span class="line">         实例：</span><br><span class="line">         （1）显示当前所有进程环境变量及进程间关系</span><br><span class="line">         ps -ef</span><br><span class="line">         （2）显示当前所有进程</span><br><span class="line">         ps -A</span><br><span class="line">         （3）与grep联用查找某进程</span><br><span class="line">         ps -aux | grep apache</span><br><span class="line">         （4）找出与 cron 与 syslog 这两个服务有关的 PID 号码</span><br><span class="line">         ps aux | grep <span class="string">'(cron|syslog)'</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="16-kill命令"><a href="#16-kill命令" class="headerlink" title="16.kill命令"></a>16.kill命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">发送指定的信号到相应进程。不指定型号将发送SIGTERM（15）终止指定进程。如果任无法终止该程序可用“-KILL” 参数，其发送的信号为SIGKILL(9) ，将强制结束进程，使用ps命令或者<span class="built_in">jobs</span> 命令可以查看进程号。root用户将影响用户的进程，非root用户只能影响自己的进程。</span><br><span class="line"></span><br><span class="line">      常用参数：</span><br><span class="line">      -l  信号，若果不加信号的编号参数，则使用“-l”参数会列出全部的信号名称</span><br><span class="line">      -a  当处理当前进程时，不限制命令名和进程号的对应关系</span><br><span class="line">      -p  指定<span class="built_in">kill</span> 命令只打印相关进程的进程号，而不发送任何信号</span><br><span class="line">      -s  指定发送信号</span><br><span class="line">      -u  指定用户</span><br><span class="line">      实例：</span><br><span class="line">      </span><br><span class="line">     （1）先使用ps查找进程pro1，然后用<span class="built_in">kill</span>杀掉</span><br><span class="line">      <span class="built_in">kill</span> -9 $(ps -ef | grep pro1)</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/23/Spring%E5%9F%BA%E7%A1%80/" rel="prev" title="Spring基础">
+      <i class="fa fa-chevron-left"></i> Spring基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/23/%E5%89%91%E6%8C%87offer%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0/" rel="next" title="剑指offer算法实现">
+      剑指offer算法实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ls命令"><span class="nav-number">1.</span> <span class="nav-text">1.ls命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-cd命令"><span class="nav-number">2.</span> <span class="nav-text">2.cd命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-pwd命令"><span class="nav-number">3.</span> <span class="nav-text">3.pwd命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-mkdir命令"><span class="nav-number">4.</span> <span class="nav-text">4.mkdir命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-rm命令"><span class="nav-number">5.</span> <span class="nav-text">5.rm命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-mv命令"><span class="nav-number">6.</span> <span class="nav-text">6.mv命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-cp命令"><span class="nav-number">7.</span> <span class="nav-text">7.cp命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-cat命令"><span class="nav-number">8.</span> <span class="nav-text">8.cat命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-tail命令"><span class="nav-number">9.</span> <span class="nav-text">9.tail命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-tar命令"><span class="nav-number">10.</span> <span class="nav-text">10.tar命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-df磁盘命令"><span class="nav-number">11.</span> <span class="nav-text">11.df磁盘命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-date日期命令"><span class="nav-number">12.</span> <span class="nav-text">12.date日期命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-grep命令"><span class="nav-number">13.</span> <span class="nav-text">13.grep命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-wc命令"><span class="nav-number">14.</span> <span class="nav-text">14.wc命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-ps查看进程命令"><span class="nav-number">15.</span> <span class="nav-text">15.ps查看进程命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-kill命令"><span class="nav-number">16.</span> <span class="nav-text">16.kill命令</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="binshow"
+      src="/images/ruiwen.gif">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
