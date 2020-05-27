@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-center-circle.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Redis中的数据类型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis详解之数据结构">
+<meta property="og:url" content="http://yoursite.com/2020/05/25/Redis%E8%AF%A6%E8%A7%A3%E4%B9%8B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="Redis中的数据类型">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590374496313.png">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQZYuqmprbyribHqEdWvMKjdeiaaUR5swWG3iciaJ2ghlwp6ubdfxLahIQVg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQn3GcsgglqK0DaME5KXiciaQLCkkSVKMia9gmv5icavhQhOwuHRavTLIMdg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQZxrtjNvic9S9GPVcQiaWS4dhxvCJPxdHSxSCUdP81SU5o6JjS0E9sy5A/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQ5qUqf8c0vC3bfbc710Tz6iadcOlDYb39pApOUP9pCaUDQtuicUn9Jibvg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQclc3x7f7KuQtUMpfn1rP3I7mGVuOyydQjyhujAgTzo9z8XiacD0oJmA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1hWpz4SH2JPuvDicuia4icWxXY1Mg9JfIwfQib9TjibXMjdlHNEwIyULpqiaA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1aOtL429T5sn0sslPj4amBKnRh3a6ebRXmAtbIZMxhPsicI07iaOeiaBdw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1BdGiaqzbNCe3uj0oYewpNU3a9jjL0dWrYtuOPqnIq9MFiaeiasswVXSzw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1JtvaI8IVQmsicTY0jvma10juXiacLsEj6M3t9dnK4ak3icBJV9eL6cQXg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1VOmCpHUTctKOfsGoVWJoMFFwWojV4VQhUc2NmJCTKw1cdS8ThRkU6w/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/2ibrAG0C697wAuYYc7IusEqxptaVxibLTQun5f7ZA9LkpwUoQrzoiaIQ0JXz4ic1qPUuQxlEztLA8kDbr2qBuAWfDg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/2ibrAG0C697wAuYYc7IusEqxptaVxibLTQ7iaGCfxls6gyCRHCyfoYhPZtsbalEPzyNIWlXAHDIc3zY7NzdMay5IA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/2ibrAG0C697wAuYYc7IusEqxptaVxibLTQ4sRjOGvXFMdh4QOHwWRH6VIFnSBnv1NECYDaV1C4tnxfgoGCqnEibiaQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-800dbf77bba29897de1ad769d0149f8f_720w.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-55a09b68f9d07f82d490d9afbb9105cb_720w.jpg">
+<meta property="article:published_time" content="2020-05-25T02:14:38.000Z">
+<meta property="article:modified_time" content="2020-05-25T05:05:39.932Z">
+<meta property="article:author" content="binshow">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590374496313.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/25/Redis%E8%AF%A6%E8%A7%A3%E4%B9%8B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis详解之数据结构 | binshow的Java学习</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">binshow的Java学习</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/25/Redis%E8%AF%A6%E8%A7%A3%E4%B9%8B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ruiwen.gif">
+      <meta itemprop="name" content="binshow">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binshow的Java学习">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis详解之数据结构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-25 10:14:38 / 修改时间：13:05:39" itemprop="dateCreated datePublished" datetime="2020-05-25T10:14:38+08:00">2020-05-25</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Redis中的数据类型</p>
+<a id="more"></a>
+
+<h1 id="一、String"><a href="#一、String" class="headerlink" title="一、String"></a>一、String</h1><h2 id="1-Redis中的SDS和C中字符串的区别"><a href="#1-Redis中的SDS和C中字符串的区别" class="headerlink" title="1.Redis中的SDS和C中字符串的区别"></a>1.Redis中的SDS和C中字符串的区别</h2><p>C 语言使用了一个长度为 <code>N+1</code> 的字符数组来表示长度为 <code>N</code> 的字符串，并且字符数组最后一个元素总是 <code>\0</code>，这种简单的字符串表示方式 <strong>不符合 Redis 对字符串在安全性、效率以及功能方面的要求</strong>。</p>
+<p>问题：</p>
+<ul>
+<li><strong>获取字符串长度为 O(N) 级别的操作</strong> → 因为 C 不保存数组的长度，每次都需要遍历一遍整个数组；</li>
+<li>不能很好的杜绝 <strong>缓冲区溢出/内存泄漏</strong> 的问题 → 跟上述问题原因一样，如果执行拼接 or 缩短字符串的操作，如果操作不当就很容易造成上述问题；</li>
+<li>C 字符串 <strong>只能保存文本数据</strong> → 因为 C 语言中的字符串必须符合某种编码（比如 ASCII），例如中间出现的 <code>&#39;\0&#39;</code> 可能会被判定为提前结束的字符串而识别不了；</li>
+</ul>
+<p><a href="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7iacDCtsE2vxokt1kuyOCzFlA6ubb0GCcia2dsO6bwG1icK3fPWT2LEOl2SzFNMmIOUqN849dicersqQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" target="_blank" rel="noopener">https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7iacDCtsE2vxokt1kuyOCzFlA6ubb0GCcia2dsO6bwG1icK3fPWT2LEOl2SzFNMmIOUqN849dicersqQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1</a></p>
+<h3 id="SDS的改进"><a href="#SDS的改进" class="headerlink" title="SDS的改进"></a>SDS的改进</h3><ol>
+<li><strong>多增加 len 表示当前字符串的长度</strong>：这样就可以直接获取长度了，复杂度 O(1)；</li>
+<li><strong>自动扩展空间</strong>：当 SDS 需要对字符串进行修改时，首先借助于 <code>len</code> 和 <code>alloc</code> 检查空间是否满足修改所需的要求，如果空间不够的话，SDS 会自动扩展空间，避免了像 C 字符串操作中的覆盖情况；</li>
+<li><strong>有效降低内存分配次数</strong>：C 字符串在涉及增加或者清除操作时会改变底层数组的大小造成重新分配，SDS 使用了 <strong>空间预分配</strong> 和 <strong>惰性空间释放</strong> 机制，简单理解就是每次在扩展时是成倍的多分配的，在缩容是也是先留着并不正式归还给 OS；</li>
+<li><strong>二进制安全</strong>：C 语言字符串只能保存 <code>ascii</code> 码，对于图片、音频等信息无法保存，SDS 是二进制安全的，写入什么读取就是什么，不做任何过滤和限制；</li>
+</ol>
+<h1 id="二、字典Hash"><a href="#二、字典Hash" class="headerlink" title="二、字典Hash"></a>二、字典Hash</h1><p><strong>Redis</strong> 中的字典相当于 Java 中的 <strong>HashMap</strong>，内部实现也差不多类似，都是通过 <strong>“数组 + 链表”</strong> 的 <strong>链地址法</strong> 来解决部分 哈希冲突，同时这样的结构也吸收了两种不同数据结构的优点。</p>
+<p>字典结构内部包含 <strong>两个 hashtable</strong>，通常情况下只有一个 <code>hashtable</code> 有值，但是在字典扩容缩容时，需要分配新的 <code>hashtable</code>，然后进行 <strong>渐进式搬迁</strong> <em>(rehash)</em>，这时候两个 <code>hashtable</code> 分别存储旧的和新的 <code>hashtable</code>，待搬迁结束后，旧的将被删除，新的 <code>hashtable</code> 取而代之。</p>
+<h4 id="扩缩容的条件"><a href="#扩缩容的条件" class="headerlink" title="扩缩容的条件"></a>扩缩容的条件</h4><p>正常情况下，当 hash 表中 <strong>元素的个数等于第一维数组的长度时</strong>，就会开始扩容，扩容的新数组是 <strong>原数组大小的 2 倍</strong>。不过如果 Redis 正在做 <code>bgsave(持久化命令)</code>，为了减少内存也得过多分离，Redis 尽量不去扩容，但是如果 hash 表非常满了，<strong>达到了第一维数组长度的 5 倍了</strong>，这个时候就会 <strong>强制扩容</strong>。</p>
+<p>当 hash 表因为元素逐渐被删除变得越来越稀疏时，Redis 会对 hash 表进行缩容来减少 hash 表的第一维数组空间占用。所用的条件是 <strong>元素个数低于数组长度的 10%</strong>，缩容不会考虑 Redis 是否在做 <code>bgsave</code>。</p>
+<h1 id="三、有序列表-zset"><a href="#三、有序列表-zset" class="headerlink" title="三、有序列表 zset"></a>三、<strong>有序列表 zset</strong></h1><p> <strong>SortedSet</strong> 和 <strong>HashMap</strong> 的结合体，一方面它是一个 set 保证了内部 value 的唯一性，另一方面又可以给每个 value 赋予一个排序的权重值 score，来达到 <strong>排序</strong> 的目的。</p>
+<p>它的内部实现就依赖了一种叫做 <strong>「跳跃列表」</strong> 的数据结构。</p>
+<h2 id="为什么使用跳表"><a href="#为什么使用跳表" class="headerlink" title="为什么使用跳表"></a>为什么使用跳表</h2><p>首先，因为 zset 要支持随机的插入和删除，所以它 <strong>不宜使用数组来实现</strong>，关于排序问题，我们也很容易就想到 <strong>红黑树/ 平衡树</strong> 这样的树形结构，为什么 Redis 不使用这样一些结构呢？</p>
+<ol>
+<li><strong>性能考虑：</strong> 在高并发的情况下，树形结构需要执行一些类似于 rebalance 这样的可能涉及整棵树的操作，相对来说跳跃表的变化只涉及局部 <em>(下面详细说)</em>；</li>
+<li><strong>实现考虑：</strong> 在复杂度与红黑树相同的情况下，跳跃表实现起来更简单，看起来也更加直观；</li>
+</ol>
+<p>基于以上的一些考虑，Redis 基于 <strong>William Pugh</strong> 的论文做出一些改进后采用了 <strong>跳跃表</strong> 这样的结构。</p>
+<h2 id="跳表的本质"><a href="#跳表的本质" class="headerlink" title="跳表的本质"></a>跳表的本质</h2><p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590374496313.png" alt="1590374496313"></p>
+<p>这个链表按照 score 值进行排序，需要添加新的元素时，我们需要定位到插入点，这样才可以继续保证链表是有序的，通常我们会使用 <strong>二分查找法</strong>，但二分查找是有序数组的，链表没办法进行位置定位，我们除了遍历整个找到第一个比给定数据大的节点为止 <em>（时间复杂度 O(n))</em> 似乎没有更好的办法。</p>
+<p>但假如我们每相邻两个节点之间就增加一个指针，让指针指向下一个节点，如下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQZYuqmprbyribHqEdWvMKjdeiaaUR5swWG3iciaJ2ghlwp6ubdfxLahIQVg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>这样所有新增的指针连成了一个新的链表，但它包含的数据却只有原来的一半 <em>（图中的为 3，11）</em>。</p>
+<p>现在假设我们想要查找数据时，可以根据这条新的链表查找，如果碰到比待查找数据大的节点时，再回到原来的链表中进行查找，比如，我们想要查找 7，查找的路径则是沿着下图中标注出的红色指针所指向的方向进行的：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQn3GcsgglqK0DaME5KXiciaQLCkkSVKMia9gmv5icavhQhOwuHRavTLIMdg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>这是一个略微极端的例子，但我们仍然可以看到，通过新增加的指针查找，我们不再需要与链表上的每一个节点逐一进行比较，这样改进之后需要比较的节点数大概只有原来的一半。</p>
+<p>利用同样的方式，我们可以在新产生的链表上，继续为每两个相邻的节点增加一个指针，从而产生第三层链表：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQZxrtjNvic9S9GPVcQiaWS4dhxvCJPxdHSxSCUdP81SU5o6JjS0E9sy5A/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>在这个新的三层链表结构中，我们试着 <strong>查找 13</strong>，那么沿着最上层链表首先比较的是 11，发现 11 比 13 小，于是我们就知道只需要到 11 后面继续查找，<strong>从而一下子跳过了 11 前面的所有节点。</strong></p>
+<p>可以想象，当链表足够长，这样的多层链表结构可以帮助我们跳过很多下层节点，从而加快查找的效率。</p>
+<p><strong>跳跃表 skiplist</strong> 就是受到这种多层链表结构的启发而设计出来的。按照上面生成链表的方式，上面每一层链表的节点个数，是下面一层的节点个数的一半，这样查找过程就非常类似于一个二分查找，使得查找的时间复杂度可以降低到 <em>O(logn)</em>。</p>
+<p>但是，这种方法在插入数据的时候有很大的问题。新插入一个节点之后，就会打乱上下相邻两层链表上节点个数严格的 2:1 的对应关系。如果要维持这种对应关系，就必须把新插入的节点后面的所有节点 <em>（也包括新插入的节点）</em> 重新进行调整，这会让时间复杂度重新蜕化成 <em>O(n)</em>。删除数据也有同样的问题。</p>
+<p><strong>skiplist</strong> 为了避免这一问题，它不要求上下相邻两层链表之间的节点个数有严格的对应关系，而是 <strong>为每个节点随机出一个层数(level)</strong>。比如，一个节点随机出的层数是 3，那么就把它链入到第 1 层到第 3 层这三层链表中。为了表达清楚，下图展示了如何通过一步步的插入操作从而形成一个 skiplist 的过程：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQ5qUqf8c0vC3bfbc710Tz6iadcOlDYb39pApOUP9pCaUDQtuicUn9Jibvg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>从上面的创建和插入的过程中可以看出，每一个节点的层数（level）是随机出来的，而且新插入一个节点并不会影响到其他节点的层数，因此，<strong>插入操作只需要修改节点前后的指针，而不需要对多个节点都进行调整</strong>，这就降低了插入操作的复杂度。</p>
+<p>现在我们假设从我们刚才创建的这个结构中查找 23 这个不存在的数，那么查找路径会如下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H5ZLiaicqeR9mzkQuQLwvtFfQclc3x7f7KuQtUMpfn1rP3I7mGVuOyydQjyhujAgTzo9z8XiacD0oJmA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<h1 id="四、HyperLogLog"><a href="#四、HyperLogLog" class="headerlink" title="四、HyperLogLog"></a>四、<strong>HyperLogLog</strong></h1><p><strong>基数统计(Cardinality Counting)</strong> 通常是用来统计一个集合中不重复的元素个数。</p>
+<p>可以解决很多精确度不高的统计需求</p>
+<h1 id="五、布隆过滤器"><a href="#五、布隆过滤器" class="headerlink" title="五、布隆过滤器"></a>五、布隆过滤器</h1><p><strong>布隆过滤器(Bloom Filter)</strong> 就是这样一种专门用来解决去重问题的高级数据结构。但是跟 <strong>HyperLogLog</strong> 一样，它也一样有那么一点点不精确，也存在一定的误判概率，但它能在解决去重的同时，在 <strong>空间上能节省 90%</strong> 以上，也是非常值得的。</p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>基于上述的功能，我们大致可以把布隆过滤器用于以下的场景之中：</p>
+<ul>
+<li><strong>大数据判断是否存在</strong>：这就可以实现出上述的去重功能，如果你的服务器内存足够大的话，那么使用 HashMap 可能是一个不错的解决方案，理论上时间复杂度可以达到 O(1 的级别，但是当数据量起来之后，还是只能考虑布隆过滤器。</li>
+<li><strong>解决缓存穿透</strong>：我们经常会把一些热点数据放在 Redis 中当作缓存，例如产品详情。通常一个请求过来之后我们会先查询缓存，而不用直接读取数据库，这是提升性能最简单也是最普遍的做法，但是 <strong>如果一直请求一个不存在的缓存</strong>，那么此时一定不存在缓存，那就会有 <strong>大量请求直接打到数据库</strong> 上，造成 <strong>缓存穿透</strong>，布隆过滤器也可以用来解决此类问题。</li>
+<li><strong>爬虫/ 邮箱等系统的过滤</strong>：平时不知道你有没有注意到有一些正常的邮件也会被放进垃圾邮件目录中，这就是使用布隆过滤器 <strong>误判</strong> 导致的</li>
+</ul>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>布隆过滤器 <strong>本质上</strong> 是由长度为 <code>m</code> 的位向量或位列表（仅包含 <code>0</code> 或 <code>1</code> 位值的列表）组成，最初所有的值均设置为 <code>0</code>，所以我们先来创建一个稍微长一些的位向量用作展示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1hWpz4SH2JPuvDicuia4icWxXY1Mg9JfIwfQib9TjibXMjdlHNEwIyULpqiaA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>当我们向布隆过滤器中添加数据时，会使用 <strong>多个</strong> <code>hash</code> 函数对 <code>key</code> 进行运算，算得一个证书索引值，然后对位数组长度进行取模运算得到一个位置，每个 <code>hash</code> 函数都会算得一个不同的位置。再把位数组的这几个位置都置为 <code>1</code> 就完成了 <code>add</code> 操作，例如，我们添加一个 <code>wmyskxz</code>：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1aOtL429T5sn0sslPj4amBKnRh3a6ebRXmAtbIZMxhPsicI07iaOeiaBdw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>向布隆过滤器查查询 <code>key</code> 是否存在时，跟 <code>add</code> 操作一样，会把这个 <code>key</code> 通过相同的多个 <code>hash</code> 函数进行运算，查看 <strong>对应的位置</strong> 是否 <strong>都</strong> 为 <code>1</code>，<strong>只要有一个位为 0</strong>，那么说明布隆过滤器中这个 <code>key</code> 不存在。如果这几个位置都是 <code>1</code>，并不能说明这个 <code>key</code> 一定存在，只能说极有可能存在，因为这些位置的 <code>1</code> 可能是因为其他的 <code>key</code> 存在导致的。</p>
+<p>就比如我们在 <code>add</code> 了一定的数据之后，查询一个 <strong>不存在</strong> 的 <code>key</code>：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1BdGiaqzbNCe3uj0oYewpNU3a9jjL0dWrYtuOPqnIq9MFiaeiasswVXSzw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>很明显，<code>1/3/5</code> 这几个位置的 <code>1</code> 是因为上面第一次添加的 <code>wmyskxz</code> 而导致的，所以这里就存在 <strong>误判</strong>。幸运的是，布隆过滤器有一个可以预判误判率的公式，比较复杂，感兴趣的朋友可以自行去阅读，比较烧脑.. 只需要记住以下几点就好了：</p>
+<ul>
+<li>使用时 <strong>不要让实际元素数量远大于初始化数量</strong>；</li>
+<li>当实际元素数量超过初始化数量时，应该对布隆过滤器进行 <strong>重建</strong>，重新分配一个 <code>size</code> 更大的过滤器，再将所有的历史元素批量 <code>add</code> 进行；</li>
+</ul>
+<h3 id="Google-开源的-Guava-中自带的布隆过滤器"><a href="#Google-开源的-Guava-中自带的布隆过滤器" class="headerlink" title="Google 开源的 Guava 中自带的布隆过滤器"></a>Google 开源的 Guava 中自带的布隆过滤器</h3><h1 id="六、GeoHash"><a href="#六、GeoHash" class="headerlink" title="六、GeoHash"></a>六、GeoHash</h1><p>微信 <strong>“附近的人”</strong>，美团 <strong>“附近的餐厅”</strong>，支付宝共享单车 <strong>“附近的车”</strong> </p>
+<p>这是业界比较通用的，用于 <strong>地理位置距离排序</strong> 的一个算法，<strong>Redis</strong> 也采用了这样的算法。GeoHash 算法将 <strong>二维的经纬度</strong> 数据映射到 <strong>一维</strong> 的整数，这样所有的元素都将在挂载到一条线上，距离靠近的二维坐标映射到一维后的点之间距离也会很接近。当我们想要计算 <strong>「附近的人时」</strong>，首先将目标位置映射到这条线上，然后在这个一维的线上获取附近的点就行了。</p>
+<p>它的核心思想就是把整个地球看成是一个 <strong>二维的平面</strong>，然后把这个平面不断地等分成一个一个小的方格，<strong>每一个</strong> 坐标元素都位于其中的 <strong>唯一一个方格</strong> 中，等分之后的 <strong>方格越小</strong>，那么坐标也就 <strong>越精确</strong>，类似下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1JtvaI8IVQmsicTY0jvma10juXiacLsEj6M3t9dnK4ak3icBJV9eL6cQXg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>经过划分的地球，我们需要对其进行编码：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/ia1kbU3RS1H7DM6vcGjko0z2wGm7WNSn1VOmCpHUTctKOfsGoVWJoMFFwWojV4VQhUc2NmJCTKw1cdS8ThRkU6w/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>经过这样顺序的编码之后，如果你仔细观察一会儿，你就会发现一些规律：</p>
+<ul>
+<li>横着的所有编码中，<strong>第 2 位和第 4 位都是一样的</strong>，例如第一排第一个 <code>0101</code> 和第二个 <code>0111</code>，他们的第 2 位和第 4 位都是 <code>1</code>；</li>
+<li>竖着的所有编码中，<strong>第 1 位和第 3 位是递增的</strong>，例如第一排第一个 <code>0101</code>，如果单独把第 1 位和第 3 位拎出来的话，那就是 <code>00</code>，同理看第一排第二个 <code>0111</code>，同样的方法第 1 位和第 3 位拎出来是 <code>01</code>，刚好是 <code>00</code> 递增一个；</li>
+</ul>
+<p>通过这样的规律我们就把每一个小方块儿进行了一定顺序的编码，这样做的 <strong>好处</strong> 是显而易见的：每一个元素坐标既能够被 <strong>唯一标识</strong> 在这张被编码的地图上，也不至于 <strong>暴露特别的具体的位置</strong>，因为区域是共享的，我可以告诉你我就在公园附近，但是在具体的哪个地方你就无从得知了。</p>
+<p>总之，我们通过上面的思想，能够把任意坐标变成一串二进制的编码了，类似于 <code>11010010110001000100</code> 这样 <em>(注意经度和维度是交替出现的哦..)</em>，通过这个整数我们就可以还原出元素的坐标，整数越长，还原出来的坐标值的损失程序就越小。对于 <strong>“附近的人”</strong> 这个功能来说，损失的一点经度可以忽略不计。</p>
+<p>最后就是一个 <code>Base32</code> <em>(0<del>9, a</del>z, 去掉 a/i/l/o 四个字母)</em> 的编码操作，让它变成一个字符串，例如上面那一串儿就变成了 <code>wx4g0ec1</code>。</p>
+<p>在 <strong>Redis</strong> 中，经纬度使用 <code>52</code> 位的整数进行编码，放进了 zset 里面，zset 的 <code>value</code> 是元素的 <code>key</code>，<code>score</code> 是 <strong>GeoHash</strong> 的 <code>52</code> 位整数值。zset 的 <code>score</code> 虽然是浮点数，但是对于 <code>52</code> 位的整数值来说，它可以无损存储。</p>
+<h1 id="七、压缩列表-ziplist"><a href="#七、压缩列表-ziplist" class="headerlink" title="七、压缩列表(ziplist)"></a>七、压缩列表(ziplist)</h1><p>压缩列表被用作列表键和哈希键的底层实现之一。</p>
+<p><strong>zset</strong> 和 <strong>hash</strong> 容器对象会在元素个数较少的时候，采用压缩列表（ziplist）进行存储。压缩列表是 <strong>一块连续的内存空间</strong>，元素之间紧挨着存储，没有任何冗余空隙。</p>
+<p>我们知道,数组要求每个元素的大小相同,如果我们要存储不同长度的字符串,那我们就需要用最大长度的字符串大小作为元素的大小(假设是20个字节)。存储小于 20 个字节长度的字符串的时候，便会浪费部分存储空间。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2ibrAG0C697wAuYYc7IusEqxptaVxibLTQun5f7ZA9LkpwUoQrzoiaIQ0JXz4ic1qPUuQxlEztLA8kDbr2qBuAWfDg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>​    数组的优势占用一片连续的空间可以很好的利用CPU缓存访问数据。如果我们想要保留这种优势，又想节省存储空间我们可以对数组进行压缩。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2ibrAG0C697wAuYYc7IusEqxptaVxibLTQ7iaGCfxls6gyCRHCyfoYhPZtsbalEPzyNIWlXAHDIc3zY7NzdMay5IA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>​     但是这样有一个问题，我们在遍历它的时候由于不知道每个元素的大小是多少，因此也就无法计算出下一个节点的具体位置。这个时候我们可以给每个节点增加一个lenght的属性。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2ibrAG0C697wAuYYc7IusEqxptaVxibLTQ4sRjOGvXFMdh4QOHwWRH6VIFnSBnv1NECYDaV1C4tnxfgoGCqnEibiaQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>​    如此。我们在遍历节点的之后就知道每个节点的长度(占用内存的大小)，就可以很容易计算出下一个节点再内存中的位置。这种结构就像一个简单的压缩列表了。</p>
+<p><strong>ziplist 是一个特殊的双向链表</strong><br>特殊之处在于：没有维护双向指针:prev next；而是存储上一个 entry的长度和 当前entry的长度，通过长度推算下一个元素在什么地方。<br>牺牲读取的性能，获得高效的存储空间，因为(简短字符串的情况)存储指针比存储entry长度 更费内存。这是典型的“时间换空间”。</p>
+<p><strong>ziplist使用局限性</strong><br>字段、值比较小，才会用ziplist。</p>
+<p><strong>压缩列表ziplist存储结构</strong><br>ziplist使用连续的内存块，每一个节点（entry）都是连续存储的；ziplist 存储分布如下：</p>
+<p>可见，每一个存储节点 zlentry，都包含</p>
+<ul>
+<li>prevrawlen 前一个 entry的长度</li>
+<li>lensize 当前entry的长度</li>
+</ul>
+<p><strong>如何通过一个节点向前跳转到另一个节点？</strong><br>用指向当前节点的指针 e ， 减去 前一个 entry的长度， 得出的结果就是指向前一个节点的地址 p 。</p>
+<p><strong>完整的zlentry由以下3各部分组成：</strong></p>
+<ul>
+<li>prevrawlen：记录前一个节点所占有的内存字节数，通过该值，我们可以从当前节点计算前一个节点的地址，可以用来实现表尾向表头节点遍历；</li>
+<li>len/encoding：记录了当前节点content占有的内存字节数及其存储类型，用来解析content用；</li>
+<li>content：保存了当前节点的值。<br>最关键的是prevrawlen和len/encoding，content只是实际存储数值的比特位。</li>
+</ul>
+<p><strong>prevrawlen是变长编码，有两种表示方法：</strong></p>
+<ul>
+<li>如果前一节点的长度小于 254 字节，则使用1字节(uint8_t)来存储prevrawlen；</li>
+<li>如果前一节点的长度大于等于 254 字节，那么将第 1 个字节的值设为 254 ，然后用接下来的 4 个字节保存实际长度。</li>
+</ul>
+<h3 id="ziplist连锁更新问题"><a href="#ziplist连锁更新问题" class="headerlink" title="ziplist连锁更新问题"></a><strong>ziplist连锁更新问题</strong></h3><p>因为在ziplist中，每个zlentry都存储着前一个节点所占的字节数，而这个数值又是<strong>变长编码</strong>的。假设存在一个压缩列表，其包含e1、e2、e3、e4…..，e1节点的大小为253字节，那么e2.prevrawlen的大小为1字节，如果此时在e2与e1之间插入了一个新节点e_new，e_new编码后的整体长度（包含e1的长度）为<strong>254字节</strong>，此时e2.prevrawlen就需要扩充为<strong>5字节</strong>；如果e2的整体长度变化又引起了e3.prevrawlen的存储长度变化，那么e3也需要扩…….如此递归直到表尾节点或者某一个节点的prevrawlen本身长度可以容纳前一个节点的变化。<strong>其中每一次扩充都需要进行空间再分配操作</strong>。删除节点亦是如此，只要引起了操作节点之后的节点的prevrawlen的变化，都可能引起连锁更新。</p>
+<p>连锁更新在最坏情况下需要进行N次空间再分配，而每次空间再分配的最坏时间复杂度为O(N)，因此连锁更新的总体时间复杂度是O(N^2)。<br>即使涉及连锁更新的时间复杂度这么高，但它能引起的性能问题的概率是极低的：需要列表中存在大量的节点长度接近254的zlentry。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">由于ziplist连锁更新的问题，也使得ziplist的优缺点极其明显；也使得后续Redis采取折中，替换了ziplist。</span><br></pre></td></tr></table></figure>
+
+<p>ziplist的主要优点是节省内存，但它上面的查找操作只能按顺序查找（可以是从前往后、也可以从后往前）。<br>ziplist将数据按照一定规则编码在一块连续的内存区域，目的是节省内存，这种结构并不擅长做修改操作。一旦数据发生改动，就会引发内存realloc，可能导致内存拷贝。</p>
+<h1 id="八、列表List"><a href="#八、列表List" class="headerlink" title="八、列表List"></a>八、列表List</h1><h2 id="压缩列表-双向链表"><a href="#压缩列表-双向链表" class="headerlink" title="压缩列表+双向链表"></a>压缩列表+双向链表</h2><p>因为双向链表占用的内存比压缩列表要多， 所以当创建新的列表键时， 列表会优先考虑使用压缩列表， 并且在有需要的时候， 才从压缩列表实现转换到双向链表实现。</p>
+<h2 id="quickList"><a href="#quickList" class="headerlink" title="quickList"></a>quickList</h2><p>在版本3.2之前，当列表对象中元素的长度比较小或者数量比较少的时候，采用ziplist来存储，当列表对象中元素的长度比较大或者数量比较多的时候，则会转而使用双向列表linkedlist来存储。</p>
+<p><strong>这两种存储方式的优缺点</strong></p>
+<ul>
+<li>双向链表linkedlist便于在表的两端进行push和pop操作，在插入节点上复杂度很低，但是它的内存开销比较大。首先，它在每个节点上除了要保存数据之外，还要额外保存两个指针；其次，双向链表的各个节点是单独的内存块，地址不连续，节点多了容易产生内存碎片。</li>
+<li>ziplist存储在一段连续的内存上，所以存储效率很高。但是，它不利于修改操作，插入和删除操作需要频繁的申请和释放内存。特别是当ziplist长度很长的时候，一次realloc可能会导致大批量的数据拷贝。</li>
+</ul>
+<p>可以认为quickList，是ziplist和linkedlist二者的结合；quickList将二者的优点结合起来。<br>官方给出的定义</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A generic doubly linked quicklist implementation</span><br><span class="line">A doubly linked list of ziplists</span><br></pre></td></tr></table></figure>
+
+<p>quickList是一个ziplist组成的双向链表。每个节点使用ziplist来保存数据。<br>本质上来说，quicklist里面保存着一个一个小的ziplist。结构如下：</p>
+<p><img src="https://pic4.zhimg.com/80/v2-800dbf77bba29897de1ad769d0149f8f_720w.jpg" alt="img"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;* quicklistNode is a 32 byte struct describing a ziplist for a quicklist.</span><br><span class="line"> * We use bit fields keep the quicklistNode at 32 bytes.</span><br><span class="line"> * count: 16 bits, max 65536 (max zl bytes is 65k, so max count actually &lt; 32k).</span><br><span class="line"> * encoding: 2 bits, RAW&#x3D;1, LZF&#x3D;2.</span><br><span class="line"> * container: 2 bits, NONE&#x3D;1, ZIPLIST&#x3D;2.</span><br><span class="line"> * recompress: 1 bit, bool, true if node is temporarry decompressed for usage.</span><br><span class="line"> * attempted_compress: 1 bit, boolean, used for verifying during testing.</span><br><span class="line"> * extra: 12 bits, free for future use; pads out the remainder of 32 bits *&#x2F;</span><br><span class="line">typedef struct quicklistNode &#123;</span><br><span class="line">    struct quicklistNode *prev; &#x2F;&#x2F;上一个node节点</span><br><span class="line">    struct quicklistNode *next; &#x2F;&#x2F;下一个node</span><br><span class="line">    unsigned char *zl;            &#x2F;&#x2F;保存的数据 压缩前ziplist 压缩后压缩的数据</span><br><span class="line">    unsigned int sz;             &#x2F;* ziplist size in bytes *&#x2F;</span><br><span class="line">    unsigned int count : 16;     &#x2F;* count of items in ziplist *&#x2F;</span><br><span class="line">    unsigned int encoding : 2;   &#x2F;* RAW&#x3D;&#x3D;1 or LZF&#x3D;&#x3D;2 *&#x2F;</span><br><span class="line">    unsigned int container : 2;  &#x2F;* NONE&#x3D;&#x3D;1 or ZIPLIST&#x3D;&#x3D;2 *&#x2F;</span><br><span class="line">    unsigned int recompress : 1; &#x2F;* was this node previous compressed? *&#x2F;</span><br><span class="line">    unsigned int attempted_compress : 1; &#x2F;* node can&#39;t compress; too small *&#x2F;</span><br><span class="line">    unsigned int extra : 10; &#x2F;* more bits to steal for future usage *&#x2F;</span><br><span class="line">&#125; quicklistNode;</span><br><span class="line"></span><br><span class="line">&#x2F;* quicklistLZF is a 4+N byte struct holding &#39;sz&#39; followed by &#39;compressed&#39;.</span><br><span class="line"> * &#39;sz&#39; is byte length of &#39;compressed&#39; field.</span><br><span class="line"> * &#39;compressed&#39; is LZF data with total (compressed) length &#39;sz&#39;</span><br><span class="line"> * NOTE: uncompressed length is stored in quicklistNode-&gt;sz.</span><br><span class="line"> * When quicklistNode-&gt;zl is compressed, node-&gt;zl points to a quicklistLZF *&#x2F;</span><br><span class="line">typedef struct quicklistLZF &#123;</span><br><span class="line">    unsigned int sz; &#x2F;* LZF size in bytes*&#x2F;</span><br><span class="line">    char compressed[];</span><br><span class="line">&#125; quicklistLZF;</span><br><span class="line"></span><br><span class="line">&#x2F;* quicklist is a 32 byte struct (on 64-bit systems) describing a quicklist.</span><br><span class="line"> * &#39;count&#39; is the number of total entries.</span><br><span class="line"> * &#39;len&#39; is the number of quicklist nodes.</span><br><span class="line"> * &#39;compress&#39; is: -1 if compression disabled, otherwise it&#39;s the number</span><br><span class="line"> *                of quicklistNodes to leave uncompressed at ends of quicklist.</span><br><span class="line"> * &#39;fill&#39; is the user-requested (or default) fill factor. *&#x2F;</span><br><span class="line">typedef struct quicklist &#123;</span><br><span class="line">    quicklistNode *head; &#x2F;&#x2F;头结点</span><br><span class="line">    quicklistNode *tail; &#x2F;&#x2F;尾节点</span><br><span class="line">    unsigned long count;        &#x2F;* total count of all entries in all ziplists *&#x2F;</span><br><span class="line">    unsigned int len;           &#x2F;* number of quicklistNodes *&#x2F;</span><br><span class="line">    int fill : 16;              &#x2F;* fill factor for individual nodes *&#x2F;&#x2F;&#x2F;负数代表级别，正数代表个数</span><br><span class="line">    unsigned int compress : 16; &#x2F;* depth of end nodes not to compress;0&#x3D;off *&#x2F;&#x2F;&#x2F;压缩级别</span><br><span class="line">&#125; quicklist;</span><br></pre></td></tr></table></figure>
+
+<p>quickList就是一个标准的双向链表的配置，有head 有tail;<br>每一个节点是一个quicklistNode，包含prev和next指针。<br>每一个quicklistNode 包含 一个ziplist，*zp 压缩链表里存储键值。<br>所以quicklist是对ziplist进行一次封装，使用小块的ziplist来既保证了少使用内存，也保证了性能。</p>
+<hr>
+<h3 id="列表list其他实现点"><a href="#列表list其他实现点" class="headerlink" title="列表list其他实现点"></a><strong>列表list其他实现点</strong></h3><p>Redis列表list底层的编码分析完了，我们再来探讨两个list其他的实现点：</p>
+<h3 id="list是如何实现阻塞队列的？"><a href="#list是如何实现阻塞队列的？" class="headerlink" title="list是如何实现阻塞队列的？"></a><strong>list是如何实现阻塞队列的？</strong></h3><p>阻塞队列，就像ArrayBlockingQueue那样，消费端取数据时，如果列表为空，就阻塞。Redis是如何实现的呢？<br><code>blpop 、 brpop 和 brpoplpush</code>这个几个阻塞命令的实现原理：</p>
+<p>只有当这些命令被用于空列表时， 它们才会阻塞客户端。<br>阻塞一个客户端需要执行以下步骤：</p>
+<ul>
+<li>将客户端的状态设为“正在阻塞”，并记录阻塞这个客户端的各个键，以及阻塞的最长时限（timeout）等数据。</li>
+<li>将客户端的信息记录到 server.db[i]-&gt;blocking_keys 中（其中 i 为客户端所使用的数据库号码）。</li>
+<li>继续维持客户端和服务器之间的网络连接，但不再向客户端传送任何信息，造成客户端阻塞。<br>步骤 2 是将来解除阻塞的关键， server.db[i]-&gt;blocking_keys 是一个字典， 字典的键是那些造成客户端阻塞的键， 而字典的值是一个链表， 链表里保存了所有因为这个键而被阻塞的客户端 （被同一个键所阻塞的客户端可能不止一个）：</li>
+</ul>
+<p><img src="https://pic4.zhimg.com/80/v2-55a09b68f9d07f82d490d9afbb9105cb_720w.jpg" alt="img"></p>
+<h3 id="ziplist和linkedlist-编码下的list，列表操作命令底层实现不同"><a href="#ziplist和linkedlist-编码下的list，列表操作命令底层实现不同" class="headerlink" title="ziplist和linkedlist 编码下的list，列表操作命令底层实现不同"></a><strong>ziplist和linkedlist 编码下的list，列表操作命令底层实现不同</strong></h3><p><code>lpush、rpush、lpop、rpop</code>等进行列表操作，这些命令在不同编码的列表对象下的实现方法是不同的。<br>对linkedlist来说，这些命令都是基于prev、next、head、tail指针完成的，双向链表基于指针，实现比较容易。<br>而ziplist则是 通过当前entry的指针，加减位移的偏移量(前一个entry的长度)，进行跳跃节点。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/24/JUC%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89%E5%A4%A7%E8%BE%85%E5%8A%A9%E7%B1%BB/" rel="prev" title="JUC详解之三大辅助类">
+      <i class="fa fa-chevron-left"></i> JUC详解之三大辅助类
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/25/%E9%9D%A2%E8%AF%95%E5%B8%B8%E8%A7%81%E4%BB%A3%E7%A0%81/" rel="next" title="面试常见代码">
+      面试常见代码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、String"><span class="nav-number">1.</span> <span class="nav-text">一、String</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Redis中的SDS和C中字符串的区别"><span class="nav-number">1.1.</span> <span class="nav-text">1.Redis中的SDS和C中字符串的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SDS的改进"><span class="nav-number">1.1.1.</span> <span class="nav-text">SDS的改进</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、字典Hash"><span class="nav-number">2.</span> <span class="nav-text">二、字典Hash</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#扩缩容的条件"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">扩缩容的条件</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、有序列表-zset"><span class="nav-number">3.</span> <span class="nav-text">三、有序列表 zset</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么使用跳表"><span class="nav-number">3.1.</span> <span class="nav-text">为什么使用跳表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#跳表的本质"><span class="nav-number">3.2.</span> <span class="nav-text">跳表的本质</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、HyperLogLog"><span class="nav-number">4.</span> <span class="nav-text">四、HyperLogLog</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、布隆过滤器"><span class="nav-number">5.</span> <span class="nav-text">五、布隆过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#应用场景"><span class="nav-number">5.1.</span> <span class="nav-text">应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">5.2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Google-开源的-Guava-中自带的布隆过滤器"><span class="nav-number">5.2.1.</span> <span class="nav-text">Google 开源的 Guava 中自带的布隆过滤器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六、GeoHash"><span class="nav-number">6.</span> <span class="nav-text">六、GeoHash</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#七、压缩列表-ziplist"><span class="nav-number">7.</span> <span class="nav-text">七、压缩列表(ziplist)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ziplist连锁更新问题"><span class="nav-number">7.0.1.</span> <span class="nav-text">ziplist连锁更新问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#八、列表List"><span class="nav-number">8.</span> <span class="nav-text">八、列表List</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#压缩列表-双向链表"><span class="nav-number">8.1.</span> <span class="nav-text">压缩列表+双向链表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#quickList"><span class="nav-number">8.2.</span> <span class="nav-text">quickList</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#列表list其他实现点"><span class="nav-number">8.2.1.</span> <span class="nav-text">列表list其他实现点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#list是如何实现阻塞队列的？"><span class="nav-number">8.2.2.</span> <span class="nav-text">list是如何实现阻塞队列的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ziplist和linkedlist-编码下的list，列表操作命令底层实现不同"><span class="nav-number">8.2.3.</span> <span class="nav-text">ziplist和linkedlist 编码下的list，列表操作命令底层实现不同</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="binshow"
+      src="/images/ruiwen.gif">
+  <p class="site-author-name" itemprop="name">binshow</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">binshow</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
