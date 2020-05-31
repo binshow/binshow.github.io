@@ -29,11 +29,13 @@
 <meta property="og:site_name" content="binshow的Java学习">
 <meta property="og:description" content="常用命令">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590749575007.png">
 <meta property="article:published_time" content="2020-05-23T10:22:06.000Z">
-<meta property="article:modified_time" content="2020-05-23T10:52:35.616Z">
+<meta property="article:modified_time" content="2020-05-29T11:19:51.626Z">
 <meta property="article:author" content="binshow">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590749575007.png">
 
 <link rel="canonical" href="http://yoursite.com/2020/05/23/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
 
@@ -185,10 +187,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-05-23 18:22:06 / 修改时间：18:52:35" itemprop="dateCreated datePublished" datetime="2020-05-23T18:22:06+08:00">2020-05-23</time>
+              <time title="创建时间：2020-05-23 18:22:06" itemprop="dateCreated datePublished" datetime="2020-05-23T18:22:06+08:00">2020-05-23</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-29 19:19:51" itemprop="dateModified" datetime="2020-05-29T19:19:51+08:00">2020-05-29</time>
+              </span>
 
           
 
@@ -224,7 +232,7 @@
 
 <h2 id="10-tar命令"><a href="#10-tar命令" class="headerlink" title="10.tar命令"></a>10.tar命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用来压缩和解压文件。tar本身不具有压缩功能，只具有打包功能，有关压缩及解压是调用其它的功能来完成</span><br><span class="line">-c 建立新的压缩文件</span><br><span class="line">-f 指定压缩文件</span><br><span class="line">-r 添加文件到已经压缩文件包中</span><br><span class="line"> -u 添加改了和现有的文件到压缩包中</span><br><span class="line"> -x 从压缩包中抽取文件</span><br><span class="line"> -t 显示压缩文件中的内容</span><br><span class="line"> -z 支持gzip压缩</span><br><span class="line"> -j 支持bzip2压缩</span><br><span class="line"> -Z 支持compress解压文件</span><br><span class="line">  -v 显示操作过程</span><br></pre></td></tr></table></figure>
 
-<h2 id="11-df磁盘命令"><a href="#11-df磁盘命令" class="headerlink" title="11.df磁盘命令"></a>11.df磁盘命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-a 全部文件系统列表</span><br><span class="line">-h 以方便阅读的方式显示信息</span><br><span class="line">-i 显示inode信息</span><br><span class="line">-k 区块为1024字节</span><br><span class="line">-l 只显示本地磁盘</span><br><span class="line">-T 列出文件系统类型</span><br><span class="line"></span><br><span class="line">df -l 显示磁盘使用情况</span><br><span class="line">df -haT 以易读方式列出所有文件系统及其类型</span><br></pre></td></tr></table></figure>
+<h2 id="11-df磁盘命令"><a href="#11-df磁盘命令" class="headerlink" title="11.df磁盘命令"></a>11.df磁盘命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">-a 全部文件系统列表</span><br><span class="line">-h 以方便阅读的方式显示信息</span><br><span class="line">-i 显示inode信息</span><br><span class="line">-k 区块为1024字节</span><br><span class="line">-l 只显示本地磁盘</span><br><span class="line">-T 列出文件系统类型</span><br><span class="line"></span><br><span class="line">df -l 显示磁盘使用情况</span><br><span class="line">df -haT 以易读方式列出所有文件系统及其类型</span><br><span class="line">df -h //以人类能看懂的 显示容量</span><br><span class="line">文件系统        容量  已用  可用 已用% 挂载点</span><br><span class="line">devtmpfs        471M     0  471M    0% /dev</span><br><span class="line">tmpfs           487M     0  487M    0% /dev/shm</span><br><span class="line">tmpfs           487M  8.6M  478M    2% /run</span><br><span class="line">tmpfs           487M     0  487M    0% /sys/fs/cgroup</span><br><span class="line">/dev/sda3        23G  9.5G   14G   42% /</span><br><span class="line">/dev/sda1       297M  229M   69M   77% /boot</span><br><span class="line">tmpfs            98M   20K   98M    1% /run/user/0</span><br></pre></td></tr></table></figure>
 
 <h2 id="12-date日期命令"><a href="#12-date日期命令" class="headerlink" title="12.date日期命令"></a>12.date日期命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">-d&lt;字符串&gt; 　显示字符串所指的日期与时间。字符串前后必须加上双引号。</span><br><span class="line">-s&lt;字符串&gt; 　根据字符串来设置日期与时间。字符串前后必须加上双引号。</span><br><span class="line">-u 　显示GMT。</span><br><span class="line">%H 小时(00-23)</span><br><span class="line">%I 小时(00-12)</span><br><span class="line">%M 分钟(以00-59来表示)</span><br><span class="line">%s 总秒数。起算时间为1970-01-01 00:00:00 UTC。</span><br><span class="line">%S 秒(以本地的惯用法来表示)</span><br><span class="line">%a 星期的缩写。</span><br><span class="line">%A 星期的完整名称。</span><br><span class="line">%d 日期(以01-31来表示)。</span><br><span class="line">%D 日期(含年月日)。</span><br><span class="line">%m 月份(以01-12来表示)。</span><br><span class="line">%y 年份(以00-99来表示)。</span><br><span class="line">%Y 年份(以四位数来表示)。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">date -d <span class="string">"nov 22"</span>  今年的 11 月 22 日是星期三</span><br><span class="line">date -d <span class="string">'2 weeks'</span> 2周后的日期</span><br><span class="line">date -d <span class="string">'next monday'</span> (下周一的日期)</span><br><span class="line">date -d next-day +%Y%m%d（明天的日期）或者：date -d tomorrow +%Y%m%d</span><br><span class="line">date -d last-day +%Y%m%d(昨天的日期) 或者：date -d yesterday +%Y%m%d</span><br><span class="line">date -d last-month +%Y%m(上个月是几月)</span><br><span class="line">date -d next-month +%Y%m(下个月是几月)</span><br></pre></td></tr></table></figure>
 
@@ -236,6 +244,57 @@
 
 <h2 id="16-kill命令"><a href="#16-kill命令" class="headerlink" title="16.kill命令"></a>16.kill命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">发送指定的信号到相应进程。不指定型号将发送SIGTERM（15）终止指定进程。如果任无法终止该程序可用“-KILL” 参数，其发送的信号为SIGKILL(9) ，将强制结束进程，使用ps命令或者<span class="built_in">jobs</span> 命令可以查看进程号。root用户将影响用户的进程，非root用户只能影响自己的进程。</span><br><span class="line"></span><br><span class="line">      常用参数：</span><br><span class="line">      -l  信号，若果不加信号的编号参数，则使用“-l”参数会列出全部的信号名称</span><br><span class="line">      -a  当处理当前进程时，不限制命令名和进程号的对应关系</span><br><span class="line">      -p  指定<span class="built_in">kill</span> 命令只打印相关进程的进程号，而不发送任何信号</span><br><span class="line">      -s  指定发送信号</span><br><span class="line">      -u  指定用户</span><br><span class="line">      实例：</span><br><span class="line">      </span><br><span class="line">     （1）先使用ps查找进程pro1，然后用<span class="built_in">kill</span>杀掉</span><br><span class="line">      <span class="built_in">kill</span> -9 $(ps -ef | grep pro1)</span><br></pre></td></tr></table></figure>
 
+<h2 id="17-top整机命令"><a href="#17-top整机命令" class="headerlink" title="17.top整机命令"></a>17.top整机命令</h2><p><img src="/.com//C:%5CUsers%5Cbinshow%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5C1590749575007.png" alt="1590749575007"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">top</span><br><span class="line">2.03 1.23 0.50 分别表示系统1分钟，5分钟，15分钟的平均负载均衡值，如果相加/3&gt;60 ,系统压力比较重</span><br><span class="line"></span><br><span class="line">uptime 只看系统的负载均衡值</span><br></pre></td></tr></table></figure>
+
+<h2 id="18-CPU查看"><a href="#18-CPU查看" class="headerlink" title="18.CPU查看"></a>18.CPU查看</h2><h3 id="vmstat"><a href="#vmstat" class="headerlink" title="vmstat"></a>vmstat</h3><blockquote>
+<p>vmstat -n 2 3  没2秒采样一次，一共采样三次 ,查看CPU</p>
+<p>procs: r：运行和等待cpu时间片的进程数 ，b：等待资源的进程数（磁盘IO，网络IO等）</p>
+<p>cpu：us：表示用户进程消耗CPU时间的百分比 us高，用户进程消耗cpu高</p>
+<p>​    sy: 内核进程消耗的CPU的百分比</p>
+</blockquote>
+<blockquote>
+<p>procs ———–memory———- —swap– —–io—- -system– ——cpu—–<br>r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st<br>2  0  79360  64788      4 209704   17  256  5375   353  419  733  6 13 68 14  0<br>0  0  79360  64788      4 209736    0    0     0     0   56  123  0  0 100  0  0<br>0  0  79360  64536      4 209976    0    0   124     0   57  121  0  1 99  0  0</p>
+</blockquote>
+<blockquote>
+<p>mpstat -P ALL 2   每2秒打印cpu信息一次</p>
+</blockquote>
+<blockquote>
+<p>pidstat -u l -p  进程编号   //查看</p>
+</blockquote>
+<h2 id="19-内存"><a href="#19-内存" class="headerlink" title="19.内存"></a>19.内存</h2><blockquote>
+<p>free</p>
+<p>free -g</p>
+<p>free -m</p>
+<p>pidstat -p 进程号 -r 采用间隔秒数</p>
+</blockquote>
+<h2 id="20-磁盘IO"><a href="#20-磁盘IO" class="headerlink" title="20.磁盘IO"></a>20.磁盘IO</h2><blockquote>
+<p>pidstat -d 采样间隔秒数 -p 进程号</p>
+<p>iostat -xdk 2 3</p>
+</blockquote>
+<blockquote>
+<p>sda               0.70    21.55   40.13    6.52  1935.18   125.69    88.35     0.43    9.24   10.41    2.02   2.27  10.60<br>dm-0              0.00     0.00    0.59    0.04     4.55     2.28    21.67     0.00    2.13    2.16    1.75   1.70   0.11</p>
+<p>Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util<br>sda               0.00     0.00    0.51    1.01     4.04     4.04    10.67     0.01    8.67   25.00    0.50   8.67   1.31<br>dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</p>
+<p>Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util<br>sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00<br>dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</p>
+</blockquote>
+<p>util字段表示1秒中有百分之几的时间用于IO操作，接近100的时候，表示磁盘带宽跑满，需要优化程序或者增加磁盘</p>
+<h2 id="21-网络IO"><a href="#21-网络IO" class="headerlink" title="21.网络IO"></a>21.网络IO</h2><blockquote>
+<p>ifstat  需要下载</p>
+</blockquote>
+<h2 id="22-CPU过高，如何定位"><a href="#22-CPU过高，如何定位" class="headerlink" title="22.CPU过高，如何定位"></a>22.CPU过高，如何定位</h2><p>结合Linux和JDX命令块一起分析</p>
+<ol>
+<li>top命令找到cpu占比最高的</li>
+<li>ps -ef 或者jps进一步定位 ，得知是怎么样的一共后台程序</li>
+<li>定位到具体线程或代码 ps -mp 进程 -o THREAD,tid,time</li>
+<li>将需要的线程ID切换成16进制的格式（英文小写格式）</li>
+<li>jstack 进程ID | grep tid（16进制线程ID小写的英文） -A60 打印出前60行</li>
+</ol>
+<blockquote>
+<p>ps -mp 进程 -o THREAD,tid,time 中 </p>
+<p>-m显示所有的线程</p>
+<p>-p pid进程使用CPU的时间</p>
+<p>-o 该参数后是用户自定义格式</p>
+</blockquote>
 
     </div>
 
@@ -319,7 +378,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ls命令"><span class="nav-number">1.</span> <span class="nav-text">1.ls命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-cd命令"><span class="nav-number">2.</span> <span class="nav-text">2.cd命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-pwd命令"><span class="nav-number">3.</span> <span class="nav-text">3.pwd命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-mkdir命令"><span class="nav-number">4.</span> <span class="nav-text">4.mkdir命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-rm命令"><span class="nav-number">5.</span> <span class="nav-text">5.rm命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-mv命令"><span class="nav-number">6.</span> <span class="nav-text">6.mv命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-cp命令"><span class="nav-number">7.</span> <span class="nav-text">7.cp命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-cat命令"><span class="nav-number">8.</span> <span class="nav-text">8.cat命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-tail命令"><span class="nav-number">9.</span> <span class="nav-text">9.tail命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-tar命令"><span class="nav-number">10.</span> <span class="nav-text">10.tar命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-df磁盘命令"><span class="nav-number">11.</span> <span class="nav-text">11.df磁盘命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-date日期命令"><span class="nav-number">12.</span> <span class="nav-text">12.date日期命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-grep命令"><span class="nav-number">13.</span> <span class="nav-text">13.grep命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-wc命令"><span class="nav-number">14.</span> <span class="nav-text">14.wc命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-ps查看进程命令"><span class="nav-number">15.</span> <span class="nav-text">15.ps查看进程命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-kill命令"><span class="nav-number">16.</span> <span class="nav-text">16.kill命令</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ls命令"><span class="nav-number">1.</span> <span class="nav-text">1.ls命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-cd命令"><span class="nav-number">2.</span> <span class="nav-text">2.cd命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-pwd命令"><span class="nav-number">3.</span> <span class="nav-text">3.pwd命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-mkdir命令"><span class="nav-number">4.</span> <span class="nav-text">4.mkdir命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-rm命令"><span class="nav-number">5.</span> <span class="nav-text">5.rm命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-mv命令"><span class="nav-number">6.</span> <span class="nav-text">6.mv命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-cp命令"><span class="nav-number">7.</span> <span class="nav-text">7.cp命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-cat命令"><span class="nav-number">8.</span> <span class="nav-text">8.cat命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-tail命令"><span class="nav-number">9.</span> <span class="nav-text">9.tail命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-tar命令"><span class="nav-number">10.</span> <span class="nav-text">10.tar命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-df磁盘命令"><span class="nav-number">11.</span> <span class="nav-text">11.df磁盘命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-date日期命令"><span class="nav-number">12.</span> <span class="nav-text">12.date日期命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-grep命令"><span class="nav-number">13.</span> <span class="nav-text">13.grep命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-wc命令"><span class="nav-number">14.</span> <span class="nav-text">14.wc命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-ps查看进程命令"><span class="nav-number">15.</span> <span class="nav-text">15.ps查看进程命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-kill命令"><span class="nav-number">16.</span> <span class="nav-text">16.kill命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#17-top整机命令"><span class="nav-number">17.</span> <span class="nav-text">17.top整机命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#18-CPU查看"><span class="nav-number">18.</span> <span class="nav-text">18.CPU查看</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vmstat"><span class="nav-number">18.1.</span> <span class="nav-text">vmstat</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#19-内存"><span class="nav-number">19.</span> <span class="nav-text">19.内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#20-磁盘IO"><span class="nav-number">20.</span> <span class="nav-text">20.磁盘IO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#21-网络IO"><span class="nav-number">21.</span> <span class="nav-text">21.网络IO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#22-CPU过高，如何定位"><span class="nav-number">22.</span> <span class="nav-text">22.CPU过高，如何定位</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -335,7 +394,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">48</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

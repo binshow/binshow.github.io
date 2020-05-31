@@ -22,16 +22,23 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="article">
+  <meta name="description" content="索引基本知识">
+<meta property="og:type" content="article">
 <meta property="og:title" content="mySQL详解之索引">
 <meta property="og:url" content="http://yoursite.com/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8B%E7%B4%A2%E5%BC%95/index.html">
 <meta property="og:site_name" content="binshow的Java学习">
+<meta property="og:description" content="索引基本知识">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMyEzKjGsDVMdHDCHfibk7J2vc7hrMib3j08IxSShb6L4ZbSLAdjrhsFgQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMYDgyYTt1EfvIXpttEATqBx05tkU3l6abjNiam1Q3AXnkkAntmDXC3ZA/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMdUTGlurUxVJFSV3yUJNvxEL9yHRWhfFL4otOZibROicuwcLEX4yibA1sg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrM68Hq6CEzTYX7KJav5cDVoY9crLbSicQBib1qmsf0sO7FbLFKoibhLTiajA/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
 <meta property="article:published_time" content="2020-05-21T08:15:09.000Z">
-<meta property="article:modified_time" content="2020-05-21T08:15:35.671Z">
+<meta property="article:modified_time" content="2020-05-30T08:00:15.320Z">
 <meta property="article:author" content="binshow">
 <meta property="article:tag" content="mySQL">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMyEzKjGsDVMdHDCHfibk7J2vc7hrMib3j08IxSShb6L4ZbSLAdjrhsFgQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
 
 <link rel="canonical" href="http://yoursite.com/2020/05/21/mySQL%E8%AF%A6%E8%A7%A3%E4%B9%8B%E7%B4%A2%E5%BC%95/">
 
@@ -183,10 +190,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-05-21 16:15:09 / 修改时间：16:15:35" itemprop="dateCreated datePublished" datetime="2020-05-21T16:15:09+08:00">2020-05-21</time>
+              <time title="创建时间：2020-05-21 16:15:09" itemprop="dateCreated datePublished" datetime="2020-05-21T16:15:09+08:00">2020-05-21</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-30 16:00:15" itemprop="dateModified" datetime="2020-05-30T16:00:15+08:00">2020-05-30</time>
+              </span>
 
           
 
@@ -199,7 +212,195 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <p>索引基本知识</p>
+<a id="more"></a>
+
+<h2 id="1-说说你对-MySQL-索引的理解？"><a href="#1-说说你对-MySQL-索引的理解？" class="headerlink" title="1.说说你对 MySQL 索引的理解？"></a>1.说说你对 MySQL 索引的理解？</h2><ul>
+<li>MYSQL官方对索引的定义为：索引（Index）是帮助MySQL高效获取数据的数据结构，所以说<strong>索引的本质是：数据结构</strong></li>
+<li>索引的目的在于提高查询效率，可以类比字典、 火车站的车次表、图书的目录等</li>
+<li>索引本身也很大，不可能全部存储在内存中，<strong>一般以索引文件的形式存储在磁盘上</strong></li>
+<li>平常说的索引，没有特别指明的话，就是B+树（多路搜索树，不一定是二叉树）结构组织的索引。其中聚集索引，次要索引，覆盖索引，符合索引，前缀索引，唯一索引默认都是使用B+树索引，统称索引。此外还有哈希索引等。</li>
+</ul>
+<h2 id="2-索引创建的基本语法"><a href="#2-索引创建的基本语法" class="headerlink" title="2.索引创建的基本语法"></a>2.索引创建的基本语法</h2><ul>
+<li><p>创建：</p>
+</li>
+<li><ul>
+<li><p>创建索引：<code>CREATE [UNIQUE] INDEX indexName ON mytable(username(length));</code></p>
+<p>如果是CHAR，VARCHAR类型，length可以小于字段实际长度；如果是BLOB和TEXT类型，必须指定 length。</p>
+</li>
+<li><p>修改表结构(添加索引)：<code>ALTER table tableName ADD [UNIQUE] INDEX indexName(columnName)</code></p>
+</li>
+</ul>
+</li>
+<li><p>删除：<code>DROP INDEX [indexName] ON mytable;</code></p>
+</li>
+<li><p>查看：<code>SHOW INDEX FROM table_name\G</code>             –可以通过添加 \G 来格式化输出信息。</p>
+</li>
+<li><p>使用ALERT命令</p>
+</li>
+<li><ul>
+<li><code>ALTER TABLE tbl_name ADD PRIMARY KEY (column_list):</code> 该语句添加一个主键，这意味着索引值必须是唯一的，且不能为NULL。</li>
+<li><code>ALTER TABLE tbl_name ADD UNIQUE index_name (column_list</code> 这条语句创建索引的值必须是唯一的（除了NULL外，NULL可能会出现多次）。</li>
+<li><code>ALTER TABLE tbl_name ADD INDEX index_name (column_list)</code> 添加普通索引，索引值可出现多次。</li>
+<li><code>ALTER TABLE tbl_name ADD FULLTEXT index_name (column_list)</code>该语句指定了索引为 FULLTEXT ，用于全文索引。</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-索引的优势和劣势"><a href="#3-索引的优势和劣势" class="headerlink" title="3.索引的优势和劣势"></a>3.索引的优势和劣势</h2><ul>
+<li><strong>提高数据检索效率，降低数据库IO成本</strong></li>
+<li><strong>降低数据排序的成本，降低CPU的消耗</strong></li>
+</ul>
+<ul>
+<li>索引也是一张表，保存了主键和索引字段，并指向实体表的记录，所以也需要占用内存</li>
+<li>虽然索引大大提高了查询速度，同时却会<strong>降低更新表的速度</strong>，如对表进行INSERT、UPDATE和DELETE。因为更新表时，MySQL不仅要保存数据，还要保存一下索引文件每次更新添加了索引列的字段， 都会调整因为更新所带来的键值变化后的索引信息</li>
+</ul>
+<h2 id="4-索引分类"><a href="#4-索引分类" class="headerlink" title="4.索引分类"></a>4.索引分类</h2><h4 id="数据结构角度"><a href="#数据结构角度" class="headerlink" title="数据结构角度"></a>数据结构角度</h4><ul>
+<li>B+树索引</li>
+<li>Hash索引</li>
+<li>Full-Text全文索引</li>
+<li>R-Tree索引</li>
+</ul>
+<h4 id="从物理存储角度"><a href="#从物理存储角度" class="headerlink" title="从物理存储角度"></a>从物理存储角度</h4><ul>
+<li><p>聚集索引（clustered index）</p>
+</li>
+<li><p>非聚集索引（non-clustered index），也叫辅助索引（secondary index）</p>
+<p>聚集索引和非聚集索引都是B+树结构</p>
+</li>
+</ul>
+<h4 id="从逻辑角度"><a href="#从逻辑角度" class="headerlink" title="从逻辑角度"></a>从逻辑角度</h4><ul>
+<li>主键索引：主键索引是一种特殊的唯一索引，不允许有空值</li>
+<li>单列索引：每个索引只包含单个列，一个表可以有多个单列索引</li>
+<li>多列索引（复合索引、联合索引）：复合索引指多个字段上创建的索引，只有在查询条件中使用了创建索引时的第一个字段，索引才会被使用。使用复合索引时遵循最左前缀集合</li>
+<li>唯一索引或者非唯一索引</li>
+<li>空间索引：空间索引是对空间数据类型的字段建立的索引，MYSQL中的空间数据类型有4种，分别是GEOMETRY、POINT、LINESTRING、POLYGON。MYSQL使用SPATIAL关键字进行扩展，使得能够用于创建正规索引类型的语法创建空间索引。创建空间索引的列，必须将其声明为NOT NULL，<strong>空间索引只能在存储引擎为MYISAM的表中创建</strong></li>
+</ul>
+<h2 id="5-索引结构"><a href="#5-索引结构" class="headerlink" title="5.索引结构"></a>5.索引结构</h2><p><strong>首先要明白索引（index）是在存储引擎（storage engine）层面实现的，而不是server层面</strong>。</p>
+<h4 id="B-Tree-和-B-Tree-的区别"><a href="#B-Tree-和-B-Tree-的区别" class="headerlink" title="B-Tree 和 B+Tree 的区别"></a>B-Tree 和 B+Tree 的区别</h4><h5 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B-Tree"></a>B-Tree</h5><p>B-Tree是为磁盘等外存储设备设计的一种平衡查找树。</p>
+<p><strong>系统从磁盘读取数据到内存时是以磁盘块（block）为基本单位的，位于同一个磁盘块中的数据会被一次性读取出来，而不是需要什么取什么。</strong> —局部性原理</p>
+<p>InnoDB 存储引擎中有页（Page）的概念，<strong>页是其磁盘管理的最小单位</strong>。InnoDB 存储引擎中<strong>默认每个页的大小为16KB</strong>，可通过参数 <code>innodb_page_size</code> 将页的大小设置为 4K、8K、16K，在 MySQL 中可通过如下命令查看页的大小：<code>show variables like &#39;innodb_page_size&#39;;</code></p>
+<p>而系统一个磁盘块的存储空间往往没有这么大，因此 I<strong>nnoDB 每次申请磁盘空间时都会是若干地址连续磁盘块来达到页的大小 16KB</strong>。</p>
+<p>InnoDB 在把磁盘数据读入到磁盘时会以页为基本单位，在查询数据时如果一个页中的每条数据都能有助于定位数据记录的位置，这将会减少磁盘I/O次数，提高查询效率。</p>
+<p>B-Tree 结构的数据可以让系统高效的找到数据所在的磁盘块。为了描述 B-Tree，首先定义一条记录为一个二元组[key, data] ，key为记录的键值，对应表中的主键值，data 为一行记录中除主键外的数据。对于不同的记录，key值互不相同。</p>
+<p>一棵m阶的B-Tree有如下特性：</p>
+<ol>
+<li>每个节点最多有m个孩子</li>
+<li>除了根节点和叶子节点外，其它每个节点至少有Ceil(m/2)个孩子。</li>
+<li>若根节点不是叶子节点，则至少有2个孩子</li>
+<li>所有叶子节点都在同一层，且不包含其它关键字信息</li>
+<li>每个非终端节点包含n个关键字信息（P0,P1,…Pn, k1,…kn）</li>
+<li>关键字的个数n满足：ceil(m/2)-1 &lt;= n &lt;= m-1</li>
+<li>ki(i=1,…n)为关键字，且关键字升序排序</li>
+<li>Pi(i=1,…n)为指向子树根节点的指针。P(i-1)指向的子树的所有节点关键字均小于ki，但都大于k(i-1)</li>
+</ol>
+<p>B-Tree 中的每个节点根据实际情况可以包含大量的关键字信息和分支，如下图所示为一个 3 阶的 B-Tree：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMyEzKjGsDVMdHDCHfibk7J2vc7hrMib3j08IxSShb6L4ZbSLAdjrhsFgQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img">图片：DobbinSoong</p>
+<p>每个节点占用一个盘块的磁盘空间，一个节点上有两个升序排序的关键字和三个指向子树根节点的指针，指针存储的是子节点所在磁盘块的地址。两个关键词划分成的三个范围域对应三个指针指向的子树的数据的范围域。以根节点为例，关键字为17和35，P1指针指向的子树的数据范围为小于17，P2指针指向的子树的数据范围为17~35，P3指针指向的子树的数据范围为大于35。</p>
+<p>模拟查找关键字29的过程：</p>
+<ol>
+<li>根据根节点找到磁盘块1，读入内存。【磁盘I/O操作第1次】</li>
+<li>比较关键字29在区间（17,35），找到磁盘块1的指针P2。</li>
+<li>根据P2指针找到磁盘块3，读入内存。【磁盘I/O操作第2次】</li>
+<li>比较关键字29在区间（26,30），找到磁盘块3的指针P2。</li>
+<li>根据P2指针找到磁盘块8，读入内存。【磁盘I/O操作第3次】</li>
+<li>在磁盘块8中的关键字列表中找到关键字29。</li>
+</ol>
+<p>分析上面过程，发现需要3次磁盘I/O操作，和3次内存查找操作。由于内存中的关键字是一个有序表结构，可以利用二分法查找提高效率。而3次磁盘I/O操作是影响整个B-Tree查找效率的决定因素。B-Tree相对于AVLTree缩减了节点个数，使每次磁盘I/O取到内存的数据都发挥了作用，从而提高了查询效率。</p>
+<h5 id="B-Tree-1"><a href="#B-Tree-1" class="headerlink" title="B+Tree"></a>B+Tree</h5><p>B+Tree 是在 B-Tree 基础上的一种优化，使其更适合实现外存储索引结构。</p>
+<p>从上一节中的B-Tree结构图中可以看到每个节点中不仅包含数据的key值，还有data值。而每一个页的存储空间是有限的，如果data数据较大时将会导致每个节点（即一个页）能存储的key的数量很小，当存储的数据量很大时同样会导致B-Tree的深度较大，增大查询时的磁盘I/O次数，进而影响查询效率。在B+Tree中，<strong>所有数据记录节点都是按照键值大小顺序存放在同一层的叶子节点上</strong>，而<strong>非叶子节点上只存储key值信息</strong>，这样可以大大加大每个节点存储的key值数量，降低B+Tree的高度。</p>
+<p>B+Tree相对于B-Tree有几点不同：</p>
+<ol>
+<li><strong>非叶子节点只存储键值信息；</strong></li>
+<li><strong>所有叶子节点之间都有一个链指针；</strong></li>
+<li><strong>数据记录都存放在叶子节点中</strong></li>
+</ol>
+<p>将上一节中的B-Tree优化，由于B+Tree的非叶子节点只存储键值信息，假设每个磁盘块能存储4个键值及指针信息，则变成B+Tree后其结构如下图所示：<img src="https://mmbiz.qpic.cn/mmbiz_jpg/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMYDgyYTt1EfvIXpttEATqBx05tkU3l6abjNiam1Q3AXnkkAntmDXC3ZA/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>通常在B+Tree上有两个头指针，一个指向根节点，另一个指向关键字最小的叶子节点，而且所有叶子节点（即数据节点）之间是一种链式环结构。因此可以对B+Tree进行两种查找运算：一种是对于主键的范围查找和分页查找，另一种是从根节点开始，进行随机查找。</p>
+<p>可能上面例子中只有22条数据记录，看不出B+Tree的优点，下面做一个推算：</p>
+<p>InnoDB存储引擎中页的大小为16KB，一般表的主键类型为INT（占用4个字节）或BIGINT（占用8个字节），指针类型也一般为4或8个字节，也就是说一个页（B+Tree中的一个节点）中大概存储16KB/(8B+8B)=1K个键值（因为是估值，为方便计算，这里的K取值为10^3）。也就是说一个深度为3的B+Tree索引可以维护10^3 * 10^3 * 10^3 = 10亿 条记录。</p>
+<p>实际情况中每个节点可能不能填充满，因此在数据库中，B+Tree的高度一般都在2-4层。MySQL的InnoDB存储引擎在设计时是将根节点常驻内存的，也就是说查找某一键值的行记录时最多只需要1~3次磁盘I/O操作。</p>
+<p>B+Tree性质</p>
+<ol>
+<li>通过上面的分析，我们知道IO次数取决于b+数的高度h，假设当前数据表的数据为N，每个磁盘块的数据项的数量是m，则有h=㏒(m+1)N，当数据量N一定的情况下，m越大，h越小；而m = 磁盘块的大小 / 数据项的大小，磁盘块的大小也就是一个数据页的大小，是固定的，如果数据项占的空间越小，数据项的数量越多，树的高度越低。这就是为什么每个数据项，即索引字段要尽量的小，比如int占4字节，要比bigint8字节少一半。这也是为什么b+树要求把真实的数据放到叶子节点而不是内层节点，一旦放到内层节点，磁盘块的数据项会大幅度下降，导致树增高。当数据项等于1时将会退化成线性表。</li>
+<li>当b+树的数据项是复合的数据结构，比如(name,age,sex)的时候，b+数是按照从左到右的顺序来建立搜索树的，比如当(张三,20,F)这样的数据来检索的时候，b+树会优先比较name来确定下一步的所搜方向，如果name相同再依次比较age和sex，最后得到检索的数据；但当(20,F)这样的没有name的数据来的时候，b+树就不知道下一步该查哪个节点，因为建立搜索树的时候name就是第一个比较因子，必须要先根据name来搜索才能知道下一步去哪里查询。比如当(张三,F)这样的数据来检索时，b+树可以用name来指定搜索方向，但下一个字段age的缺失，所以只能把名字等于张三的数据都找到，然后再匹配性别是F的数据了， 这个是非常重要的性质，即<strong>索引的最左匹配特性</strong>。</li>
+</ol>
+<h4 id="为什么Mysql索引要用B-树不是B树？"><a href="#为什么Mysql索引要用B-树不是B树？" class="headerlink" title="为什么Mysql索引要用B+树不是B树？"></a>为什么Mysql索引要用B+树不是B树？</h4><blockquote>
+<p>❝</p>
+<p>为什么Mysql索引要用B+树不是B树？</p>
+</blockquote>
+<p>用B+树不用B树考虑的是IO对性能的影响，B树的每个节点都存储数据，而B+树只有叶子节点才存储数据，所以查找相同数据量的情况下，B树的高度更高，IO更频繁。数据库索引是存储在磁盘上的，当数据量大时，就不能把整个索引全部加载到内存了，只能逐一加载每一个磁盘页（对应索引树的节点）。其中在MySQL底层对B+树进行进一步优化：在叶子节点中是双向链表，且在链表的头结点和尾节点也是循环指向的。</p>
+<blockquote>
+<p>❝</p>
+<p>面试官：为何不采用Hash方式？</p>
+</blockquote>
+<p>因为Hash索引底层是哈希表，哈希表是一种以key-value存储数据的结构，所以多个数据在存储关系上是完全没有任何顺序关系的，所以，对于区间查询是无法直接通过索引查询的，就需要全表扫描。所以，哈希索引只适用于等值查询的场景。而B+ Tree是一种多路平衡查询树，所以他的节点是天然有序的（左子节点小于父节点、父节点小于右子节点），所以对于范围查询的时候不需要做全表扫描。</p>
+<p>哈希索引不支持多列联合索引的最左匹配规则，如果有大量重复键值得情况下，哈希索引的效率会很低，因为存在哈希碰撞问题。</p>
+<h2 id="6-主键索引与辅助索引的区别"><a href="#6-主键索引与辅助索引的区别" class="headerlink" title="6.主键索引与辅助索引的区别"></a>6.主键索引与辅助索引的区别</h2><p>MyISAM引擎的索引文件和数据文件是分离的。<strong>MyISAM引擎索引结构的叶子节点的数据域，存放的并不是实际的数据记录，而是数据记录的地址</strong>。索引文件与数据文件分离，这样的索引称为”<strong>非聚簇索引</strong>“。MyISAM的主索引与辅助索引区别并不大，只是主键索引不能有重复的关键字。</p>
+<p>在MyISAM中，索引（含叶子节点）存放在单独的.myi文件中，叶子节点存放的是数据的物理地址偏移量（通过偏移量访问就是随机访问，速度很快）。</p>
+<p>主索引是指主键索引，键值不可能重复；辅助索引则是普通索引，键值可能重复。</p>
+<p>通过索引查找数据的流程：先从索引文件中查找到索引节点，从中拿到数据的文件指针，再到数据文件中通过文件指针定位了具体的数据。辅助索引类似。</p>
+<h5 id="InnoDB主键索引与辅助索引的结构"><a href="#InnoDB主键索引与辅助索引的结构" class="headerlink" title="InnoDB主键索引与辅助索引的结构"></a>InnoDB主键索引与辅助索引的结构</h5><p><strong>InnoDB引擎索引结构的叶子节点的数据域，存放的就是实际的数据记录</strong>（对于主索引，此处会存放表中所有的数据记录；对于辅助索引此处会引用主键，检索的时候通过主键到主键索引中找到对应数据行），或者说，<strong>InnoDB的数据文件本身就是主键索引文件</strong>，这样的索引被称为“聚簇索引”，一个表只能有一个聚簇索引。</p>
+<h6 id="主键索引："><a href="#主键索引：" class="headerlink" title="主键索引："></a>主键索引：</h6><p>我们知道InnoDB索引是聚集索引，它的索引和数据是存入同一个.idb文件中的，因此它的索引结构是在同一个树节点中同时存放索引和数据，如下图中最底层的叶子节点有三行数据，对应于数据表中的id、stu_id、name数据项。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrMdUTGlurUxVJFSV3yUJNvxEL9yHRWhfFL4otOZibROicuwcLEX4yibA1sg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>在Innodb中，索引分叶子节点和非叶子节点，非叶子节点就像新华字典的目录，单独存放在索引段中，叶子节点则是顺序排列的，在数据段中。Innodb的数据文件可以按照表来切分（只需要开启<code>innodb_file_per_table)</code>，切分后存放在<code>xxx.ibd</code>中，默认不切分，存放在<code>xxx.ibdata</code>中。</p>
+<h6 id="辅助（非主键）索引："><a href="#辅助（非主键）索引：" class="headerlink" title="辅助（非主键）索引："></a>辅助（非主键）索引：</h6><p>这次我们以示例中学生表中的name列建立辅助索引，它的索引结构跟主键索引的结构有很大差别，在最底层的叶子结点有两行数据，第一行的字符串是辅助索引，按照ASCII码进行排序，第二行的整数是主键的值。</p>
+<p>这就意味着，对name列进行条件搜索，需要两个步骤：</p>
+<p>① 在辅助索引上检索name，到达其叶子节点获取对应的主键；</p>
+<p>② 使用主键在主索引上再进行对应的检索操作</p>
+<p>这也就是所谓的“<strong>回表查询</strong>”</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/Z0fxkgAKKLNc1rZcnHlq151m3KPG6SrM68Hq6CEzTYX7KJav5cDVoY9crLbSicQBib1qmsf0sO7FbLFKoibhLTiajA/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p><strong>InnoDB 索引结构需要注意的点</strong></p>
+<ol>
+<li>数据文件本身就是索引文件</li>
+<li>表数据文件本身就是按 B+Tree 组织的一个索引结构文件</li>
+<li>聚集索引中叶节点包含了完整的数据记录</li>
+<li>InnoDB 表必须要有主键，并且推荐使用整型自增主键</li>
+</ol>
+<p>正如我们上面介绍 InnoDB 存储结构，索引与数据是共同存储的，不管是主键索引还是辅助索引，在查找时都是通过先查找到索引节点才能拿到相对应的数据，<strong>如果我们在设计表结构时没有显式指定索引列的话，MySQL 会从表中选择数据不重复的列建立索引，如果没有符合的列，则 MySQL 自动为 InnoDB 表生成一个隐含字段作为主键，并且这个字段长度为6个字节，类型为整型。</strong></p>
+<h2 id="7-为什么推荐使用整型自增主键而不是选择UUID？"><a href="#7-为什么推荐使用整型自增主键而不是选择UUID？" class="headerlink" title="7.为什么推荐使用整型自增主键而不是选择UUID？"></a>7.为什么推荐使用整型自增主键而不是选择UUID？</h2><ul>
+<li>UUID是字符串，比整型消耗更多的存储空间，进行查找的时候整型数据的比较运算比字符串更快速；</li>
+<li>自增的整型索引在磁盘中会连续存储，在读取一页数据时也是连续；UUID是随机产生的，读取的上下两行数据存储是分散的，不适合执行where id &gt; 5 &amp;&amp; id &lt; 20的条件查询语句。</li>
+<li>在插入或删除数据时，整型自增主键会在叶子结点的末尾建立新的叶子节点，不会破坏左侧子树的结构；UUID主键很容易出现这样的情况，B+树为了维持自身的特性，有可能会进行结构的重构，消耗更多的时间。</li>
+</ul>
+<h2 id="8-为什么非主键索引结构叶子节点存储的是主键值？"><a href="#8-为什么非主键索引结构叶子节点存储的是主键值？" class="headerlink" title="8.为什么非主键索引结构叶子节点存储的是主键值？"></a>8.为什么非主键索引结构叶子节点存储的是主键值？</h2><p>保证数据一致性和节省存储空间，可以这么理解：商城系统订单表会存储一个用户ID作为关联外键，而不推荐存储完整的用户信息，因为当我们用户表中的信息（真实名称、手机号、收货地址···）修改后，不需要再次维护订单表的用户数据，同时也节省了存储空间。</p>
+<h2 id="9-介绍Hash索引和full-text全文索引"><a href="#9-介绍Hash索引和full-text全文索引" class="headerlink" title="9.介绍Hash索引和full-text全文索引"></a>9.介绍Hash索引和full-text全文索引</h2><ul>
+<li><p>主要就是通过Hash算法（常见的Hash算法有直接定址法、平方取中法、折叠法、除数取余法、随机数法），将数据库字段数据转换成定长的Hash值，与这条数据的行指针一并存入Hash表的对应位置；如果发生Hash碰撞（两个不同关键字的Hash值相同），则在对应Hash键下以链表形式存储。</p>
+<p>检索算法：在检索查询时，就再次对待查关键字再次执行相同的Hash算法，得到Hash值，到对应Hash表对应位置取出数据即可，如果发生Hash碰撞，则需要在取值时进行筛选。目前使用Hash索引的数据库并不多，主要有Memory等。</p>
+<p>MySQL目前有Memory引擎和NDB引擎支持Hash索引。</p>
+</li>
+</ul>
+<ul>
+<li>全文索引也是MyISAM的一种特殊索引类型，主要用于全文索引，InnoDB从MYSQL5.6版本提供对全文索引的支持。</li>
+<li>它用于替代效率较低的LIKE模糊匹配操作，而且可以通过多字段组合的全文索引一次性全模糊匹配多个字段。</li>
+<li>同样使用B-Tree存放索引数据，但使用的是特定的算法，将字段数据分割后再进行索引（一般每4个字节一次分割），索引文件存储的是分割前的索引字符串集合，与分割后的索引信息，对应Btree结构的节点存储的是分割后的词信息以及它在分割前的索引字符串集合中的位置。</li>
+</ul>
+<p><strong>R-Tree空间索引</strong></p>
+<p>空间索引是MyISAM的一种特殊索引类型，主要用于地理空间数据类型</p>
+<h2 id="10-哪些情况需要创建索引"><a href="#10-哪些情况需要创建索引" class="headerlink" title="10.哪些情况需要创建索引"></a>10.哪些情况需要创建索引</h2><ol>
+<li>主键自动建立唯一索引</li>
+<li>频繁作为查询条件的字段</li>
+<li>查询中与其他表关联的字段，外键关系建立索引</li>
+<li>单键/组合索引的选择问题，高并发下倾向创建组合索引</li>
+<li>查询中排序的字段，排序字段通过索引访问大幅提高排序速度</li>
+<li>查询中统计或分组字段</li>
+</ol>
+<h2 id="11-哪些情况不要创建索引"><a href="#11-哪些情况不要创建索引" class="headerlink" title="11.哪些情况不要创建索引"></a>11.哪些情况不要创建索引</h2><ol>
+<li>表记录太少</li>
+<li>经常增删改的表</li>
+<li>数据重复且分布均匀的表字段，只应该为最经常查询和最经常排序的数据列建立索引（如果某个数据类包含太多的重复数据，建立索引没有太大意义）</li>
+<li>频繁更新的字段不适合创建索引（会加重IO负担）</li>
+<li>where条件里用不到的字段不创建索引</li>
+</ol>
+<h2 id="12-MySQL高效索引"><a href="#12-MySQL高效索引" class="headerlink" title="12.MySQL高效索引"></a>12.MySQL高效索引</h2><p><strong>覆盖索引</strong>（Covering Index）,或者叫索引覆盖， 也就是平时所说的不需要回表操作</p>
+<ul>
+<li><p>就是select的数据列只用从索引中就能够取得，不必读取数据行，MySQL可以利用索引返回select列表中的字段，而不必根据索引再次读取数据文件，换句话说<strong>查询列要被所建的索引覆盖</strong>。</p>
+</li>
+<li><p>索引是高效找到行的一个方法，但是一般数据库也能使用索引找到一个列的数据，因此它不必读取整个行。毕竟索引叶子节点存储了它们索引的数据，当能通过读取索引就可以得到想要的数据，那就不需要读取行了。一个索引包含（覆盖）满足查询结果的数据就叫做覆盖索引。</p>
+</li>
+<li><p><strong>判断标准</strong></p>
+<p>使用explain，可以通过输出的extra列来判断，对于一个索引覆盖查询，显示为<strong>using index</strong>，MySQL查询优化器在执行查询前会决定是否有索引覆盖查询</p>
+</li>
+</ul>
+
     </div>
 
     
@@ -282,6 +483,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-说说你对-MySQL-索引的理解？"><span class="nav-number">1.</span> <span class="nav-text">1.说说你对 MySQL 索引的理解？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-索引创建的基本语法"><span class="nav-number">2.</span> <span class="nav-text">2.索引创建的基本语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-索引的优势和劣势"><span class="nav-number">3.</span> <span class="nav-text">3.索引的优势和劣势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-索引分类"><span class="nav-number">4.</span> <span class="nav-text">4.索引分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据结构角度"><span class="nav-number">4.0.1.</span> <span class="nav-text">数据结构角度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从物理存储角度"><span class="nav-number">4.0.2.</span> <span class="nav-text">从物理存储角度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从逻辑角度"><span class="nav-number">4.0.3.</span> <span class="nav-text">从逻辑角度</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-索引结构"><span class="nav-number">5.</span> <span class="nav-text">5.索引结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B-Tree-和-B-Tree-的区别"><span class="nav-number">5.0.1.</span> <span class="nav-text">B-Tree 和 B+Tree 的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#B-Tree"><span class="nav-number">5.0.1.1.</span> <span class="nav-text">B-Tree</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#B-Tree-1"><span class="nav-number">5.0.1.2.</span> <span class="nav-text">B+Tree</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么Mysql索引要用B-树不是B树？"><span class="nav-number">5.0.2.</span> <span class="nav-text">为什么Mysql索引要用B+树不是B树？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-主键索引与辅助索引的区别"><span class="nav-number">6.</span> <span class="nav-text">6.主键索引与辅助索引的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#InnoDB主键索引与辅助索引的结构"><span class="nav-number">6.0.0.1.</span> <span class="nav-text">InnoDB主键索引与辅助索引的结构</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#主键索引："><span class="nav-number">6.0.0.1.1.</span> <span class="nav-text">主键索引：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#辅助（非主键）索引："><span class="nav-number">6.0.0.1.2.</span> <span class="nav-text">辅助（非主键）索引：</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-为什么推荐使用整型自增主键而不是选择UUID？"><span class="nav-number">7.</span> <span class="nav-text">7.为什么推荐使用整型自增主键而不是选择UUID？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-为什么非主键索引结构叶子节点存储的是主键值？"><span class="nav-number">8.</span> <span class="nav-text">8.为什么非主键索引结构叶子节点存储的是主键值？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-介绍Hash索引和full-text全文索引"><span class="nav-number">9.</span> <span class="nav-text">9.介绍Hash索引和full-text全文索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-哪些情况需要创建索引"><span class="nav-number">10.</span> <span class="nav-text">10.哪些情况需要创建索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-哪些情况不要创建索引"><span class="nav-number">11.</span> <span class="nav-text">11.哪些情况不要创建索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-MySQL高效索引"><span class="nav-number">12.</span> <span class="nav-text">12.MySQL高效索引</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -297,7 +499,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">48</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
