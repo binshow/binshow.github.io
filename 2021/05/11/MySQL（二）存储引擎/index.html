@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>MySQL（二）存储引擎 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="binshow"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="binshow"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Java学习"><meta property="og:type" content="blog"><meta property="og:title" content="MySQL（二）存储引擎"><meta property="og:url" content="http://example.com/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="Java学习"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E.jpeg"><meta property="article:published_time" content="2021-05-11T12:12:52.000Z"><meta property="article:modified_time" content="2021-05-11T15:30:47.549Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="MySQL"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/"},"headline":"MySQL（二）存储引擎","image":[],"datePublished":"2021-05-11T12:12:52.000Z","dateModified":"2021-05-11T15:30:47.549Z","author":{"@type":"Person","name":"Binshow"},"description":"本篇讲述了MySQL的逻辑分层和存储引擎InnoDB"}</script><link rel="canonical" href="http://example.com/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E.jpeg" alt="MySQL（二）存储引擎"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-05-11T12:12:52.000Z" title="2021/5/11下午8:12:52">2021-05-11</time>发表</span><span class="level-item"><time dateTime="2021-05-11T15:30:47.549Z" title="2021/5/11下午11:30:47">2021-05-11</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">1 小时读完 (大约7574个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">MySQL（二）存储引擎</h1><div class="content"><p>本篇讲述了MySQL的逻辑分层和存储引擎InnoDB</p>
+<span id="more"></span>
+
+<h1 id="MySQL的逻辑分层"><a href="#MySQL的逻辑分层" class="headerlink" title="MySQL的逻辑分层"></a>MySQL的逻辑分层</h1><p><strong>插件式的存储引擎架构将查询处理和其它的系统任务以及数据的存储提取相分离</strong>。</p>
+<p>这种架构可以根据业务的需求和实际需要选择合适的存储引擎。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/14/1734bff308eb9e2d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img"></p>
+<p><strong>连接层</strong>：最上层是一些客户端和连接服务。<strong>主要完成一些类似于连接处理、授权认证、及相关的安全方案</strong>。在该层上引入了线程池的概念，为通过认证安全接入的客户端提供线程。同样在该层上可以实现基于SSL的安全链接。服务器也会为安全接入的每个客户端验证它所具有的操作权限。</p>
+<p><strong>服务层</strong>：第二层服务层，主要完成大部分的核心服务功能， 包括查询解析、分析、优化、缓存、以及所有的内置函数，所有跨存储引擎的功能也都在这一层实现，包括触发器、存储过程、视图等</p>
+<p><strong>引擎层</strong>：第三层存储引擎层，存储引擎真正的负责了MySQL中数据的存储和提取，服务器通过API与存储引擎进行通信。不同的存储引擎具有的功能不同，这样我们可以根据自己的实际需要进行选取</p>
+<p><strong>存储层</strong>：第四层为数据存储层，主要是将数据存储在运行于该设备的文件系统之上，并完成与存储引擎的交互</p>
+<h1 id="一条SQL语句的执行流程"><a href="#一条SQL语句的执行流程" class="headerlink" title="一条SQL语句的执行流程"></a>一条SQL语句的执行流程</h1><ol>
+<li>客户端请求 </li>
+<li>连接器（验证用户身份，给予权限）</li>
+<li>查询缓存（存在缓存则直接返回，不存在则执行后续操作，mysql8.0之后取消了缓存）</li>
+<li>分析器（对SQL进行词法分析和语法分析操作</li>
+<li>优化器（主要对执行的sql优化选择最优的执行方案方法）</li>
+<li>执行器（执行时会先看用户是否有执行权限，有才去使用这个引擎提供的接口）</li>
+<li>去引擎层获取数据返回（如果开启查询缓存则会缓存查询结果）</li>
+</ol>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/14/1734bff309fc730f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img"></p>
+<h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><p>InnoDB 现在是 MySQL 默认的存储引擎，支持<strong>事务、行级锁定和外键</strong></p>
+<h2 id="InnoDB体系结构"><a href="#InnoDB体系结构" class="headerlink" title="InnoDB体系结构"></a>InnoDB体系结构</h2><p>InnoDB存储引擎中有很多内存块，可以认为这些内存块组成了一个大的内存池，负责如下工作：</p>
+<ul>
+<li>维护所有进程/线程需要访问的多个内部数据结构</li>
+<li>缓存磁盘上的数据</li>
+<li>重做日志redo log 缓冲</li>
+</ul>
+<img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/InnoDB引擎结构.png" alt="InnoDB引擎结构" style="zoom:50%;">
+
+<p>​     后台线程的主要作用是负责刷新内存池中的数据，保证缓冲池中的内存缓存是最近的数据。此外将已经修改后的数据文件刷新到磁盘中去，同时保证在发生异常情况下可以恢复到正常运行状态。</p>
+<h3 id="后台线程的分类"><a href="#后台线程的分类" class="headerlink" title="后台线程的分类"></a>后台线程的分类</h3><h4 id="Master线程"><a href="#Master线程" class="headerlink" title="Master线程"></a>Master线程</h4><p>一个非常核心的后台线程，主要负责将缓冲池中的数据异步刷新到磁盘，保证数据的一致性。包括脏页的刷新、合并插入缓存、UNDO页的回收等等</p>
+<h4 id="IO线程"><a href="#IO线程" class="headerlink" title="IO线程"></a>IO线程</h4><p>共有四种IO线程：</p>
+<ul>
+<li>insert buffer thread</li>
+<li>log thread</li>
+<li>read thread ， 4个</li>
+<li>write thread，4个</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status; <span class="operator">/</span><span class="operator">/</span>可以查看InnoDB状态</span><br><span class="line"></span><br><span class="line">FILE I<span class="operator">/</span>O</span><br><span class="line"><span class="comment">--------</span></span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">0</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (<span class="keyword">insert</span> buffer thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">1</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (log thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">2</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (read thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">3</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (read thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">4</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (read thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">5</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (read thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">6</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (write thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">7</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (write thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">8</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (write thread)</span><br><span class="line">I<span class="operator">/</span>O thread <span class="number">9</span> state: waiting <span class="keyword">for</span> i<span class="operator">/</span>o request (write thread)</span><br><span class="line">Pending normal aio <span class="keyword">reads</span>: [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>] , aio writes: [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>] ,</span><br><span class="line"> ibuf aio <span class="keyword">reads</span>:, log i<span class="operator">/</span>o<span class="string">&#x27;s:, sync i/o&#x27;</span>s:</span><br><span class="line">Pending flushes (fsync) log: <span class="number">0</span>; buffer pool: <span class="number">0</span></span><br><span class="line"><span class="number">900</span> OS file <span class="keyword">reads</span>, <span class="number">1594</span> OS file writes, <span class="number">930</span> OS fsyncs</span><br><span class="line"><span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0</span> avg bytes<span class="operator">/</span>read, <span class="number">0.00</span> writes<span class="operator">/</span>s, <span class="number">0.00</span> fsyncs<span class="operator">/</span>s</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Purge-Thread"><a href="#Purge-Thread" class="headerlink" title="Purge Thread"></a>Purge Thread</h4><p>事务被提交之后，其使用的undolog可能不再需要了，因此purge thread会回收已经使用并分配的undo页。</p>
+<h4 id="Page-Cleaner-Thread"><a href="#Page-Cleaner-Thread" class="headerlink" title="Page Cleaner Thread"></a>Page Cleaner Thread</h4><p>将脏页中的刷新操作放入到单独的线程中来完成，减轻Master Thread的工作对用户查询线程的阻塞。</p>
+<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><h4 id="缓冲池"><a href="#缓冲池" class="headerlink" title="缓冲池"></a>缓冲池</h4><p>缓冲池简单来说就是一块内存区域，通过内存的速度来弥补CPU和磁盘之间速度的差异。</p>
+<p>在数据库中读取页的操作，首先将从磁盘读到的页存放在缓冲池中，下次再读相同的页时，首先判断该页是否在缓冲池中，如果在则命中，否则从磁盘中进行读取。</p>
+<p>在数据库中修改页的操作，首先修改在缓冲池中的页，然后再以一定的频率刷新到磁盘上（<strong>通过一种checkpoint到机制触发</strong>）。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> version();</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+</span></span><br><span class="line"><span class="operator">|</span> version() <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">8.0</span><span class="number">.23</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;innodb_buffer_pool_size&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------+-----------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name           <span class="operator">|</span> <span class="keyword">Value</span>     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------+-----------+</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_size <span class="operator">|</span> <span class="number">134217728</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------+-----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p><strong>缓冲池中存放着各种类型的页：</strong></p>
+<img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/缓冲池中的数据对象.png" alt="InnoDB引擎结构" style="zoom:50%;">
+
+<h4 id="LRU列表、Free列表、Flush列表"><a href="#LRU列表、Free列表、Flush列表" class="headerlink" title="LRU列表、Free列表、Flush列表"></a><strong>LRU列表、Free列表、Flush列表</strong></h4><p>这么多页使用优化之后的LRU算法来进行管理的。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status;</span><br><span class="line"><span class="comment">----------------------</span></span><br><span class="line">BUFFER POOL <span class="keyword">AND</span> MEMORY</span><br><span class="line"><span class="comment">----------------------</span></span><br><span class="line">Total <span class="keyword">large</span> memory allocated <span class="number">136970240</span></span><br><span class="line">Dictionary memory allocated <span class="number">500792</span></span><br><span class="line">Buffer pool size   <span class="number">8191</span>    <span class="operator">/</span><span class="operator">/</span><span class="number">8191</span>个页，每个页<span class="number">16</span>KB <span class="operator">=</span> <span class="number">128</span>G</span><br><span class="line"><span class="keyword">Free</span> buffers       <span class="number">7079</span>		 <span class="operator">/</span><span class="operator">/</span> <span class="keyword">free</span>列表中的页数</span><br><span class="line">Database pages     <span class="number">1107</span>    <span class="operator">/</span><span class="operator">/</span> LRU列表中的页数</span><br><span class="line"><span class="keyword">Old</span> database pages <span class="number">423</span></span><br><span class="line">Modified db pages  <span class="number">0</span>      <span class="operator">/</span><span class="operator">/</span>Flush 脏页列表的页数，FLUSH列表即为脏页列表。</span><br><span class="line">Pending <span class="keyword">reads</span>      <span class="number">0</span></span><br><span class="line">Pending writes: LRU <span class="number">0</span>, flush list <span class="number">0</span>, single page <span class="number">0</span></span><br><span class="line">Pages made young <span class="number">1</span>, <span class="keyword">not</span> young <span class="number">0</span>   <span class="operator">/</span><span class="operator">/</span>Pages made young 表示LRU列表中页移动到前端的次数</span><br><span class="line"><span class="number">0.00</span> youngs<span class="operator">/</span>s, <span class="number">0.00</span> non<span class="operator">-</span>youngs<span class="operator">/</span>s  <span class="operator">/</span><span class="operator">/</span>表示每秒上面两个操作的次数</span><br><span class="line">Pages read <span class="number">899</span>, created <span class="number">208</span>, written <span class="number">935</span></span><br><span class="line"><span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0.00</span> creates<span class="operator">/</span>s, <span class="number">0.00</span> writes<span class="operator">/</span>s</span><br><span class="line"><span class="keyword">No</span> buffer pool page gets since the <span class="keyword">last</span> printout</span><br><span class="line">Pages read ahead <span class="number">0.00</span><span class="operator">/</span>s, evicted <span class="keyword">without</span> access <span class="number">0.00</span><span class="operator">/</span>s, Random read ahead <span class="number">0.00</span><span class="operator">/</span>s</span><br><span class="line">LRU len: <span class="number">1107</span>, unzip_LRU len: <span class="number">0</span>  <span class="operator">/</span><span class="operator">/</span>可以压缩页，unzip_LRU列表管理着非<span class="number">16</span>KB的页</span><br><span class="line">I<span class="operator">/</span>O sum[<span class="number">0</span>]:cur[<span class="number">0</span>], unzip sum[<span class="number">0</span>]:cur[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<p>LRU列表中的页被修改之后，称该页为脏页（缓冲池中的页和磁盘上的页出现了数据不一致）。</p>
+<h4 id="重做日志缓冲"><a href="#重做日志缓冲" class="headerlink" title="重做日志缓冲"></a>重做日志缓冲</h4><p>从图2-2可以看到，InnoDB 存储引擎的内存区域除了有缓冲池外，还有重做日志缓冲(redo log buffer)。<strong>InnoDB 存储引擎首先将重做日志信息先放入到这个缓冲区，然后按一定频率将其刷新到重做日志文件</strong>。重做日志缓冲一般不需要设置得很大，因为- -般情况下每一秒钟会将重做日志缓冲刷新到日志文件，因此用户只需要保证每秒产生的事务量在这个缓冲大小之内即可。该值可由配置参数innodb_ log_ buffer_ size控制，默认为8MB:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;innodb_log_buffer_size&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------+----------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name          <span class="operator">|</span> <span class="keyword">Value</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------+----------+</span></span><br><span class="line"><span class="operator">|</span> innodb_log_buffer_size <span class="operator">|</span> <span class="number">16777216</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------+----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>重做日志在下列三种情况下会将重做日志缓冲中的内容刷新到外部磁盘的重做日志文件中:</p>
+<ol>
+<li>MasterThread每一秒将重做日志缓冲刷新到重做日志文件;</li>
+<li>每个事务提交时会将重做日志缓冲刷新到重做日志文件;</li>
+<li>当重做日志缓冲池剩余空间小于1/2时，重做日志缓冲刷新到重做日志文件。</li>
+</ol>
+<h2 id="Checkpoint技术"><a href="#Checkpoint技术" class="headerlink" title="Checkpoint技术"></a>Checkpoint技术</h2><p><strong>Checkpoint技术就是将缓存池中脏页在某个时间点刷回到磁盘的操作</strong></p>
+<p>一个DML语句，进行数据update或delete 操作时，此时改变了缓冲池页中的记录，此时因为缓冲池页的数据比磁盘的新，此时的页就叫做脏页。</p>
+<p>不管怎样，总会后的内存页数据需要刷回到磁盘里，这里就涉及几个问题：</p>
+<ul>
+<li>若每次一个页发生变化，就将新页的版本刷新到磁盘，那么这个开销是非常大的</li>
+<li>若热点数据集中在某几个页中，那么数据库的性能将变得非常差</li>
+<li>如果在从缓冲池将页的新版本刷新到磁盘时发生了宕机，那么数据就不能恢复了  — Write Ahead Log</li>
+</ul>
+<h3 id="Write-Ahead-Log（预写式日志）"><a href="#Write-Ahead-Log（预写式日志）" class="headerlink" title="Write Ahead Log（预写式日志）"></a>Write Ahead Log（预写式日志）</h3><p>WAL策略解决了刷新页数据到磁盘时发生宕机而导致数据丢失的问题，它是关系数据库系统中用于提供原子性和持久性（ACID 属性中的两个）的一系列技术。</p>
+<p>WAL策略核心点就是<code>redo log</code>，每当有事务提交时，先写入 <code>redo log</code>（重做日志），在修改缓冲池数据页，这样当发生掉电之类的情况时系统可以在重启后继续操作。</p>
+<p>按理说有了WAL策略，我们就可以高枕无忧了。但其问题点又出现在redo log上面：</p>
+<ul>
+<li>redo log 不可能是无限大的，不能没完没了的存储我们的数据等待一起刷新到磁盘</li>
+<li>在数据库怠机恢复时，如果redo log 太大的话恢复的代价也是非常大的</li>
+</ul>
+<p>所以为了解决脏页的刷新性能，脏页应该在什么时间、什么情况下进行脏页的刷新就用到了Checkpoint技术。</p>
+<h3 id="Checkpoint-的目的"><a href="#Checkpoint-的目的" class="headerlink" title="Checkpoint 的目的"></a>Checkpoint 的目的</h3><p><strong>1、缩短数据库的恢复时间</strong></p>
+<p>当数据库怠机恢复时，不需要重做所有的日志信息。因为Checkpoint前的数据页已经刷回到磁盘了。只需要Checkpoint后的redo log进行恢复就好了。</p>
+<p><strong>2、缓冲池不够用时，将脏页刷新到磁盘</strong></p>
+<p>当缓冲池空间不足时，根据LRU算法会溢出最近最少使用的页，若此页为脏页，那么需要强制执行Checkpoint，将脏页也就是页的新版本刷回磁盘。</p>
+<p><strong>3、redo log不可用时，刷新脏页</strong></p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/262bc0841daa47f6bb95ff792fb4f877~tplv-k3u1fbpfcp-zoom-1.image" alt="图片名称"></p>
+<p>如图redo log 的不可用是因为当前数据库对其设计都是循环使用的，所以其空间并不是无限大。</p>
+<p>当redo log被写满, 因为此时系统不能接受更新, 所有更新语句都会被堵住。</p>
+<p>此时必须强制产生Checkpoint需要将 write pos 向前推进，推进范围内的脏页都需要刷新到磁盘</p>
+<h3 id="Checkpoint-的种类"><a href="#Checkpoint-的种类" class="headerlink" title="Checkpoint 的种类"></a>Checkpoint 的种类</h3><p>Checkpoint发生的时间、条件及脏页的选择等都非常复杂。</p>
+<p>Checkpoint 每次刷新多少脏页到磁盘？</p>
+<p>Checkpoint每次从哪里取脏页？</p>
+<p>Checkpoint 什么时间被触发？</p>
+<p><strong>面对上面的问题，InnoDB存储引擎内部为我们提供了两种Checkpoint：</strong></p>
+<ul>
+<li>Sharp Checkpoint：发生在数据库关闭时将所有的脏页都刷新回磁盘，这是默认的工作方式，参数innodb_fast_shutdown=1</li>
+<li>Fuzzy Checkpoint：InnoDB存储引擎内部使用这种模式,只刷新一部分脏页，而不是刷新所有的脏页回磁盘</li>
+</ul>
+<p><strong>FuzzyCheckpoint发生的情况</strong></p>
+<ul>
+<li><p>Master Thread Checkpoint</p>
+<p>差不多以每秒或每十秒的速度从缓冲池的脏页列表中刷新一定比例的页回磁盘。</p>
+<p>这个过程是异步的，即此时InnoDB存储引擎可以进行其他的操作，用户查询线程不会阻塞</p>
+</li>
+<li><p>FLUSH_LRU_LIST Checkpoint</p>
+<p>因为LRU列表要保证一定数量的空闲页可被使用，所以如果不够会从尾部移除页，如果移除的页有脏页，就会进行此Checkpoint。</p>
+<p>5.6版本后，这个Checkpoint放在了一个单独的Page Cleaner线程中进行，并且用户可以通过参数innodb_lru_scan_depth控制LRU列表中可用页的数量，该值默认为1024</p>
+</li>
+<li><p>Async/Sync Flush Checkpoint</p>
+<p>指的是redo log文件不可用的情况，这时需要强制将一些页刷新回磁盘，而此时脏页是从脏页列表中选取的</p>
+<p>5.6版本后不会阻塞用户查询</p>
+</li>
+<li><p>Dirty Page too much Checkpoint 即脏页的数量太多，导致InnoDB存储引擎强制进行Checkpoint。</p>
+<p>其目的总的来说还是为了保证缓冲池中有足够可用的页。</p>
+<p>其可由参数innodb_max_dirty_pages_pct控制,比如该值为75，表示当缓冲池中脏页占据75%时，强制进行CheckPoint</p>
+</li>
+</ul>
+<ul>
+<li>因为CPU和磁盘间的鸿沟的问题，从而出现缓冲池数据页来加快数据库DML操作</li>
+<li>因为缓冲池数据页与磁盘数据一致性的问题，从而出现WAL策略（核心就是redo log）</li>
+<li>因为缓冲池脏页的刷新性能问题，从而出现Checkpoint技术</li>
+</ul>
+<p>InnoDB 为了提高执行效率，并不会每次DML操作都和磁盘交互进行持久化。而是通过Write Ahead Log 先策略写入redo log保证事物的持久化。</p>
+<p>对于事物中修改的缓冲池脏页，会通过异步的方式刷盘，而内存空闲页和redo log的可用是通过Checkpoint技术来保证的。</p>
+<h2 id="不同存储引擎文件存储结构"><a href="#不同存储引擎文件存储结构" class="headerlink" title="不同存储引擎文件存储结构"></a>不同存储引擎文件存储结构</h2><p>每个数据表都有一个对应的<code>.frm</code>文件，保存每个数据表的元数据信息，包括表结构的定义信息。</p>
+<p>MyISAM 物理文件结构为：</p>
+<ul>
+<li><code>.frm</code>文件：与表相关的元数据信息都存放在frm文件，包括表结构的定义信息等</li>
+<li><code>.MYD</code> (<code>MYData</code>) 文件：MyISAM 存储引擎专用，用于存储MyISAM 表的数据</li>
+<li><code>.MYI</code> (<code>MYIndex</code>)文件：MyISAM 存储引擎专用，用于存储MyISAM 表的索引相关信息</li>
+</ul>
+<p>InnoDB 物理文件结构为：</p>
+<ul>
+<li><p><code>.frm</code> 文件：与表相关的元数据信息都存放在frm文件，包括表结构的定义信息等</p>
+</li>
+<li><p><code>.ibd</code> 文件或 <code>.ibdata</code> 文件： 这两种文件都是存放 InnoDB 数据的文件，之所以有两种文件形式存放 InnoDB 的数据，是因为 InnoDB 的数据存储方式能够通过配置来决定是使用<strong>共享表空间</strong>存放存储数据，还是用<strong>独享表空间</strong>存放存储数据。</p>
+<p>独享表空间存储方式使用<code>.ibd</code>文件，并且每个表一个<code>.ibd</code>文件 共享表空间存储方式使用<code>.ibdata</code>文件，所有表共同使用一个<code>.ibdata</code>文件（或多个，可自己配置）</p>
+</li>
+</ul>
+<h2 id="InnoDB和MyISAM的区别（5点）"><a href="#InnoDB和MyISAM的区别（5点）" class="headerlink" title="InnoDB和MyISAM的区别（5点）"></a>InnoDB和MyISAM的区别（5点）</h2><ol>
+<li><p>InnoDB 支持事务，MyISAM 不支持事务。这是 MySQL 将默认存储引擎从 MyISAM 变成 InnoDB 的重要原因之一；</p>
+</li>
+<li><p>InnoDB 支持外键，而 MyISAM 不支持。对一个包含外键的 InnoDB 表转为 MYISAM 会失败；</p>
+</li>
+<li><p>InnoDB 是聚簇索引，MyISAM 是非聚簇索引。聚簇索引的文件存放在主键索引的叶子节点上，因此 InnoDB 必须要有主键，通过主键索引效率很高。但是辅助索引需要两次查询，先查询到主键，然后再通过主键查询到数据。因此，主键不应该过大，因为主键太大，其他索引也都会很大。而 MyISAM 是非聚集索引，数据文件是分离的，索引保存的是数据文件的指针。主键索引和辅助索引是独立的。</p>
+</li>
+<li><p>InnoDB 不保存表的具体行数，执行<code>select count(*) from table</code> 时需要全表扫描。而 MyISAM 用一个变量保存了整个表的行数，执行上述语句时只需要读出该变量即可，速度很快；</p>
+</li>
+<li><p>InnoDB 最小的锁粒度是行锁，MyISAM 最小的锁粒度是表锁。一个更新语句会锁住整张表，导致其他查询和更新都会被阻塞，因此并发访问受限。这也是 MySQL 将默认存储引擎从 MyISAM 变成 InnoDB 的重要原因之一；</p>
+</li>
+</ol>
+<blockquote>
+<p>一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ?</p>
+<p>如果表的类型是MyISAM，那么是18。因为MyISAM表会把自增主键的最大ID 记录到数据文件中，重启MySQL自增主键的最大ID也不会丢失；</p>
+<p>如果表的类型是InnoDB，那么是15。因为InnoDB 表只是把自增主键的最大ID记录到内存中，所以重启数据库或对表进行OPTION操作，都会导致最大ID丢失</p>
+</blockquote>
+<h2 id="InnoDB的逻辑存储结构"><a href="#InnoDB的逻辑存储结构" class="headerlink" title="InnoDB的逻辑存储结构"></a>InnoDB的逻辑存储结构</h2><p>记录是按照行来存储的，但是数据库的读取并不以行为单位，否则一次读取（也就是一次 I/O 操作）只能处理一行数据，效率会非常低。因此<strong>在数据库中，不论读一行，还是读多行，都是将这些行所在的页进行加载。也就是说，数据库管理存储空间的基本单位是页（Page）。</strong></p>
+<p>一个页中可以存储多个行记录（Row），同时在数据库中，还存在着区（Extent）、段（Segment）和表空间（Tablespace）。行、页、区、段、表空间的关系如下图所示：</p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/InnoDB%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="InnoDB存储结构"></p>
+<p>从图中你能看到一个表空间包括了一个或多个段，一个段包括了一个或多个区，一个区包括了多个页，而一个页中可以有多行记录，这些概念我简单给你讲解下。</p>
+<h3 id="表空间"><a href="#表空间" class="headerlink" title="表空间"></a>表空间</h3><p>表空间（Tablespace）是一个逻辑容器，表空间存储的对象是段，在一个表空间中可以有一个或多个段，但是一个段只能属于一个表空间。数据库由一个或多个表空间组成，表空间从管理上可以划分为系统表空间、用户表空间、撤销表空间、临时表空间等。</p>
+<p>在 InnoDB 中存在两种表空间的类型：共享表空间和独立表空间。如果是共享表空间就意味着多张表共用一个表空间。如果是独立表空间，就意味着每张表有一个独立的表空间，也就是数据和索引信息都会保存在自己的表空间中。独立的表空间可以在不同的数据库之间进行迁移。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;innodb_file_per_table&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name         <span class="operator">|</span> <span class="keyword">Value</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> innodb_file_per_table <span class="operator">|</span> <span class="keyword">ON</span>    <span class="operator">|</span>   <span class="operator">/</span><span class="operator">/</span>每张表都会单独保存为一个.ibd 文件。</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------+-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="段"><a href="#段" class="headerlink" title="段"></a>段</h3><p>段（Segment）<strong>由一个或多个区组成</strong>，区在文件系统是一个连续分配的空间（在 InnoDB 中是连续的 64 个页），不过在段中不要求区与区之间是相邻的。段是数据库中的分配单位，不同类型的数据库对象以不同的段形式存在。<strong>当我们创建数据表、索引的时候，就会相应创建对应的段，比如创建一张表时会创建一个表段，创建一个索引时会创建一个索引段</strong>。</p>
+<h3 id="区"><a href="#区" class="headerlink" title="区"></a>区</h3><p>区（Extent）是比页大一级的存储结构，在 InnoDB 存储引擎中，一个区会分配 64 个连续的页。因为 InnoDB 中的页大小默认是 <strong>16KB</strong>，所以一个区的大小是 64*16KB=1MB。</p>
+<h3 id="页内结构"><a href="#页内结构" class="headerlink" title="页内结构"></a>页内结构</h3><p>页（Page）如果按类型划分的话，常见的有<strong>数据页（保存 B+ 树节点）、系统页、Undo 页和事务数据页</strong>等。数据页是我们最常使用的页。在 MySQL 的 InnoDB 存储引擎中，默认页的大小是 16KB，我们可以通过下面的命令来进行查看：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%innodb_page_size%&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name    <span class="operator">|</span> <span class="keyword">Value</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> innodb_page_size <span class="operator">|</span> <span class="number">16384</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>数据库 I/O 操作的最小单位是页，与数据库相关的内容都会存储在页结构里。数据页包括七个部分，分别是文件头（File Header）、页头（Page Header）、最大最小记录（Infimum+supremum）、用户记录（User Records）、空闲空间（Free Space）、页目录（Page Directory）和文件尾（File Tailer）。</p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/%E9%A1%B5%E7%BB%93%E6%9E%84.png" alt="页结构"></p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/%E9%A1%B5%E7%BB%93%E6%9E%84%E4%B8%8D%E5%90%8C%E9%83%A8%E5%88%86%E7%9A%84%E4%BD%9C%E7%94%A8.png" alt="页结构不同部分的作用"></p>
+<p>可以分为一下三个部分：</p>
+<ol>
+<li><p>首先是文件通用部分，也就是文件头和文件尾。它们类似集装箱，将页的内容进行封装，通过文件头和文件尾校验的方式来确保页的传输是完整的。在文件头中有两个字段，分别是 FIL_PAGE_PREV 和 FIL_PAGE_NEXT，它们的作用相当于指针，分别指向上一个数据页和下一个数据页。连接起来的页相当于一个双向的链表</p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/%E6%95%B0%E6%8D%AE%E9%A1%B5%E7%BB%84%E6%88%90%E7%9A%84%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8.png" alt="数据页组成的双向链表"></p>
+</li>
+<li><p>第二个部分是记录部分，页的主要作用是存储记录，所以“最小和最大记录”和“用户记录”部分占了页结构的主要空间。另外空闲空间是个灵活的部分，当有新的记录插入时，会从空闲空间中进行分配用于存储新记录，</p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/%E9%A1%B5%E7%9A%84%E5%AD%98%E5%82%A8%E8%AE%B0%E5%BD%95.png" alt="页的存储记录"></p>
+</li>
+<li><p>第三部分是索引部分，这部分重点指的是页目录，它起到了记录的索引作用，因为在页中，记录是以单向链表的形式进行存储的。单向链表的特点就是插入、删除非常方便，但是检索效率不高，最差的情况下需要遍历链表上的所有节点才能完成检索，因此在页目录中提供了二分查找的方式，用来提高记录的检索效率。这个过程就好比是给记录创建了一个目录：</p>
+<ol>
+<li><p>将所有的记录分成几个组，这些记录包括最小记录和最大记录，但不包括标记为“已删除”的记录。</p>
+</li>
+<li><p>第 1 组，也就是最小记录所在的分组只有 1 个记录；最后一组，就是最大记录所在的分组，会有 1-8 条记录；其余的组记录数量在 4-8 条之间。这样做的好处是，除了第 1 组（最小记录所在组）以外，其余组的记录数会尽量平分。</p>
+</li>
+<li><p>在每个组中最后一条记录的头信息中会存储该组一共有多少条记录，作为 n_owned 字段。</p>
+</li>
+<li><p>页目录用来存储每组最后一条记录的地址偏移量，这些地址偏移量会按照先后顺序存储起来，每组的地址偏移量也被称之为槽（slot），每个槽相当于指针指向了不同组的最后一个记录。如下图所示：</p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/%E9%A1%B5%E7%9B%AE%E5%BD%95%E7%B4%A2%E5%BC%95.png" alt="页目录索引"></p>
+</li>
+</ol>
+</li>
+</ol>
+<p>页目录存储的是槽，槽相当于分组记录的索引。我们通过槽查找记录，实际上就是在做二分查找。这里我以上面的图示进行举例，5 个槽的编号分别为 0，1，2，3，4，我想查找主键为 9 的用户记录，我们初始化查找的槽的下限编号，设置为 low=0，然后设置查找的槽的上限编号 high=4，然后采用二分查找法进行查找。</p>
+<p>首先找到槽的中间位置 p=(low+high)/2=(0+4)/2=2，这时我们取编号为 2 的槽对应的分组记录中最大的记录，取出关键字为 8。因为 9 大于 8，所以应该会在槽编号为 (p,high] 的范围进行查找</p>
+<p>接着重新计算中间位置 p’=(p+high)/2=(2+4)/2=3，我们查找编号为 3 的槽对应的分组记录中最大的记录，取出关键字为 12。因为 9 小于 12，所以应该在槽 3 中进行查找。</p>
+<p>遍历槽 3 中的所有记录，找到关键字为 9 的记录，取出该条记录的信息即为我们想要查找的内容。</p>
+<h2 id="从数据页的角度看-B-树是如何进行查询的"><a href="#从数据页的角度看-B-树是如何进行查询的" class="headerlink" title="从数据页的角度看 B+ 树是如何进行查询的"></a>从数据页的角度看 B+ 树是如何进行查询的</h2><p>MySQL 的 InnoDB 存储引擎采用 B+ 树作为索引，而索引又可以分成聚集索引和非聚集索引（二级索引），这些索引都相当于一棵 B+ 树，如图所示。一棵 B+ 树按照节点类型可以分成两部分：</p>
+<ol>
+<li>叶子节点，B+ 树最底层的节点，节点的高度为 0，存储行记录。</li>
+<li>非叶子节点，节点的高度大于 0，存储索引键和页面指针，并不存储行记录本身。</li>
+</ol>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/B+%E6%A0%91.png" alt="B+树"></p>
+<p>在一棵 B+ 树中，<strong>每个节点都是一个页</strong>，每次新建节点的时候，就会申请一个页空间。同一层上的节点之间，通过页的结构构成一个双向的链表（页文件头中的两个指针字段）。非叶子节点，包括了多个索引行，每个索引行里存储索引键和指向下一层页面的页面指针。最后是叶子节点，它存储了关键字和行记录，在节点内部（也就是页结构的内部）记录之间是一个单向的链表，但是对记录进行查找，则可以通过页目录采用二分查找的方式来进行。</p>
+<p>当我们从页结构来理解 B+ 树的结构的时候，可以帮我们理解一些通过索引进行检索的原理：</p>
+<p><strong>1.B+ 树是如何进行记录检索的？</strong></p>
+<p>如果通过 B+ 树的索引查询行记录，首先是从 B+ 树的根开始，逐层检索，直到找到叶子节点，也就是找到对应的数据页为止，将数据页加载到内存中，页目录中的槽（slot）采用二分查找的方式先找到一个粗略的记录分组，然后再在分组中通过链表遍历的方式查找记录。</p>
+<p><strong>2. 普通索引和唯一索引在查询效率上有什么不同？</strong></p>
+<p>我们创建索引的时候可以是普通索引，也可以是唯一索引，那么这两个索引在查询效率上有什么不同呢？</p>
+<p>唯一索引就是在普通索引上增加了约束性，也就是关键字唯一，找到了关键字就停止检索。而普通索引，可能会存在用户记录中的关键字相同的情况，根据页结构的原理，当我们读取一条记录的时候，不是单独将这条记录从磁盘中读出去，而是将这个记录所在的页加载到内存中进行读取。InnoDB 存储引擎的页大小为 16KB，在一个页中可能存储着上千个记录，因此在普通索引的字段上进行查找也就是在内存中多几次“判断下一条记录”的操作，对于 CPU 来说，这些操作所消耗的时间是可以忽略不计的。所以对一个索引字段进行检索，采用普通索引还是唯一索引在检索效率上基本上没有差别。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>今天我们学习了数据库中的基本存储单位，也就是页（Page），磁盘 I/O 都是基于页来进行读取的，在页之上还有区、段和表空间，它们都是更大的存储单位。我们在分配空间的时候会按照页为单位来进行分配，同一棵树上同一层的页与页之间采用双向链表，而在页里面，记录之间采用的单向链表的方式。</p>
+<p>链表这种数据结构的特点是增加、删除比较方便，所以在对记录进行删除的时候，有时候并不是真的删除了记录，而只是逻辑上的删除，也就是在标记为上标记为“已删除”。但链表还有个问题就是查找效率低，因此在页结构中还专门设计了页目录这个模块，专门给记录做一个目录，通过二分查找法的方式进行检索提升效率。</p>
+<p><img src="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E6%80%BB%E7%BB%93.png" alt="存储引擎总结"></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>MySQL（二）存储引擎</p><p><a href="http://example.com/2021/05/11/MySQL（二）存储引擎/">http://example.com/2021/05/11/MySQL（二）存储引擎/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-05-11</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-05-11</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/MySQL/">MySQL</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/05/11/MySQL%EF%BC%88%E4%B8%80%EF%BC%89%E8%AF%AD%E6%B3%95%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/"><span class="level-item">MySQL（一）语法和数据类型</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">11</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">5</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#MySQL的逻辑分层"><span class="level-left"><span class="level-item">1</span><span class="level-item">MySQL的逻辑分层</span></span></a></li><li><a class="level is-mobile" href="#一条SQL语句的执行流程"><span class="level-left"><span class="level-item">2</span><span class="level-item">一条SQL语句的执行流程</span></span></a></li><li><a class="level is-mobile" href="#InnoDB存储引擎"><span class="level-left"><span class="level-item">3</span><span class="level-item">InnoDB存储引擎</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#InnoDB体系结构"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">InnoDB体系结构</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#后台线程的分类"><span class="level-left"><span class="level-item">3.1.1</span><span class="level-item">后台线程的分类</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Master线程"><span class="level-left"><span class="level-item">3.1.1.1</span><span class="level-item">Master线程</span></span></a></li><li><a class="level is-mobile" href="#IO线程"><span class="level-left"><span class="level-item">3.1.1.2</span><span class="level-item">IO线程</span></span></a></li><li><a class="level is-mobile" href="#Purge-Thread"><span class="level-left"><span class="level-item">3.1.1.3</span><span class="level-item">Purge Thread</span></span></a></li><li><a class="level is-mobile" href="#Page-Cleaner-Thread"><span class="level-left"><span class="level-item">3.1.1.4</span><span class="level-item">Page Cleaner Thread</span></span></a></li></ul></li><li><a class="level is-mobile" href="#内存"><span class="level-left"><span class="level-item">3.1.2</span><span class="level-item">内存</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#缓冲池"><span class="level-left"><span class="level-item">3.1.2.1</span><span class="level-item">缓冲池</span></span></a></li><li><a class="level is-mobile" href="#LRU列表、Free列表、Flush列表"><span class="level-left"><span class="level-item">3.1.2.2</span><span class="level-item">LRU列表、Free列表、Flush列表</span></span></a></li><li><a class="level is-mobile" href="#重做日志缓冲"><span class="level-left"><span class="level-item">3.1.2.3</span><span class="level-item">重做日志缓冲</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#Checkpoint技术"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">Checkpoint技术</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Write-Ahead-Log（预写式日志）"><span class="level-left"><span class="level-item">3.2.1</span><span class="level-item">Write Ahead Log（预写式日志）</span></span></a></li><li><a class="level is-mobile" href="#Checkpoint-的目的"><span class="level-left"><span class="level-item">3.2.2</span><span class="level-item">Checkpoint 的目的</span></span></a></li><li><a class="level is-mobile" href="#Checkpoint-的种类"><span class="level-left"><span class="level-item">3.2.3</span><span class="level-item">Checkpoint 的种类</span></span></a></li></ul></li><li><a class="level is-mobile" href="#不同存储引擎文件存储结构"><span class="level-left"><span class="level-item">3.3</span><span class="level-item">不同存储引擎文件存储结构</span></span></a></li><li><a class="level is-mobile" href="#InnoDB和MyISAM的区别（5点）"><span class="level-left"><span class="level-item">3.4</span><span class="level-item">InnoDB和MyISAM的区别（5点）</span></span></a></li><li><a class="level is-mobile" href="#InnoDB的逻辑存储结构"><span class="level-left"><span class="level-item">3.5</span><span class="level-item">InnoDB的逻辑存储结构</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#表空间"><span class="level-left"><span class="level-item">3.5.1</span><span class="level-item">表空间</span></span></a></li><li><a class="level is-mobile" href="#段"><span class="level-left"><span class="level-item">3.5.2</span><span class="level-item">段</span></span></a></li><li><a class="level is-mobile" href="#区"><span class="level-left"><span class="level-item">3.5.3</span><span class="level-item">区</span></span></a></li><li><a class="level is-mobile" href="#页内结构"><span class="level-left"><span class="level-item">3.5.4</span><span class="level-item">页内结构</span></span></a></li></ul></li><li><a class="level is-mobile" href="#从数据页的角度看-B-树是如何进行查询的"><span class="level-left"><span class="level-item">3.6</span><span class="level-item">从数据页的角度看 B+ 树是如何进行查询的</span></span></a></li><li><a class="level is-mobile" href="#总结"><span class="level-left"><span class="level-item">3.7</span><span class="level-item">总结</span></span></a></li></ul></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">9</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T12:12:52.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">MySQL（二）存储引擎</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T09:06:04.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/MySQL%EF%BC%88%E4%B8%80%EF%BC%89%E8%AF%AD%E6%B3%95%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">MySQL（一）语法和数据类型</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T06:19:16.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/">消息队列基础问题</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T01:53:11.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/JVM%EF%BC%88%E4%B8%89%EF%BC%89%E7%B1%BB%E6%96%87%E4%BB%B6%E5%92%8C%E7%B1%BB%E5%8A%A0%E8%BD%BD/">JVM（三）类文件和类加载</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-10T15:40:10.000Z">2021-05-10</time></p><p class="title"><a href="/2021/05/10/JVM%EF%BC%88%E4%BA%8C%EF%BC%89%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">JVM（二）垃圾回收和内存分配</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 Binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
