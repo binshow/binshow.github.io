@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>消息队列基础问题 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="binshow"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="binshow"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Java学习"><meta property="og:type" content="blog"><meta property="og:title" content="消息队列基础问题"><meta property="og:url" content="http://example.com/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="Java学习"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.jpeg"><meta property="article:published_time" content="2021-05-11T06:19:16.000Z"><meta property="article:modified_time" content="2021-05-11T07:17:47.323Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="消息队列"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/"},"headline":"消息队列基础问题","image":[],"datePublished":"2021-05-11T06:19:16.000Z","dateModified":"2021-05-11T07:17:47.323Z","author":{"@type":"Person","name":"Binshow"},"description":"消息队列基础篇，主要描述了四个问题：  为什么要用消息队列 如何保证消息不丢失  如何保证消息不重复消费 如何处理消息的积压"}</script><link rel="canonical" href="http://example.com/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.jpeg" alt="消息队列基础问题"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-05-11T06:19:16.000Z" title="2021/5/11下午2:19:16">2021-05-11</time>发表</span><span class="level-item"><time dateTime="2021-05-11T07:17:47.323Z" title="2021/5/11下午3:17:47">2021-05-11</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">42 分钟读完 (大约6299个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">消息队列基础问题</h1><div class="content"><p>消息队列基础篇，主要描述了四个问题：</p>
+<ul>
+<li>为什么要用消息队列</li>
+<li>如何保证消息不丢失 </li>
+<li>如何保证消息不重复消费</li>
+<li>如何处理消息的积压</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="消息队列的使用场景"><a href="#消息队列的使用场景" class="headerlink" title="消息队列的使用场景"></a>消息队列的使用场景</h1><h2 id="异步处理"><a href="#异步处理" class="headerlink" title="异步处理"></a>异步处理</h2><p>我们以常见的电商秒杀场景为例，秒杀系统需要解决的核心问题是，<strong>如何利用有限的服务器资源，尽可能多地处理短时间内的海量请求</strong>。</p>
+<p>一个秒杀通常包含了一下几个步骤：</p>
+<ol>
+<li>风险控制</li>
+<li>库存锁定</li>
+<li>生成订单</li>
+<li>短信通知</li>
+<li>更新统计数据等等。。</li>
+</ol>
+<p>如果没有任何优化处理的话，正常的处理流程是：App 将请求发送给网关，依次调用上述 5 个流程，然后将结果返回给 APP。但实际上，用户能否秒杀成功主要是看风险控制和库存锁定两步，也就是说当服务端完成前面 2 个步骤，确定本次请求的秒杀结果后，就可以马上给用户返回响应，剩余的步骤都可以放入消息队列中，异步的进行后续的处理。</p>
+<p><img src="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/MQ%E4%BC%98%E5%8C%96%E5%BC%82%E6%AD%A5%E5%90%8E%E7%9A%84%E7%A7%92%E6%9D%80.png" alt="MQ异步后的秒杀"></p>
+<p>这样处理之后，在秒杀期间我们可以用更多的服务器资源来处理秒杀请求，秒杀结束后再异步的处理后续的步骤。</p>
+<p><strong>在这个场景中，消息队列被用于实现服务的异步处理。</strong>这样做的好处是：</p>
+<ul>
+<li>可以更快地返回结果；</li>
+<li>减少等待，自然实现了步骤之间的并发，提升系统总体的性能。</li>
+</ul>
+<h2 id="流量削峰"><a href="#流量削峰" class="headerlink" title="流量削峰"></a>流量削峰</h2><p>还是以秒杀场景为例，我们已经通过部分异步处理提高了用户的响应效率，下一个问题是如何避免瞬间过多的请求压垮我们的秒杀系统？</p>
+<blockquote>
+<p>一个设计健壮的程序有自我保护的能力，也就是说，它应该可以在海量的请求下，还能在自身能力范围内尽可能多地处理请求，拒绝处理不了的请求并且保证自身运行正常。不幸的是，现实中很多程序并没有那么“健壮”，而直接拒绝请求返回错误对于用户来说也是不怎么好的体验。</p>
+</blockquote>
+<p><strong>使用消息队列隔离网关和后端服务，以达到流量控制和保护后端服务的目的。</strong></p>
+<p>加入消息队列后，整个秒杀流程变为：</p>
+<ol>
+<li>网关在收到请求后，将请求放入请求消息队列；</li>
+<li>后端服务从请求消息队列中获取 APP 请求，完成后续秒杀处理过程，然后返回结果。</li>
+</ol>
+<p><img src="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6.png" alt="消息队列流量控制">秒杀开始后，当短时间内大量的秒杀请求到达网关时，不会直接冲击到后端的秒杀服务，而是<strong>先堆积在消息队列中</strong>，后端服务按照自己的最大处理能力，从消息队列中消费请求进行处理。</p>
+<p>对于超时的请求可以直接丢弃，APP 将超时无响应的请求处理为秒杀失败即可。运维人员还可以随时增加秒杀服务的实例数量进行水平扩容，而不用对系统的其他部分做任何更改。</p>
+<p>这种设计的优点是：能根据下游的处理能力自动调节流量，达到“削峰填谷”的作用。但这样做同样是有代价的：</p>
+<ul>
+<li>增加了系统调用链环节，导致总体的响应时延变长。</li>
+<li>上下游系统都要将同步调用改为异步消息，增加了系统的复杂度。</li>
+</ul>
+<h3 id="消息队列实现令牌桶进行限流"><a href="#消息队列实现令牌桶进行限流" class="headerlink" title="消息队列实现令牌桶进行限流"></a>消息队列实现令牌桶进行限流</h3><p>令牌桶控制流量的原理是：单位时间内只发放固定数量的令牌到令牌桶中，规定服务在处理请求之前必须先从令牌桶中拿出一个令牌，如果令牌桶中没有令牌，则拒绝请求。这样就保证单位时间内，能处理的请求不超过发放令牌的数量，起到了流量控制的作用。</p>
+<img src="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/MQ实现令牌桶.png" alt="MQ实现令牌桶" style="zoom:50%;">
+
+<p>网关在处理 APP 请求时增加一个获取令牌的逻辑。</p>
+<p>令牌桶可以简单地用一个有固定容量的消息队列加一个“令牌发生器”来实现：令牌发生器按照预估的处理能力，匀速生产令牌并放入令牌队列（如果队列满了则丢弃令牌），<strong>网关在收到请求时去令牌队列消费一个令牌，获取到令牌则继续调用后端秒杀服务，如果获取不到令牌则直接返回秒杀失败</strong>。</p>
+<h2 id="服务解耦"><a href="#服务解耦" class="headerlink" title="服务解耦"></a>服务解耦</h2><p>订单信息是电商系统中比较核心的数据，当一个新订单创建时：</p>
+<ol>
+<li>支付系统需要发起支付流程；</li>
+<li>风控系统需要审核订单的合法性；</li>
+<li>客服系统需要给用户发短信告知用户；</li>
+<li>经营分析系统需要更新统计数据；</li>
+</ol>
+<p>这些订单下游的系统都需要实时获得订单数据。随着业务不断发展，这些订单下游系统不断的增加，不断变化，并且每个系统可能只需要订单数据的一个子集，负责订单服务的开发团队不得不花费很大的精力，应对不断增加变化的下游系统，不停地修改调试订单系统与这些下游系统的接口。任何一个下游系统接口变更，都需要订单模块重新进行一次上线，对于一个电商的核心服务来说，这几乎是不可接受的。</p>
+<p>所有的电商都选择用消息队列来解决类似的系统耦合过于紧密的问题。引入消息队列后，订单服务在订单变化时发送一条消息到消息队列的一个主题 Order 中，所有下游系统都订阅主题 Order，这样每个下游系统都可以获得一份实时完整的订单数据。</p>
+<h1 id="如何保证消息不丢失"><a href="#如何保证消息不丢失" class="headerlink" title="如何保证消息不丢失"></a>如何保证消息不丢失</h1><h2 id="如何检测消息是否丢失"><a href="#如何检测消息是否丢失" class="headerlink" title="如何检测消息是否丢失"></a>如何检测消息是否丢失</h2><ol>
+<li>如果是 IT 基础设施比较完善的公司，一般都有分布式链路追踪系统，使用类似的追踪系统可以很方便地追踪每一条消息。</li>
+<li>如果没有这样的追踪系统，这里我提供一个比较简单的方法，来检查是否有消息丢失的情况。<strong>我们可以利用消息队列的有序性来验证是否有消息丢失。</strong>原理非常简单，在 Producer 端，我们给每个发出的消息附加一个连续递增的序号，然后在 Consumer 端来检查这个序号的连续性。如果没有消息丢失，Consumer 收到消息的序号必然是连续递增的，或者说收到的消息，其中的序号必然是上一条消息的序号 +1。如果检测到序号不连续，那就是丢消息了。还可以通过缺失的序号来确定丢失的是哪条消息，方便进一步排查原因。</li>
+</ol>
+<p>大多数消息队列的客户端都支持拦截器机制，你可以利用这个拦截器机制，在 Producer 发送消息之前的拦截器中将序号注入到消息中，在 Consumer 收到消息的拦截器中检测序号的连续性，这样实现的好处是消息检测的代码不会侵入到你的业务代码中，待你的系统稳定后，也方便将这部分检测的逻辑关闭或者删除。</p>
+<h3 id="分布式系统中需要注意的点"><a href="#分布式系统中需要注意的点" class="headerlink" title="分布式系统中需要注意的点"></a>分布式系统中需要注意的点</h3><ol>
+<li><p>首先，像 Kafka 和 RocketMQ 这样的消息队列，它是不保证在 Topic 上的严格顺序的，只能保证分区上的消息是有序的，所以我们在发消息的时候必须要指定分区，并且，在每个分区单独检测消息序号的连续性。</p>
+</li>
+<li><p>如果你的系统中 Producer 是多实例的，由于并不好协调多个 Producer 之间的发送顺序，所以也需要每个 Producer 分别生成各自的消息序号，并且需要附加上 Producer 的标识，在 Consumer 端按照每个 Producer 分别来检测序号的连续性。</p>
+</li>
+<li><p>Consumer 实例的数量最好和分区数量一致，做到 Consumer 和分区一一对应，这样会比较方便地在 Consumer 内检测消息序号的连续性。</p>
+</li>
+</ol>
+<h2 id="如何确保消息可靠传递"><a href="#如何确保消息可靠传递" class="headerlink" title="如何确保消息可靠传递"></a>如何确保消息可靠传递</h2><p><img src="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/MQ%E7%9A%84%E4%B8%89%E4%B8%AA%E9%98%B6%E6%AE%B5.png" alt="MQ的三个阶段"></p>
+<ul>
+<li><strong>生产阶段</strong>: 在这个阶段，从消息在 Producer 创建出来，经过网络传输发送到 Broker 端。</li>
+<li><strong>存储阶段</strong>: 在这个阶段，消息在 Broker 端存储，如果是集群，消息会在这个阶段被复制到其他的副本上。</li>
+<li><strong>消费阶段</strong>: 在这个阶段，Consumer 从 Broker 上拉取消息，经过网络传输发送到 Consumer 上。</li>
+</ul>
+<p><strong>1. 生产阶段：</strong></p>
+<p>在生产阶段，消息队列<strong>通过最常用的请求确认机制，来保证消息的可靠传递</strong>：当你的代码调用发消息方法时，消息队列的客户端会把消息发送到 Broker，Broker 收到消息后（最好写入到磁盘中才返回确认消息），会给客户端返回一个确认响应，表明消息已经收到了。客户端收到响应后，完成了一次正常消息的发送。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">你在编写发送消息代码时，需要注意，正确处理返回值或者捕获异常，就可以保证这个阶段的消息不会丢失。</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    RecordMetadata metadata = producer.send(record).get();</span><br><span class="line">    System.out.println(<span class="string">&quot; 消息发送成功。&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot; 消息发送失败！&quot;</span>);</span><br><span class="line">    System.out.println(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>异步发送时，则需要在回调方法里进行检查。这个地方是需要特别注意的，很多丢消息的原因就是，我们使用了异步发送，却没有在回调中检查发送结果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">producer.send(record, (metadata, exception) -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (metadata != <span class="keyword">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot; 消息发送成功。&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot; 消息发送失败！&quot;</span>);</span><br><span class="line">        System.out.println(exception);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.存储阶段</strong>：</p>
+<p>在存储阶段正常情况下，只要 Broker 在正常运行，就不会出现丢失消息的问题，但是如果 Broker 出现了故障，比如进程死掉了或者服务器宕机了，还是可能会丢失消息的。</p>
+<ul>
+<li><strong>对于单个节点的 Broker，需要配置 Broker 参数，在收到消息后，将消息写入磁盘后再给 Producer 返回确认响应</strong>，这样即使发生宕机，由于消息已经被写入磁盘，就不会丢失消息，恢复后还可以继续消费。例如，在 RocketMQ 中，需要将刷盘方式 flushDiskType 配置为 SYNC_FLUSH 同步刷盘。</li>
+<li>如果是 Broker 是由多个节点组成的集群，需要将 Broker 集群配置成：<strong>至少将消息发送到 2 个以上的节点，再给客户端回复发送确认响应。这样当某个 Broker 宕机时，其他的 Broker 可以替代宕机的 Broker，也不会发生消息丢失</strong>。</li>
+</ul>
+<p><strong>3.消费阶段</strong></p>
+<p>消费阶段采用和生产阶段类似的确认机制来保证消息的可靠传递，客户端从 Broker 拉取消息后，执行用户的消费业务逻辑，成功后，才会给 Broker 发送消费确认响应。如果 Broker 没有收到消费确认响应，下次拉消息的时候还会返回同一条消息，确保消息不会在网络传输过程中丢失，也不会因为客户端在执行消费逻辑中出错导致丢失。</p>
+<p>你在写消费代码时需要注意的是，<strong>不要在收到消息后就立即发送消费确认，而是应该在执行完所有消费业务逻辑之后，再发送消费确认。</strong></p>
+<h1 id="如何保证消费过程中的重复消息（幂等性）"><a href="#如何保证消费过程中的重复消息（幂等性）" class="headerlink" title="如何保证消费过程中的重复消息（幂等性）"></a>如何保证消费过程中的重复消息（幂等性）</h1><p>在消息传递过程中，如果出现传递失败的情况，发送方会执行重试，重试的过程中就有可能会产生重复的消息。对使用消息队列的业务系统来说，如果没有对重复消息进行处理，就有可能会导致系统的数据出现错误</p>
+<h2 id="消息重复的情况必然存在"><a href="#消息重复的情况必然存在" class="headerlink" title="消息重复的情况必然存在"></a>消息重复的情况必然存在</h2><p>在 MQTT 协议中，给出了三种传递消息时能够提供的服务质量标准，这三种服务质量从低到高依次是：</p>
+<ul>
+<li><strong>At most once</strong>: 至多一次。消息在传递时，最多会被送达一次。换一个说法就是，没什么消息可靠性保证，允许丢消息。一般都是一些对消息可靠性要求不太高的监控场景使用，比如每分钟上报一次机房温度数据，可以接受数据少量丢失。</li>
+<li><strong>At least once</strong>: 至少一次。消息在传递时，至少会被送达一次。也就是说，不允许丢消息，但是允许有少量重复消息出现。</li>
+<li><strong>Exactly once</strong>：恰好一次。消息在传递时，只会被送达一次，不允许丢失也不允许重复，这个是最高的等级。</li>
+</ul>
+<p>这个服务质量标准不仅适用于 MQTT，对所有的消息队列都是适用的。我们现在常用的绝大部分消息队列提供的服务质量都是 At least once，包括 RocketMQ、RabbitMQ 和 Kafka 都是这样。也就是说，消息队列很难保证消息不重复。</p>
+<h2 id="用幂等性解决重复消息问题"><a href="#用幂等性解决重复消息问题" class="headerlink" title="用幂等性解决重复消息问题"></a>用幂等性解决重复消息问题</h2><p>一个幂等操作的特点是，<strong>其任意多次执行所产生的影响均与一次执行的影响相同。</strong></p>
+<h3 id="利用数据库的唯一约束实现幂等"><a href="#利用数据库的唯一约束实现幂等" class="headerlink" title="利用数据库的唯一约束实现幂等"></a><strong>利用数据库的唯一约束实现幂等</strong></h3><p>例如我们刚刚提到的那个不具备幂等特性的转账的例子：将账户 X 的余额加 100 元。在这个例子中，我们可以通过改造业务逻辑，让它具备幂等性。</p>
+<p>首先，我们可以限定，对于每个转账单每个账户只可以执行一次变更操作，在分布式系统中，这个限制实现的方法非常多，最简单的是我们在数据库中建一张转账流水表，这个表有三个字段：转账单 ID、账户 ID 和变更金额，然后给<strong>转账单 ID 和账户 ID 这两个字段联合起来创建一个唯一约束</strong>，这样对于相同的转账单 ID 和账户 ID，表里至多只能存在一条记录。</p>
+<p>基于这个思路，不光是可以使用关系型数据库，只要是支持类似“INSERT IF NOT EXIST”语义的存储类系统都可以用于实现幂等，比如，你可以用 Redis 的 SETNX 命令来替代数据库中的唯一约束，来实现幂等消费。</p>
+<h3 id="为更新的数据设置前置条件"><a href="#为更新的数据设置前置条件" class="headerlink" title="为更新的数据设置前置条件"></a><strong>为更新的数据设置前置条件</strong></h3><p>给数据变更设置一个前置条件，如果满足条件就更新数据，否则拒绝更新数据，在更新数据的时候，同时变更前置条件中需要判断的数据。这样，重复执行这个操作时，由于第一次更新数据的时候已经变更了前置条件中需要判断的数据，不满足前置条件，则不会重复执行更新数据操作。</p>
+<p>比如，刚刚我们说过，“将账户 X 的余额增加 100 元”这个操作并不满足幂等性，我们可以把这个操作加上一个前置条件，变为：“如果账户 X 当前的余额为 500 元，将余额加 100 元”，这个操作就具备了幂等性。对应到消息队列中的使用时，可以在发消息时在消息体中带上当前的余额，在消费的时候进行判断数据库中，当前余额是否与消息中的余额相等，只有相等才执行变更操作。</p>
+<p>更加通用的方法是，给你的数据增加一个版本号属性，每次更数据前，比较当前数据的版本号是否和消息中的版本号一致，如果不一致就拒绝更新数据，更新数据的同时将版本号 +1，一样可以实现幂等更新</p>
+<h3 id="记录并检查操作"><a href="#记录并检查操作" class="headerlink" title="记录并检查操作"></a><strong>记录并检查操作</strong></h3><p>我们还有一种通用性最强，适用范围最广的实现幂等性方法：记录并检查操作，也称为“Token 机制或者 GUID（全局唯一 ID）机制”，实现的思路特别简单：在执行数据更新操作之前，先检查一下是否执行过这个更新操作。</p>
+<p>具体的实现方法是，在<strong>发送消息时，给每条消息指定一个全局唯一的 ID</strong>，消费时，先根据这个 ID 检查这条消息是否有被消费过，如果没有消费过，才更新数据，然后将消费状态置为已消费。</p>
+<p>更加麻烦的是，在“<strong>检查消费状态，然后更新数据并且设置消费状态”中，三个操作必须作为一组操作保证原子性</strong>，才能真正实现幂等，否则就会出现 Bug</p>
+<p>比如说，对于同一条消息：“全局 ID 为 8，操作为：给 ID 为 666 账户增加 100 元”，有可能出现这样的情况：</p>
+<ul>
+<li>t0 时刻：Consumer A 收到条消息，检查消息执行状态，发现消息未处理过，开始执行“账户增加 100 元”；</li>
+<li>t1 时刻：Consumer B 收到条消息，检查消息执行状态，发现消息未处理过，因为这个时刻，Consumer A 还未来得及更新消息执行状态。</li>
+</ul>
+<p>这样就会导致账户被错误地增加了两次 100 元，这是一个在分布式系统中非常容易犯的错误，一定要引以为戒。</p>
+<p>对于这个问题，当然我们可以用事务来实现，也可以用锁来实现，<strong>但是在分布式系统中，无论是分布式事务还是分布式锁</strong>都是比较难解决问题。</p>
+<h1 id="消息积压了该怎么办"><a href="#消息积压了该怎么办" class="headerlink" title="消息积压了该怎么办"></a>消息积压了该怎么办</h1><h2 id="优化性能来避免消息积压"><a href="#优化性能来避免消息积压" class="headerlink" title="优化性能来避免消息积压"></a>优化性能来避免消息积压</h2><h3 id="发送端性能优化"><a href="#发送端性能优化" class="headerlink" title="发送端性能优化"></a>发送端性能优化</h3><p>优化消息收发性能，预防消息积压的方法有两种，<strong>增加批量或者是增加并发</strong>，在发送端这两种方法都可以使用。</p>
+<p>Producer 发送消息的过程，Producer 发消息给 Broker，Broker 收到消息后返回确认响应，这是一次完整的交互。假设这一次交互的平均时延是 1ms，我们把这 1ms 的时间分解开，它包括了下面这些步骤的耗时：</p>
+<ul>
+<li>发送端准备数据、序列化消息、构造请求等逻辑的时间，也就是发送端在发送网络请求之前的耗时；</li>
+<li>发送消息和返回响应在网络传输中的耗时；</li>
+<li>Broker 处理消息的时延</li>
+</ul>
+<p>无论是增加每次发送消息的批量大小，还是增加并发，都能成倍地提升发送性能</p>
+<p>比如说，你的消息发送端是一个微服务，主要接受 RPC 请求处理在线业务。很自然的，微服务在处理每次请求的时候，就在当前线程直接发送消息就可以了，因为所有 RPC 框架都是多线程支持多并发的，自然也就实现了并行发送消息。并且在线业务比较在意的是请求响应时延，选择批量发送必然会影响 RPC 服务的时延。这种情况，比较明智的方式就是通过并发来提升发送性能。</p>
+<p>如果你的系统是一个离线分析系统，离线系统在性能上的需求是什么呢？它不关心时延，更注重整个系统的吞吐量。发送端的数据都是来自于数据库，这种情况就更适合批量发送，你可以批量从数据库读取数据，然后批量来发送消息，同样用少量的并发就可以获得非常高的吞吐量。</p>
+<h3 id="消费端性能优化"><a href="#消费端性能优化" class="headerlink" title="消费端性能优化"></a>消费端性能优化</h3><p>使用消息队列的时候，大部分的性能问题都出现在消费端，如果消费的速度跟不上发送端生产消息的速度，就会造成消息积压。如果这种性能倒挂的问题只是暂时的，那问题不大，只要消费端的性能恢复之后，超过发送端的性能，那积压的消息是可以逐渐被消化掉的。</p>
+<p>我们在设计系统的时候，<strong>一定要保证消费端的消费性能要高于生产端的发送性能，这样的系统才能健康的持续运行。</strong></p>
+<p>消费端的性能优化除了优化消费业务逻辑以外，也可以通过水平扩容，增加消费端的并发数来提升总体的消费性能。特别需要注意的一点是，<strong>在扩容 Consumer 的实例数量的同时，必须同步扩容主题中的分区（也叫队列）数量，确保 Consumer 的实例数和分区数量是相等的。</strong>如果 Consumer 的实例数量超过分区数量，这样的扩容实际上是没有效果的。原因我们之前讲过，因为对于消费者来说，在每个分区上实际上只能支持单线程消费</p>
+<h2 id="消息积压了该如何处理？"><a href="#消息积压了该如何处理？" class="headerlink" title="消息积压了该如何处理？"></a>消息积压了该如何处理？</h2><p>能导致积压突然增加，最粗粒度的原因，只有两种：要么是发送变快了，要么是消费变慢了。</p>
+<p>大部分消息队列都内置了<strong>监控的功能</strong>，只要通过监控数据，很容易确定是哪种原因。如果是单位时间发送的消息增多，比如说是赶上大促或者抢购，短时间内不太可能优化消费端的代码来提升消费性能，唯一的方法是通过扩容消费端的实例数来提升总体的消费能力。</p>
+<p>如果短时间内没有足够的服务器资源进行扩容，没办法的办法是，将系统降级，通过关闭一些不重要的业务，减少发送方发送的数据量，最低限度让系统还能正常运转，服务一些重要业务。</p>
+<p>还有一种不太常见的情况，你通过监控发现，无论是发送消息的速度还是消费消息的速度和原来都没什么变化，这时候你需要检查一下你的消费端，是不是消费失败导致的一条消息反复消费这种情况比较多，这种情况也会拖慢整个系统的消费速度。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E6%80%BB%E7%BB%93.png" alt="消息队列总结"></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>消息队列基础问题</p><p><a href="http://example.com/2021/05/11/消息队列基础问题/">http://example.com/2021/05/11/消息队列基础问题/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-05-11</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-05-11</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/05/11/JVM%EF%BC%88%E4%B8%89%EF%BC%89%E7%B1%BB%E6%96%87%E4%BB%B6%E5%92%8C%E7%B1%BB%E5%8A%A0%E8%BD%BD/"><span class="level-item">JVM（三）类文件和类加载</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">9</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">4</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#消息队列的使用场景"><span class="level-left"><span class="level-item">1</span><span class="level-item">消息队列的使用场景</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#异步处理"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">异步处理</span></span></a></li><li><a class="level is-mobile" href="#流量削峰"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">流量削峰</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#消息队列实现令牌桶进行限流"><span class="level-left"><span class="level-item">1.2.1</span><span class="level-item">消息队列实现令牌桶进行限流</span></span></a></li></ul></li><li><a class="level is-mobile" href="#服务解耦"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">服务解耦</span></span></a></li></ul></li><li><a class="level is-mobile" href="#如何保证消息不丢失"><span class="level-left"><span class="level-item">2</span><span class="level-item">如何保证消息不丢失</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#如何检测消息是否丢失"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">如何检测消息是否丢失</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#分布式系统中需要注意的点"><span class="level-left"><span class="level-item">2.1.1</span><span class="level-item">分布式系统中需要注意的点</span></span></a></li></ul></li><li><a class="level is-mobile" href="#如何确保消息可靠传递"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">如何确保消息可靠传递</span></span></a></li></ul></li><li><a class="level is-mobile" href="#如何保证消费过程中的重复消息（幂等性）"><span class="level-left"><span class="level-item">3</span><span class="level-item">如何保证消费过程中的重复消息（幂等性）</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#消息重复的情况必然存在"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">消息重复的情况必然存在</span></span></a></li><li><a class="level is-mobile" href="#用幂等性解决重复消息问题"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">用幂等性解决重复消息问题</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#利用数据库的唯一约束实现幂等"><span class="level-left"><span class="level-item">3.2.1</span><span class="level-item">利用数据库的唯一约束实现幂等</span></span></a></li><li><a class="level is-mobile" href="#为更新的数据设置前置条件"><span class="level-left"><span class="level-item">3.2.2</span><span class="level-item">为更新的数据设置前置条件</span></span></a></li><li><a class="level is-mobile" href="#记录并检查操作"><span class="level-left"><span class="level-item">3.2.3</span><span class="level-item">记录并检查操作</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#消息积压了该怎么办"><span class="level-left"><span class="level-item">4</span><span class="level-item">消息积压了该怎么办</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#优化性能来避免消息积压"><span class="level-left"><span class="level-item">4.1</span><span class="level-item">优化性能来避免消息积压</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#发送端性能优化"><span class="level-left"><span class="level-item">4.1.1</span><span class="level-item">发送端性能优化</span></span></a></li><li><a class="level is-mobile" href="#消费端性能优化"><span class="level-left"><span class="level-item">4.1.2</span><span class="level-item">消费端性能优化</span></span></a></li></ul></li><li><a class="level is-mobile" href="#消息积压了该如何处理？"><span class="level-left"><span class="level-item">4.2</span><span class="level-item">消息积压了该如何处理？</span></span></a></li></ul></li><li><a class="level is-mobile" href="#总结"><span class="level-left"><span class="level-item">5</span><span class="level-item">总结</span></span></a></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T06:19:16.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98/">消息队列基础问题</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T01:53:11.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/JVM%EF%BC%88%E4%B8%89%EF%BC%89%E7%B1%BB%E6%96%87%E4%BB%B6%E5%92%8C%E7%B1%BB%E5%8A%A0%E8%BD%BD/">JVM（三）类文件和类加载</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-10T15:40:10.000Z">2021-05-10</time></p><p class="title"><a href="/2021/05/10/JVM%EF%BC%88%E4%BA%8C%EF%BC%89%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">JVM（二）垃圾回收和内存分配</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-10T14:41:04.000Z">2021-05-10</time></p><p class="title"><a href="/2021/05/10/JVM%EF%BC%88%E4%B8%80%EF%BC%89%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E5%92%8C%E5%AF%B9%E8%B1%A1%E8%AF%A6%E8%A7%A3/">JVM（一）内存区域和对象详解</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-07T04:40:57.000Z">2021-05-07</time></p><p class="title"><a href="/2021/05/07/Java%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%B8%8B/">Java并发理论基础-下</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 Binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
