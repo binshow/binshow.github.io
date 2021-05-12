@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>MySQL（五）调优性能和分区 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="binshow"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="binshow"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Java学习"><meta property="og:type" content="blog"><meta property="og:title" content="MySQL（五）调优性能和分区"><meta property="og:url" content="http://example.com/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="Java学习"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E8%B0%83%E4%BC%98.jpeg"><meta property="article:published_time" content="2021-05-12T11:47:13.000Z"><meta property="article:modified_time" content="2021-05-12T13:07:54.015Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="MySQL"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E8%B0%83%E4%BC%98.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/"},"headline":"MySQL（五）调优性能和分区","image":[],"datePublished":"2021-05-12T11:47:13.000Z","dateModified":"2021-05-12T13:07:54.015Z","author":{"@type":"Person","name":"Binshow"},"description":"MySQL的调优介绍：  查询优化器的执行 MySQL调优的不同维度 分区&#x2F;分表&#x2F;分库的操作"}</script><link rel="canonical" href="http://example.com/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E8%B0%83%E4%BC%98.jpeg" alt="MySQL（五）调优性能和分区"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-05-12T11:47:13.000Z" title="2021/5/12下午7:47:13">2021-05-12</time>发表</span><span class="level-item"><time dateTime="2021-05-12T13:07:54.015Z" title="2021/5/12下午9:07:54">2021-05-12</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">1 小时读完 (大约10023个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">MySQL（五）调优性能和分区</h1><div class="content"><p>MySQL的调优介绍：</p>
+<ul>
+<li>查询优化器的执行</li>
+<li>MySQL调优的不同维度</li>
+<li>分区/分表/分库的操作</li>
+</ul>
+<span id="more"></span>
+
+
+
+<h1 id="查询优化器"><a href="#查询优化器" class="headerlink" title="查询优化器"></a>查询优化器</h1><h2 id="SQL的执行过程"><a href="#SQL的执行过程" class="headerlink" title="SQL的执行过程"></a>SQL的执行过程</h2><p><img src="/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/SQL%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B.png" alt="SQL执行过程"></p>
+<p>一条 SQL 查询语句首先会经过分析器，进行语法分析和语义检查。</p>
+<ul>
+<li>语法分析是检查 SQL 拼写和语法是否正确，语义检查是检查 SQL 中的访问对象是否存在。比如我们在写 SELECT 语句的时候，列名写错了，系统就会提示错误。语法检查和语义检查可以保证 SQL 语句没有错误，最终得到一棵语法分析树</li>
+<li>查询优化器的目标是找到执行 SQL 查询的最佳执行计划，执行计划就是查询树，它由一系列物理操作符组成，这些操作符按照一定的运算关系组成查询的执行计划。在查询优化器中，可以分为逻辑查询优化阶段和物理查询优化阶段。</li>
+</ul>
+<p>逻辑查询优化就是通过<strong>改变 SQL 语句的内容来使得 SQL 查询更高效</strong>，同时为物理查询优化提供更多的候选执行计划。通常采用的方式是对 SQL 语句进行等价变换，对查询进行重写，而查询重写的数学基础就是关系代数。对<strong>条件表达式进行等价谓词重写、条件简化，对视图进行重写，对子查询进行优化，对连接语义进行了外连接消除、嵌套连接消除等</strong>。</p>
+<p>逻辑查询优化是基于关系代数进行的查询重写，而关系代数的每一步都对应着物理计算，这些物理计算往往存在多种算法，因此需要计算各种物理路径的代价，从中选择代价最小的作为执行计划。在这个阶段里，对于单表和多表连接的操作，需要高效地使用索引，提升查询效率。</p>
+<p><img src="/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/%E4%BC%98%E5%8C%96%E5%99%A8.png" alt="优化器"></p>
+<h2 id="两种优化器模式"><a href="#两种优化器模式" class="headerlink" title="两种优化器模式"></a>两种优化器模式</h2><p>我们需要通过优化器来制定数据表的扫描方式、连接方式以及连接顺序，从而得到最佳的 SQL 执行计划</p>
+<p>第一种是基于规则的优化器（RBO，Rule-Based Optimizer），规则就是人们以往的经验，或者是采用已经被证明是有效的方式。通过在优化器里面嵌入规则，来判断 SQL 查询符合哪种规则，就按照相应的规则来制定执行计划，同时采用启发式规则去掉明显不好的存取路径。</p>
+<p>第二种是基于代价的优化器（CBO，Cost-Based Optimizer），这里会根据代价评估模型，计算每条可能的执行计划的代价，也就是 COST，从中选择代价最小的作为执行计划。相比于 RBO 来说，CBO 对数据更敏感，因为它会利用数据表中的统计信息来做判断，针对不同的数据表，查询得到的执行计划可能是不同的，因此制定出来的执行计划也更符合数据表的实际情况。</p>
+<blockquote>
+<p>RBO 的方式更像是一个出租车老司机，凭借自己的经验来选择从 A 到 B 的路径。而</p>
+<p>CBO 更像是手机导航，通过数据驱动，来选择最佳的执行路径。</p>
+</blockquote>
+<h2 id="CBO如何计算代价"><a href="#CBO如何计算代价" class="headerlink" title="CBO如何计算代价"></a>CBO如何计算代价</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> mysql.server_cost;</span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------------+------------+---------------------+---------+---------------+</span></span><br><span class="line"><span class="operator">|</span> cost_name                    <span class="operator">|</span> cost_value <span class="operator">|</span> last_update         <span class="operator">|</span> comment <span class="operator">|</span> default_value <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------------+------------+---------------------+---------+---------------+</span></span><br><span class="line"><span class="operator">|</span> disk_temptable_create_cost   <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>            <span class="number">20</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> disk_temptable_row_cost      <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>           <span class="number">0.5</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> key_compare_cost             <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>          <span class="number">0.05</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> memory_temptable_create_cost <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>             <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> memory_temptable_row_cost    <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>           <span class="number">0.1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> row_evaluate_cost            <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>           <span class="number">0.1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------------+------------+---------------------+---------+---------------+</span></span><br><span class="line"><span class="number">6</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><code>disk_temptable_create_cost</code>，表示临时表文件（MyISAM 或 InnoDB）的创建代价，默认值为 20</li>
+<li><code>disk_temptable_row_cost</code>，表示临时表文件（MyISAM 或 InnoDB）的行代价，默认值 0.5</li>
+<li><code>key_compare_cost</code>，表示键比较的代价。键比较的次数越多，这项的代价就越大，这是一个重要的指标，默认值 0.05。</li>
+<li><code>memory_temptable_create_cost</code>，表示内存中临时表的创建代价，默认值 1。</li>
+<li><code>memory_temptable_row_cost</code>，表示内存中临时表的行代价，默认值 0.1。</li>
+<li><code>row_evaluate_cost</code>，统计符合条件的行代价，如果符合条件的行数越多，那么这一项的代价就越大，因此这是个重要的指标，默认值 0.1。</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> mysql.engine_cost; <span class="operator">/</span><span class="operator">/</span>页加载的代价</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+-------------+------------------------+------------+---------------------+---------+---------------+</span></span><br><span class="line"><span class="operator">|</span> engine_name <span class="operator">|</span> device_type <span class="operator">|</span> cost_name              <span class="operator">|</span> cost_value <span class="operator">|</span> last_update         <span class="operator">|</span> comment <span class="operator">|</span> default_value <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+-------------+------------------------+------------+---------------------+---------+---------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">default</span>     <span class="operator">|</span>           <span class="number">0</span> <span class="operator">|</span> io_block_read_cost     <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>             <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">default</span>     <span class="operator">|</span>           <span class="number">0</span> <span class="operator">|</span> memory_block_read_cost <span class="operator">|</span>       <span class="keyword">NULL</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-05</span><span class="number">-01</span> <span class="number">14</span>:<span class="number">58</span>:<span class="number">35</span> <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>          <span class="number">0.25</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+-------------+------------------------+------------+---------------------+---------+---------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><code>io_block_read_cost</code>，从磁盘中读取一页数据的代价，默认是 1。</li>
+<li><code>memory_block_read_cost</code>，从内存中读取一页数据的代价，默认是 0.25。</li>
+</ol>
+<p><strong>总代价 = I/O 代价 + CPU 代价 + 内存代价 + 远程代价</strong></p>
+<h1 id="MySQL调优"><a href="#MySQL调优" class="headerlink" title="MySQL调优"></a>MySQL调优</h1><h2 id="调优的目标"><a href="#调优的目标" class="headerlink" title="调优的目标"></a>调优的目标</h2><p>数据库调优的目的就是要让数据库运行得更快，也就是说<strong>响应的时间更快，吞吐量更大。</strong></p>
+<p>不过随着用户量的不断增加，以及应用程序复杂度的提升，我们很难用“更快”去定义数据库调优的目标，因为用户在不同时间段访问服务器遇到的瓶颈不同，比如双十一促销的时候会带来大规模的并发访问；还有用户在进行不同业务操作的时候，数据库的事务处理和SQL 查询都会有所不同。因此我们还需要更加精细的定位，去确定调优的目标。</p>
+<h2 id="可以从哪些维度进行调优"><a href="#可以从哪些维度进行调优" class="headerlink" title="可以从哪些维度进行调优"></a>可以从哪些维度进行调优</h2><ol>
+<li><p><strong>选择适合的</strong> <strong>DBMS</strong></p>
+</li>
+<li><p><strong>优化表设计</strong></p>
+<blockquote>
+<ol>
+<li><p>表结构要尽量遵循第三范式的原则（关于第三范式，我在后面章节会讲）。这样可以让数据结构更加清晰规范，减少冗余字段，同时也减少了在更新，插入和删除数据时等异常情况的发生。</p>
+</li>
+<li><p>如果分析查询应用比较多，尤其是需要进行多表联查的时候，可以采用反范式进行优化。反范式采用空间换时间的方式，通过增加冗余字段提高查询的效率。</p>
+</li>
+<li><p>表字段的数据类型选择，关系到了查询效率的高低以及存储空间的大小。一般来说，如果字段可以采用数值类型就不要采用字符类型；字符长度要尽可能设计得短一些。针对字符类型来说，当确定字符长度固定时，就可以采用 CHAR 类型；当长度不固定时，通常采用 VARCHAR 类型。</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p><strong>优化逻辑查询</strong>:是通过改变 SQL语句的内容让 SQL 执行效率更高效，采用的方式是对 SQL 语句进行等价变换，比如我们在讲解 EXISTS 子查询和 IN 子查询的时候，会根据小表驱动大表的原则选择适合的子查询。在 WHERE 子句中会尽量避免对字段进行函数运算，它们会让字段的索引失效。</p>
+</li>
+<li><p><strong>优化物理查询</strong>:它的核心是高效地建立索引，并通过这些索引来做各种优化。</p>
+<blockquote>
+<ol>
+<li><p>如果数据重复度高，就不需要创建索引。通常在重复度超过 10% 的情况下，可以不创建这个字段的索引。比如性别这个字段（取值为男和女）。</p>
+</li>
+<li><p>要注意索引列的位置对索引使用的影响。比如我们在 WHERE 子句中对索引字段进行了表达式的计算，会造成这个字段的索引失效。</p>
+</li>
+<li><p>要注意联合索引对索引使用的影响。我们在创建联合索引的时候会对多个字段创建索引，这时索引的顺序就很重要了。比如我们对字段 x, y, z 创建了索引，那么顺序是(x,y,z) 还是 (z,y,x)，在执行的时候就会存在差别。</p>
+</li>
+<li><p>要注意多个索引对索引使用的影响。索引不是越多越好，因为每个索引都需要存储空间，索引多也就意味着需要更多的存储空间。此外，过多的索引也会导致优化器在进行评估的时候增加了筛选出索引的计算时间，影响评估的效率。</p>
+</li>
+</ol>
+<p>查询优化器在对 SQL 语句进行等价变换之后，还需要根据数据表的索引情况和数据情况<strong>确定访问路径</strong>，这就决定了执行 SQL 时所需要消耗的资源。SQL 查询时需要对不同的数据表进行查询，因此在物理查询优化阶段也需要确定这些查询所采用的路径，具体的情况包括：</p>
+<p>\1. 单表扫描：对于单表扫描来说，我们可以全表扫描所有的数据，也可以局部扫描。</p>
+<p>\2. 两张表的连接：常用的连接方式包括了嵌套循环连接、HASH 连接和合并连接。</p>
+<p>\3. 多张表的连接：多张数据表进行连接的时候，顺序很重要，因为不同的连接路径查询的</p>
+<p>效率不同，搜索空间也会不同。我们在进行多表连接的时候，搜索空间可能会达到很高的数据量级，巨大的搜索空间显然会占用更多的资源，因此我们需要通过调整连接顺</p>
+<p>序，将搜索空间调整在一个可接收的范围内。</p>
+<p>物理查询优化是在确定了逻辑查询优化之后，采用物理优化技术（比如索引等），通过计算</p>
+<p>代价模型对各种可能的访问路径进行估算，从而找到执行方式中代价最小的作为执行计划。</p>
+<p>在这个部分中，我们需要掌握的重点是对索引的创建和使用。</p>
+</blockquote>
+</li>
+<li><p><strong>使用</strong> <strong>Redis</strong> <strong>或</strong> <strong>Memcached</strong> <strong>作为缓存</strong>,如果我们将常用的数据直接放到内存中，就会大幅提升查询的效率。</p>
+</li>
+<li><p><strong>库级优化</strong>:读写分离,对数据库分库分表。当数据量级达到亿级以上时，有时候我们需要把一个数据库切成多份，放到不同的数据库服务器上</p>
+<blockquote>
+<p>什么情况下做垂直切分，什么情况下做水平切分呢？</p>
+<p>如果数据库中的数据表过多，可以采用垂直分库的方式，将关联的数据表部署在一个数据库上。</p>
+<p>如果数据表中的列过多，可以采用垂直分表的方式，将数据表分拆成多张，把经常一起使用的列放到同一张表里。</p>
+<p>如果数据表中的数据达到了亿级以上，可以考虑水平切分，将大的数据表分拆成不同的子表，每张表保持相同的表结构,采用水平拆分的方式，就是将单张数据量大的表按照某个属性维度分成不同的小表,比如说按照年份拆分</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="表设计的三范式"><a href="#表设计的三范式" class="headerlink" title="表设计的三范式"></a>表设计的三范式</h2><p>范式的定义会使用到主键和候选键（因为主键和候选键可以唯一标识元组），数据库中的键（Key）由一个或者多个属性组成。我总结了下数据表中常用的几种键和属性的定义：</p>
+<p>超键：能唯一标识元组的属性集叫做超键。</p>
+<p>候选键：如果超键不包括多余的属性，那么这个超键就是候选键。</p>
+<p>主键：用户可以从候选键中选择一个作为主键。</p>
+<p>外键：如果数据表 R1 中的某属性集不是 R1 的主键，而是另一个数据表 R2 的主键，那么这个属性集就是数据表 R1 的外键。</p>
+<p>主属性：包含在任一候选键中的属性称为主属性。</p>
+<p>非主属性：与主属性相对，指的是不包含在任何一个候选键中的属性。</p>
+<ol>
+<li><strong>1NF 指的是数据库表中的任何属性都是原子性的，不可再分</strong>。</li>
+<li><strong>2NF 指的数据表里的非主属性都要和这个数据表的候选键有完全依赖关系</strong></li>
+<li><strong>3NF 在满足 2NF 的同时，对任何非主属性都不传递依赖于候选键</strong></li>
+</ol>
+<h2 id="什么是反范式"><a href="#什么是反范式" class="headerlink" title="什么是反范式"></a>什么是反范式</h2><h2 id="SQL执行慢如何定位呢"><a href="#SQL执行慢如何定位呢" class="headerlink" title="SQL执行慢如何定位呢"></a>SQL执行慢如何定位呢</h2><p><img src="/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/%E4%BC%98%E5%8C%96%E6%AD%A5%E9%AA%A4.png" alt="优化步骤"></p>
+<ol>
+<li>观察服务器的状态是否存在周期性的波动。如果存在周期性波动，有可能是周期性节点的原因，比如双十一、促销活动等。这样的话，我们可以通过 A1 这一步骤解决，也就是加缓存，或者更改缓存失效策略。</li>
+<li>如果缓存策略没有解决，或者不是周期性波动的原因，我们就需要进一步分析查询延迟和卡顿的原因。接下来进入 S2 这一步，我们需要开启慢查询。慢查询可以帮我们定位执行慢的 SQL 语句。我们可以通过设置 long_query_time 参数定义“慢”的阈值，如果 SQL 执行时间超过了 long_query_time，则会认为是慢查询。当收集上来这些慢查询之后，我们就可以通过分析工具对慢查询日志进行分析。</li>
+<li>在 S3 这一步骤中，我们就知道了执行慢的 SQL，这样就可以针对性地用 EXPLAIN 查看对应 SQL 语句的执行计划，或者使用 show profile 查看 SQL 中每一个步骤的时间成本。这样我们就可以了解 SQL 查询慢是因为<strong>执行时间长，还是等待时间长</strong>。</li>
+<li>如果是 SQL 等待时间长，我们进入 A2 步骤。在这一步骤中，我们可以调优服务器的参数，比如适当增加数据库缓冲池等。</li>
+<li>如果是 SQL 执行时间长，就进入 A3 步骤，这一步中我们需要考虑是<strong>索引设计的问题</strong>？还是查询<strong>关联的数据表过多</strong>？还是因为<strong>数据表的字段设计问题</strong>导致了这一现象。然后在这些维度上进行对应的调整。</li>
+<li>数据库自身的 SQL 查询性能是否已经达到了瓶颈（CPU饱和/磁盘IO/硬件瓶颈，查看系统状态）</li>
+<li>如果已经达到了性能瓶颈，进入 A4 阶段，需要考虑增加服务器，采用读写分离的架构，或者考虑对数据库进行分库分表，比如垂直分库、垂直分表和水平分表等。</li>
+</ol>
+<h3 id="使用慢查询定位执行慢的-SQL"><a href="#使用慢查询定位执行慢的-SQL" class="headerlink" title="使用慢查询定位执行慢的 SQL"></a>使用慢查询定位执行慢的 SQL</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql <span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%slow_query_log&#x27;</span>;</span><br><span class="line">mysql <span class="operator">&gt;</span> <span class="keyword">set</span> <span class="keyword">global</span> slow_query_log<span class="operator">=</span><span class="string">&#x27;ON&#x27;</span>; <span class="operator">/</span><span class="operator">/</span>打开慢查询日志</span><br><span class="line">mysql <span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%long_query_time%&#x27;</span>;<span class="operator">/</span><span class="operator">/</span>看下慢查询的时间阈值设置</span><br><span class="line">mysql <span class="operator">&gt;</span> <span class="keyword">set</span> <span class="keyword">global</span> long_query_time <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="使用-EXPLAIN-查看执行计划"><a href="#使用-EXPLAIN-查看执行计划" class="headerlink" title="使用 EXPLAIN 查看执行计划"></a>使用 EXPLAIN 查看执行计划</h3><p>使用 <strong>Explain</strong> 关键字可以模拟优化器执行SQL查询语句，从而知道 MySQL 是如何处理你的 SQL 语句的。分析你的查询语句或是表结构的性能瓶颈</p>
+<p>能干吗：</p>
+<ul>
+<li>表的读取顺序</li>
+<li>数据读取操作的操作类型</li>
+<li>哪些索引可以使用</li>
+<li>哪些索引被实际使用</li>
+<li>表之间的引用</li>
+<li>每张表有多少行被优化器查询</li>
+</ul>
+<p>怎么玩：</p>
+<ul>
+<li>Explain + SQL语句</li>
+<li>执行计划包含的信息（如果有分区表的话还会有<strong>partitions</strong>）</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/14/1734bff38d5d8333?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="expalin"></p>
+<p>各字段解释</p>
+<ul>
+<li><p><strong>id</strong>（select 查询的序列号，包含一组数字，表示查询中执行select子句或操作表的顺序）</p>
+<ul>
+<li>id相同，执行顺序从上往下</li>
+<li>id全不同，如果是子查询，id的序号会递增，id值越大优先级越高，越先被执行</li>
+<li>id部分相同，执行顺序是先按照数字大的先执行，然后数字相同的按照从上往下的顺序执行</li>
+</ul>
+</li>
+<li><p><strong>select_type</strong>（查询类型，用于区别普通查询、联合查询、子查询等复杂查询）</p>
+<ul>
+<li><strong>SIMPLE</strong> ：简单的select查询，查询中不包含子查询或UNION</li>
+<li><strong>PRIMARY</strong>：查询中若包含任何复杂的子部分，最外层查询被标记为PRIMARY</li>
+<li><strong>SUBQUERY</strong>：在select或where列表中包含了子查询</li>
+<li><strong>DERIVED</strong>：在from列表中包含的子查询被标记为DERIVED，MySQL会递归执行这些子查询，把结果放在临时表里</li>
+<li><strong>UNION</strong>：若第二个select出现在UNION之后，则被标记为UNION，若UNION包含在from子句的子查询中，外层select将被标记为DERIVED</li>
+<li><strong>UNION RESULT</strong>：从UNION表获取结果的select</li>
+</ul>
+</li>
+<li><p><strong>table</strong>（显示这一行的数据是关于哪张表的）</p>
+</li>
+<li><p><strong>type</strong>（显示查询使用了那种类型，从最好到最差依次排列    <strong>system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL</strong> ）</p>
+<p><img src="/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/type%E7%A7%8D%E7%B1%BB.png" alt="type种类"></p>
+<p>在这些情况里，all 是最坏的情况，因为采用了全表扫描的方式。index 和 all 差不多，只不过 index 对索引表进行全扫描，这样做的好处是不再需要对数据进行排序，但是开销依然很大。</p>
+<p>如果我们在 extra 列中看到 Using index，说明采用了索引覆盖，也就是索引可以覆盖所需的 SELECT 字段，就不需要进行回表，这样就减少了数据查找的开销。</p>
+<ul>
+<li>system：表只有一行记录（等于系统表），是 const 类型的特例，平时不会出现</li>
+<li>const：表示通过索引一次就找到了，const 用于比较 primary key 或 unique 索引，因为只要匹配一行数据，所以很快，如将主键置于 where 列表中，mysql 就能将该查询转换为一个常量</li>
+<li>eq_ref：唯一性索引扫描，对于每个索引键，表中只有一条记录与之匹配，常见于主键或唯一索引扫描</li>
+<li>ref：非唯一性索引扫描，范围匹配某个单独值得所有行。本质上也是一种索引访问，他返回所有匹配某个单独值的行，然而，它可能也会找到多个符合条件的行，多以他应该属于查找和扫描的混合体</li>
+<li>range：只检索给定范围的行，使用一个索引来选择行。key列显示使用了哪个索引，一般就是在你的where语句中出现了between、&lt;、&gt;、in等的查询，这种范围扫描索引比全表扫描要好，因为它只需开始于索引的某一点，而结束于另一点，不用扫描全部索引</li>
+<li>index：Full Index Scan，index于ALL区别为index类型只遍历索引树。通常比ALL快，因为索引文件通常比数据文件小。（<strong>也就是说虽然all和index都是读全表，但index是从索引中读取的，而all是从硬盘中读的</strong>）</li>
+<li>ALL：Full Table Scan，将遍历全表找到匹配的行</li>
+</ul>
+<p>tip: 一般来说，得保证查询至少达到range级别，最好到达ref</p>
+</li>
+<li><p><strong>possible_keys</strong>（显示可能应用在这张表中的索引，一个或多个，查询涉及到的字段若存在索引，则该索引将被列出，但不一定被查询实际使用）</p>
+</li>
+<li><p><strong>key</strong></p>
+<ul>
+<li>实际使用的索引，如果为NULL，则没有使用索引</li>
+<li><strong>查询中若使用了覆盖索引，则该索引和查询的 select 字段重叠，仅出现在key列表中</strong></li>
+</ul>
+</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/14/1734bff38f6a6955?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="explain-key"></p>
+<ul>
+<li><strong>key_len</strong><ul>
+<li>表示索引中使用的字节数，可通过该列计算查询中使用的索引的长度。在不损失精确性的情况下，长度越短越好</li>
+<li>key_len显示的值为索引字段的最大可能长度，并非实际使用长度，即key_len是根据表定义计算而得，不是通过表内检索出的</li>
+</ul>
+</li>
+<li> <strong>ref</strong> （显示索引的哪一列被使用了，如果可能的话，是一个常数。哪些列或常量被用于查找索引列上的值）</li>
+<li> <strong>rows</strong> （根据表统计信息及索引选用情况，大致估算找到所需的记录所需要读取的行数）</li>
+<li><strong>Extra</strong>（包含不适合在其他列中显示但十分重要的额外信息）<ol>
+<li>using filesort: 说明mysql会对数据使用一个外部的索引排序，不是按照表内的索引顺序进行读取。mysql中无法利用索引完成的排序操作称为“文件排序”。常见于order by和group by语句中</li>
+<li>Using temporary：使用了临时表保存中间结果，mysql在对查询结果排序时使用临时表。常见于排序order by和分组查询group by。</li>
+<li>using index：表示相应的select操作中使用了覆盖索引，避免访问了表的数据行，效率不错，如果同时出现using where，表明索引被用来执行索引键值的查找；否则索引被用来读取数据而非执行查找操作</li>
+<li>using where：使用了where过滤</li>
+<li>using join buffer：使用了连接缓存</li>
+<li>impossible where：where子句的值总是false，不能用来获取任何元祖</li>
+<li>select tables optimized away：在没有group by子句的情况下，基于索引优化操作或对于MyISAM存储引擎优化COUNT(*)操作，不必等到执行阶段再进行计算，查询执行计划生成的阶段即完成优化</li>
+<li>distinct：优化distinct操作，在找到第一匹配的元祖后即停止找同样值的动作</li>
+</ol>
+</li>
+</ul>
+<p><strong>case</strong>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/14/1734bff39882383d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="explain-demo"></p>
+<ol>
+<li>第一行（执行顺序4）：id列为1，表示是union里的第一个select，select_type列的primary表示该查询为外层查询，table列被标记为，表示查询结果来自一个衍生表，其中derived3中3代表该查询衍生自第三个select查询，即id为3的select。【select d1.name……】</li>
+<li>第二行（执行顺序2）：id为3，是整个查询中第三个select的一部分。因查询包含在from中，所以为derived。【select id,name from t1 where other_column=’’】</li>
+<li>第三行（执行顺序3）：select列表中的子查询select_type为subquery，为整个查询中的第二个select。【select id from t3】</li>
+<li>第四行（执行顺序1）：select_type为union，说明第四个select是union里的第二个select，最先执行【select name,id from t2】</li>
+<li>第五行（执行顺序5）：代表从union的临时表中读取行的阶段，table列的&lt;union1,4&gt;表示用第一个和第四个select的结果进行union操作。【两个结果union操作】</li>
+</ol>
+<h3 id="Show-Profile-分析查询"><a href="#Show-Profile-分析查询" class="headerlink" title="Show Profile 分析查询"></a>Show Profile 分析查询</h3><p>通过慢日志查询可以知道哪些 SQL 语句执行效率低下，通过 explain 我们可以得知 SQL 语句的具体执行情况，索引使用等，还可以结合<code>Show Profile</code>命令查看执行状态。</p>
+<ul>
+<li><p>Show Profile 是 MySQL 提供可以用来分析当前会话中语句执行的资源消耗情况。可以用于SQL的调优的测量</p>
+</li>
+<li><p>默认情况下，参数处于关闭状态，并保存最近15次的运行结果</p>
+</li>
+<li><p>分析步骤</p>
+<ol>
+<li><p>是否支持，看看当前的mysql版本是否支持</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;Show  variables like &#x27;profiling&#x27;;  --默认是关闭，使用前需要开启</span><br></pre></td></tr></table></figure></li>
+<li><p>开启功能，默认是关闭，使用前需要开启</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;set profiling=1;  </span><br></pre></td></tr></table></figure></li>
+<li><p>运行SQL</p>
+</li>
+<li><p>查看结果</p>
+</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>诊断SQL，show profile cpu,block io for query  id(上一步前面的问题SQL数字号码)</li>
+<li>日常开发需要注意的结论<ul>
+<li>converting HEAP to MyISAM 查询结果太大，内存都不够用了往磁盘上搬了。</li>
+<li>create tmp table 创建临时表，这个要注意</li>
+<li>Copying to tmp table on disk   把内存临时表复制到磁盘</li>
+<li>locked</li>
+</ul>
+</li>
+</ol>
+<h3 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a>性能优化</h3><h4 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h4><ol>
+<li>全值匹配我最爱</li>
+<li>最佳左前缀法则，比如建立了一个联合索引(a,b,c)，那么其实我们可利用的索引就有(a), (a,b), (a,b,c)</li>
+<li>不在索引列上做任何操作（计算、函数、(自动or手动)类型转换），会导致索引失效而转向全表扫描</li>
+<li>存储引擎不能使用索引中范围条件右边的列</li>
+<li>尽量使用覆盖索引(只访问索引的查询(索引列和查询列一致))，减少select</li>
+<li>is null ,is not null 也无法使用索引</li>
+<li>like “xxxx%” 是可以用到索引的，like “%xxxx” 则不行(like “%xxx%” 同理)。like以通配符开头(‘%abc…’)索引失效会变成全表扫描的操作，</li>
+<li>字符串不加单引号索引失效</li>
+<li>少用or，用它来连接时会索引失效</li>
+<li>&lt;，&lt;=，=，&gt;，&gt;=，BETWEEN，IN 可用到索引，&lt;&gt;，not in ，!= 则不行，会导致全表扫描</li>
+</ol>
+<p><strong>一般性建议</strong></p>
+<ul>
+<li>对于单键索引，尽量选择针对当前query过滤性更好的索引</li>
+<li>在选择组合索引的时候，当前Query中过滤性最好的字段在索引字段顺序中，位置越靠前越好。</li>
+<li>在选择组合索引的时候，尽量选择可以能够包含当前query中的where字句中更多字段的索引</li>
+<li>尽可能通过分析统计信息和调整query的写法来达到选择合适索引的目的</li>
+<li>少用Hint强制索引</li>
+</ul>
+<h4 id="查询优化"><a href="#查询优化" class="headerlink" title="查询优化"></a>查询优化</h4><p><strong>永远小标驱动大表（小的数据集驱动大的数据集）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">slect * from A where id in (select id from B)`等价于</span><br><span class="line">#等价于</span><br><span class="line">select id from B</span><br><span class="line">select * from A where A.id=B.id</span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
+
+<p>当 B 表的数据集必须小于 A 表的数据集时，用 in 优于 exists</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">select * from A where exists (select 1 from B where B.id=A.id)</span><br><span class="line">#等价于</span><br><span class="line">select * from A</span><br><span class="line">select * from B where B.id = A.id`</span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
+
+<p>当 A 表的数据集小于B表的数据集时，用 exists优于用 in</p>
+<p>注意：A表与B表的ID字段应建立索引。</p>
+<p><strong>order by关键字优化</strong></p>
+<ul>
+<li>order by子句，尽量使用 Index 方式排序，避免使用 FileSort 方式排序</li>
+<li>MySQL 支持两种方式的排序，FileSort 和 Index，Index效率高，它指 MySQL 扫描索引本身完成排序，FileSort 效率较低；</li>
+<li>ORDER BY 满足两种情况，会使用Index方式排序；①ORDER BY语句使用索引最左前列 ②使用where子句与ORDER BY子句条件列组合满足索引最左前列</li>
+<li>尽可能在索引列上完成排序操作，遵照索引建的最佳最前缀</li>
+<li>如果不在索引列上，filesort 有两种算法，mysql就要启动双路排序和单路排序<ul>
+<li>双路排序：MySQL 4.1之前是使用双路排序,字面意思就是两次扫描磁盘，最终得到数据</li>
+<li>单路排序：从磁盘读取查询需要的所有列，按照order by 列在 buffer对它们进行排序，然后扫描排序后的列表进行输出，效率高于双路排序</li>
+</ul>
+</li>
+<li>优化策略<ul>
+<li>增大sort_buffer_size参数的设置</li>
+<li>增大max_lencth_for_sort_data参数的设置</li>
+</ul>
+</li>
+</ul>
+<p><strong>GROUP BY关键字优化</strong></p>
+<ul>
+<li>group by实质是先排序后进行分组，遵照索引建的最佳左前缀</li>
+<li>当无法使用索引列，增大 <code>max_length_for_sort_data</code> 参数的设置，增大<code>sort_buffer_size</code>参数的设置</li>
+<li>where高于having，能写在where限定的条件就不要去having限定了</li>
+</ul>
+<h4 id="数据类型优化"><a href="#数据类型优化" class="headerlink" title="数据类型优化"></a>数据类型优化</h4><p>MySQL 支持的数据类型非常多，选择正确的数据类型对于获取高性能至关重要。不管存储哪种类型的数据，下面几个简单的原则都有助于做出更好的选择。</p>
+<ul>
+<li><p>更小的通常更好：一般情况下，应该尽量使用可以正确存储数据的最小数据类型。</p>
+<p>简单就好：简单的数据类型通常需要更少的CPU周期。例如，整数比字符操作代价更低，因为字符集和校对规则（排序规则）使字符比较比整型比较复杂。</p>
+</li>
+<li><p>尽量避免NULL：通常情况下最好指定列为NOT NULL</p>
+</li>
+</ul>
+<hr>
+<h1 id="分区、分表、分库"><a href="#分区、分表、分库" class="headerlink" title="分区、分表、分库"></a>分区、分表、分库</h1><h3 id="MySQL分区"><a href="#MySQL分区" class="headerlink" title="MySQL分区"></a>MySQL分区</h3><p>一般情况下我们创建的表对应一组存储文件，使用<code>MyISAM</code>存储引擎时是一个<code>.MYI</code>和<code>.MYD</code>文件，使用<code>Innodb</code>存储引擎时是一个<code>.ibd</code>和<code>.frm</code>（表结构）文件。</p>
+<p>当数据量较大时（一般千万条记录级别以上），MySQL的性能就会开始下降，这时我们就需要将数据分散到多组存储文件，保证其单个文件的执行效率</p>
+<p><strong>能干嘛</strong></p>
+<ul>
+<li>逻辑数据分割</li>
+<li>提高单一的写和读应用速度</li>
+<li>提高分区范围读查询的速度</li>
+<li>分割数据能够有多个不同的物理文件路径</li>
+<li>高效的保存历史数据</li>
+</ul>
+<p><strong>怎么玩</strong></p>
+<p>首先查看当前数据库是否支持分区</p>
+<ul>
+<li><p>MySQL5.6以及之前版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW VARIABLES LIKE &#x27;%partition%&#x27;;</span><br></pre></td></tr></table></figure></li>
+<li><p>MySQL5.6：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show plugins;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>分区类型及操作</strong></p>
+<ul>
+<li><p><strong>RANGE分区</strong>：基于属于一个给定连续区间的列值，把多行分配给分区。mysql将会根据指定的拆分策略，,把数据放在不同的表文件上。相当于在文件上,被拆成了小块.但是,对外给客户的感觉还是一张表，透明的。</p>
+<p>按照 range 来分，就是每个库一段连续的数据，这个一般是按比如<strong>时间范围</strong>来的，比如交易表啊，销售表啊等，可以根据年月来存放数据。可能会产生热点问题，大量的流量都打在最新的数据上了。</p>
+<p>range 来分，好处在于说，扩容的时候很简单。</p>
+</li>
+<li><p><strong>LIST分区</strong>：类似于按RANGE分区，每个分区必须明确定义。它们的主要区别在于，LIST分区中每个分区的定义和选择是基于某列的值从属于一个值列表集中的一个值，而RANGE分区是从属于一个连续区间值的集合。</p>
+</li>
+<li><p><strong>HASH分区</strong>：基于用户定义的表达式的返回值来进行选择的分区，该表达式使用将要插入到表中的这些行的列值进行计算。这个函数可以包含MySQL 中有效的、产生非负整数值的任何表达式。</p>
+<p>hash 分发，好处在于说，可以平均分配每个库的数据量和请求压力；坏处在于说扩容起来比较麻烦，会有一个数据迁移的过程，之前的数据需要重新计算 hash 值重新分配到不同的库或表</p>
+</li>
+<li><p><strong>KEY分区</strong>：类似于按HASH分区，区别在于KEY分区只支持计算一列或多列，且MySQL服务器提供其自身的哈希函数。必须有一列或多列包含整数值。</p>
+</li>
+</ul>
+<p><strong>看上去分区表很帅气，为什么大部分互联网还是更多的选择自己分库分表来水平扩展咧？</strong></p>
+<ul>
+<li>分区表，分区键设计不太灵活，如果不走分区键，很容易出现全表锁</li>
+<li>一旦数据并发量上来，如果在分区表实施关联，就是一个灾难</li>
+<li>自己分库分表，自己掌控业务场景与访问模式，可控。分区表，研发写了一个sql，都不确定mysql是怎么玩的，不太可控</li>
+</ul>
+<blockquote>
+<p>随着业务的发展，业务越来越复杂，应用的模块越来越多，总的数据量很大，高并发读写操作均超过单个数据库服务器的处理能力怎么办？</p>
+</blockquote>
+<p>这个时候就出现了<strong>数据分片</strong>，数据分片指按照某个维度将存放在单一数据库中的数据分散地存放至多个数据库或表中。数据分片的有效手段就是对关系型数据库进行分库和分表。</p>
+<p>区别于分区的是，分区一般都是放在单机里的，用的比较多的是时间范围分区，方便归档。只不过分库分表需要代码实现，分区则是mysql内部实现。分库分表和分区并不冲突，可以结合使用。</p>
+<blockquote>
+<p>说说分库与分表的设计</p>
+</blockquote>
+<h3 id="MySQL分表"><a href="#MySQL分表" class="headerlink" title="MySQL分表"></a>MySQL分表</h3><p>分表有两种分割方式，一种垂直拆分，另一种水平拆分。</p>
+<ul>
+<li><p><strong>垂直拆分</strong></p>
+<p>垂直分表，通常是按照业务功能的使用频次，把主要的、热门的字段放在一起做为主要表。然后把不常用的，按照各自的业务属性进行聚集，拆分到不同的次要表中；主要表和次要表的关系一般都是一对一的。</p>
+</li>
+<li><p><strong>水平拆分(数据分片)</strong></p>
+<p>单表的容量不超过500W，否则建议水平拆分。是把一个表复制成同样表结构的不同表，然后把数据按照一定的规则划分，分别存储到这些表中，从而保证单表的容量不会太大，提升性能；当然这些结构一样的表，可以放在一个或多个数据库中。</p>
+<p>水平分割的几种方法：</p>
+<ul>
+<li>使用MD5哈希，做法是对UID进行md5加密，然后取前几位（我们这里取前两位），然后就可以将不同的UID哈希到不同的用户表（user_xx）中了。</li>
+<li>还可根据时间放入不同的表，比如：article_201601，article_201602。</li>
+<li>按热度拆分，高点击率的词条生成各自的一张表，低热度的词条都放在一张大表里，待低热度的词条达到一定的贴数后，再把低热度的表单独拆分成一张表。</li>
+<li>根据ID的值放入对应的表，第一个表user_0000，第二个100万的用户数据放在第二 个表user_0001中，随用户增加，直接添加用户表就行了。</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/14/1734bff39ffffdd1?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img"></p>
+<p>什么情况下做垂直切分，什么情况下做水平切分呢？</p>
+<p>如果数据库中的数据表过多，可以采用垂直分库的方式，将关联的数据表部署在一个数据库上。</p>
+<p>如果数据表中的列过多，可以采用垂直分表的方式，将数据表分拆成多张，把经常一起使用的列放到同一张表里。</p>
+<p>如果数据表中的数据达到了亿级以上，可以考虑水平切分，将大的数据表分拆成不同的子表，每张表保持相同的表结构。比如你可以按照年份来划分，把不同年份的数据放到不同的数据表中。2017 年、2018 年和 2019 年的数据就可以分别放到三张数据表中。</p>
+<p>采用垂直分表的形式，就是将一张数据表分拆成多张表，采用水平拆分的方式，就是将单张数据量大的表按照某个属性维度分成不同的小表。</p>
+<h3 id="MySQL分库"><a href="#MySQL分库" class="headerlink" title="MySQL分库"></a>MySQL分库</h3><blockquote>
+<p>为什么要分库?</p>
+</blockquote>
+<p>数据库集群环境后都是多台 slave，基本满足了读取操作;  但是写入或者说大数据、频繁的写入操作对master性能影响就比较大，这个时候，单库并不能解决大规模并发写入的问题，所以就会考虑分库。</p>
+<blockquote>
+<p>分库是什么？</p>
+</blockquote>
+<p>一个库里表太多了，导致了海量数据，系统性能下降，把原本存储于一个库的表拆分存储到多个库上， 通常是将表按照功能模块、关系密切程度划分出来，部署到不同库上。</p>
+<p>优点：</p>
+<ul>
+<li>减少增量数据写入时的锁对查询的影响</li>
+<li>由于单表数量下降，常见的查询操作由于减少了需要扫描的记录，使得单表单次查询所需的检索行数变少，减少了磁盘IO，时延变短</li>
+</ul>
+<p>但是它无法解决单表数据量太大的问题</p>
+<p><strong>分库分表后的难题</strong></p>
+<p>分布式事务的问题，数据的完整性和一致性问题。</p>
+<p>数据操作维度问题：用户、交易、订单各个不同的维度，用户查询维度、产品数据分析维度的不同对比分析角度。 跨库联合查询的问题，可能需要两次查询 跨节点的count、order by、group by以及聚合函数问题，可能需要分别在各个节点上得到结果后在应用程序端进行合并 额外的数据管理负担，如：访问数据表的导航定位 额外的数据运算压力，如：需要在多个节点执行，然后再合并计算程序编码开发难度提升，没有太好的框架解决，更多依赖业务看如何分，如何合，是个难题。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/%E8%B0%83%E4%BC%98%E6%80%BB%E7%BB%93.png" alt="调优总结"></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>MySQL（五）调优性能和分区</p><p><a href="http://example.com/2021/05/12/MySQL（五）调优性能和分区/">http://example.com/2021/05/12/MySQL（五）调优性能和分区/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-05-12</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-05-12</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/MySQL/">MySQL</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/05/12/MySQL%EF%BC%88%E5%9B%9B%EF%BC%89%E4%BA%8B%E5%8A%A1%E5%92%8C%E9%94%81/"><span class="level-item">MySQL（四）事务和锁</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">14</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">5</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#查询优化器"><span class="level-left"><span class="level-item">1</span><span class="level-item">查询优化器</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#SQL的执行过程"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">SQL的执行过程</span></span></a></li><li><a class="level is-mobile" href="#两种优化器模式"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">两种优化器模式</span></span></a></li><li><a class="level is-mobile" href="#CBO如何计算代价"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">CBO如何计算代价</span></span></a></li></ul></li><li><a class="level is-mobile" href="#MySQL调优"><span class="level-left"><span class="level-item">2</span><span class="level-item">MySQL调优</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#调优的目标"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">调优的目标</span></span></a></li><li><a class="level is-mobile" href="#可以从哪些维度进行调优"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">可以从哪些维度进行调优</span></span></a></li><li><a class="level is-mobile" href="#表设计的三范式"><span class="level-left"><span class="level-item">2.3</span><span class="level-item">表设计的三范式</span></span></a></li><li><a class="level is-mobile" href="#什么是反范式"><span class="level-left"><span class="level-item">2.4</span><span class="level-item">什么是反范式</span></span></a></li><li><a class="level is-mobile" href="#SQL执行慢如何定位呢"><span class="level-left"><span class="level-item">2.5</span><span class="level-item">SQL执行慢如何定位呢</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#使用慢查询定位执行慢的-SQL"><span class="level-left"><span class="level-item">2.5.1</span><span class="level-item">使用慢查询定位执行慢的 SQL</span></span></a></li><li><a class="level is-mobile" href="#使用-EXPLAIN-查看执行计划"><span class="level-left"><span class="level-item">2.5.2</span><span class="level-item">使用 EXPLAIN 查看执行计划</span></span></a></li><li><a class="level is-mobile" href="#Show-Profile-分析查询"><span class="level-left"><span class="level-item">2.5.3</span><span class="level-item">Show Profile 分析查询</span></span></a></li><li><a class="level is-mobile" href="#性能优化"><span class="level-left"><span class="level-item">2.5.4</span><span class="level-item">性能优化</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#索引优化"><span class="level-left"><span class="level-item">2.5.4.1</span><span class="level-item">索引优化</span></span></a></li><li><a class="level is-mobile" href="#查询优化"><span class="level-left"><span class="level-item">2.5.4.2</span><span class="level-item">查询优化</span></span></a></li><li><a class="level is-mobile" href="#数据类型优化"><span class="level-left"><span class="level-item">2.5.4.3</span><span class="level-item">数据类型优化</span></span></a></li></ul></li></ul></li></ul></li><li><a class="level is-mobile" href="#分区、分表、分库"><span class="level-left"><span class="level-item">3</span><span class="level-item">分区、分表、分库</span></span></a><ul class="menu-list"><ul class="menu-list"><li><a class="level is-mobile" href="#MySQL分区"><span class="level-left"><span class="level-item">3.1.1</span><span class="level-item">MySQL分区</span></span></a></li><li><a class="level is-mobile" href="#MySQL分表"><span class="level-left"><span class="level-item">3.1.2</span><span class="level-item">MySQL分表</span></span></a></li><li><a class="level is-mobile" href="#MySQL分库"><span class="level-left"><span class="level-item">3.1.3</span><span class="level-item">MySQL分库</span></span></a></li></ul></ul></li><li><a class="level is-mobile" href="#总结"><span class="level-left"><span class="level-item">4</span><span class="level-item">总结</span></span></a></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">12</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-12T11:47:13.000Z">2021-05-12</time></p><p class="title"><a href="/2021/05/12/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E8%B0%83%E4%BC%98%E6%80%A7%E8%83%BD%E5%92%8C%E5%88%86%E5%8C%BA/">MySQL（五）调优性能和分区</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-12T04:04:28.000Z">2021-05-12</time></p><p class="title"><a href="/2021/05/12/MySQL%EF%BC%88%E5%9B%9B%EF%BC%89%E4%BA%8B%E5%8A%A1%E5%92%8C%E9%94%81/">MySQL（四）事务和锁</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-12T01:50:36.000Z">2021-05-12</time></p><p class="title"><a href="/2021/05/12/MySQL%EF%BC%88%E4%B8%89%EF%BC%89%E7%B4%A2%E5%BC%95/">MySQL（三）索引</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T12:12:52.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/MySQL%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">MySQL（二）存储引擎</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-11T09:06:04.000Z">2021-05-11</time></p><p class="title"><a href="/2021/05/11/MySQL%EF%BC%88%E4%B8%80%EF%BC%89%E8%AF%AD%E6%B3%95%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">MySQL（一）语法和数据类型</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 Binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
