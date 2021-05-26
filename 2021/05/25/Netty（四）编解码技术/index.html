@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Netty（四）编解码技术 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="binshow"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="binshow"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Java学习"><meta property="og:type" content="blog"><meta property="og:title" content="Netty（四）编解码技术"><meta property="og:url" content="http://example.com/2021/05/25/Netty%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8A%80%E6%9C%AF/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="Java学习"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/Netty4.jpeg"><meta property="article:published_time" content="2021-05-25T02:13:16.000Z"><meta property="article:modified_time" content="2021-05-25T05:40:08.886Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="Netty"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/Netty4.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/25/Netty%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8A%80%E6%9C%AF/"},"headline":"Netty（四）编解码技术","image":[],"datePublished":"2021-05-25T02:13:16.000Z","dateModified":"2021-05-25T05:40:08.886Z","author":{"@type":"Person","name":"Binshow"},"description":"本篇主要讲述了  二次编码 keepalive和idle检测"}</script><link rel="canonical" href="http://example.com/2021/05/25/Netty%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8A%80%E6%9C%AF/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/Netty4.jpeg" alt="Netty（四）编解码技术"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-05-25T02:13:16.000Z" title="2021/5/25上午10:13:16">2021-05-25</time>发表</span><span class="level-item"><time dateTime="2021-05-25T05:40:08.886Z" title="2021/5/25下午1:40:08">2021-05-25</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">7 分钟读完 (大约1080个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Netty（四）编解码技术</h1><div class="content"><p>本篇主要讲述了</p>
+<ul>
+<li>二次编码</li>
+<li>keepalive和idle检测</li>
+</ul>
+<span id="more"></span>
+
+
+
+<h2 id="为什么需要二次编码"><a href="#为什么需要二次编码" class="headerlink" title="为什么需要二次编码"></a>为什么需要二次编码</h2><p>我们把解决半包和粘包问题的常用三种解码器叫做一次解码器，<strong>这层解码的结果是字节</strong>。</p>
+<p>我们在项目中使用的是对象，需要和字节进行相互转换，所以<strong>二次解码器就是将字节转换成对象</strong>。相对应的编码器就是将Java对象转换成字节流方便存储或传输。</p>
+<ul>
+<li>一次解码器：<strong>ByteToMessageDecoder</strong><ul>
+<li>io.netty.buffer.ByteBuf(原始数据流,可能出现粘包或半包)  –&gt;  io.netty.buffer.ByteBuf(用户数据的字节数组)</li>
+</ul>
+</li>
+<li>二次解码器：<strong>MessageToMessageDecoder</strong><ul>
+<li>io.netty.buffer.ByteBuf(用户数据的字节数组)     –&gt; java Object</li>
+</ul>
+</li>
+</ul>
+<h2 id="常用的二次编解码方式"><a href="#常用的二次编解码方式" class="headerlink" title="常用的二次编解码方式"></a>常用的二次编解码方式</h2><ul>
+<li>Java序列号</li>
+<li>XML</li>
+<li>JSON</li>
+<li>ProtoBuf</li>
+<li>Marshaling</li>
+</ul>
+<h2 id="选择编解码方式的特点"><a href="#选择编解码方式的特点" class="headerlink" title="选择编解码方式的特点"></a>选择编解码方式的特点</h2><ul>
+<li>压缩后的空间大小</li>
+<li>编解码的时间速度</li>
+<li>可读性</li>
+<li>多语言的支持</li>
+</ul>
+<h2 id="Protobuf的简介和使用"><a href="#Protobuf的简介和使用" class="headerlink" title="Protobuf的简介和使用"></a>Protobuf的简介和使用</h2><h2 id="源码解读"><a href="#源码解读" class="headerlink" title="源码解读"></a>源码解读</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ByteArrayDecoder</span> <span class="keyword">extends</span> <span class="title">MessageToMessageDecoder</span>&lt;<span class="title">ByteBuf</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">decode</span><span class="params">(ChannelHandlerContext ctx, ByteBuf msg, List&lt;Object&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">         <span class="comment">// copy the ByteBuf content to a byte array</span></span><br><span class="line">      	<span class="comment">//将netty的ByteBuf 转换成JDK中的字节数组</span></span><br><span class="line">        out.add(ByteBufUtil.getBytes(msg));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h1 id="Keepalive和Idle检测"><a href="#Keepalive和Idle检测" class="headerlink" title="Keepalive和Idle检测"></a>Keepalive和Idle检测</h1><h2 id="为什么需要keepalive"><a href="#为什么需要keepalive" class="headerlink" title="为什么需要keepalive"></a>为什么需要keepalive</h2><p>生活场景类比：</p>
+<p><img src="/2021/05/25/Netty%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8A%80%E6%9C%AF/keepalive.png" alt="keepalive.png"></p>
+<table>
+<thead>
+<tr>
+<th>订餐电话场景</th>
+<th>服务器应用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>电话线路</td>
+<td>数据连接（TCP 连接）</td>
+</tr>
+<tr>
+<td>交谈的话语</td>
+<td>数据</td>
+</tr>
+<tr>
+<td>通话双方</td>
+<td>数据发送和接收方</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>对比\场景</th>
+<th>订餐电话场景</th>
+<th>服务器应用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需要 keepalive 的场景</td>
+<td>对方临时着急走开</td>
+<td>对端异常“崩溃”</td>
+</tr>
+<tr>
+<td></td>
+<td>对方在，但是很忙，不知道什么时候忙完</td>
+<td>对端在，但是处理不过来</td>
+</tr>
+<tr>
+<td></td>
+<td>电话线路故障</td>
+<td>对端在，但是不可达</td>
+</tr>
+<tr>
+<td>不做 keepalive 的后果</td>
+<td>线路占用，耽误其他人订餐</td>
+<td>连接已坏，但是还浪费资源维持，下次直接用会直接报错</td>
+</tr>
+</tbody></table>
+<h2 id="如何设计keepalive？以TCP中为例"><a href="#如何设计keepalive？以TCP中为例" class="headerlink" title="如何设计keepalive？以TCP中为例"></a>如何设计keepalive？以TCP中为例</h2><p>TCP keepalive 核心参数：</p>
+<blockquote>
+<p># sysctl -a|grep tcp_keepalive</p>
+</blockquote>
+<ul>
+<li><p>net.ipv4.tcp_keepalive_time = 7200 </p>
+</li>
+<li><p>net.ipv4.tcp_keepalive_intvl = 75</p>
+</li>
+<li><p>net.ipv4.tcp_keepalive_probes = 9</p>
+</li>
+</ul>
+<p><strong>当启用（默认关闭）keepalive 时，TCP 在连接没有数据通过的7200秒后发送 keepalive 消息，当探测没有确认时，按75秒的重试频率重发，一直发 9 个探测包都没有确认，就认定连接失效。</strong></p>
+<p>所以总耗时一般为：2 小时 11 分钟 (7200 秒 + 75 秒* 9 次)</p>
+<h2 id="为什么应用层还需要keepalive"><a href="#为什么应用层还需要keepalive" class="headerlink" title="为什么应用层还需要keepalive ?"></a>为什么应用层还需要keepalive ?</h2><ul>
+<li><p><strong>协议分层，各层关注点不同</strong>：传输层关注是否“通”，应用层关注是否可服务？ 类比前面的电话订餐例子，电话能通，不代表有人接；服务器连接在，但是不定可以服务（例如服务不过来等）。</p>
+</li>
+<li><p> TCP 层的 keepalive 默认关闭，且经过路由等中转设备 keepalive 包可能会被丢弃。</p>
+</li>
+<li><p>TCP 层的 keepalive 时间太长：默认 &gt; 2 小时，虽然可改，但属于系统参数，改动影响所有应用。</p>
+</li>
+</ul>
+<blockquote>
+<p>HTTP 属于应用层协议，但是常常听到名词“ HTTP Keep-Alive ”指的是对长连接和短连接的选择：</p>
+<p>• Connection : Keep-Alive 长连接（HTTP/1.1 默认长连接，不需要带这个 header） </p>
+<p>• Connection : Close 短连接</p>
+</blockquote>
+<h2 id="idle检测是什么"><a href="#idle检测是什么" class="headerlink" title="idle检测是什么"></a>idle检测是什么</h2><p><img src="/2021/05/25/Netty%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8A%80%E6%9C%AF/idle%E6%A3%80%E6%B5%8B.png" alt="idle检测.png"></p>
+<p>Idle 监测，只是负责诊断，诊断后，做出不同的行为，决定 Idle 监测的最终用途：</p>
+<ul>
+<li><p> 发送 keepalive :一般用来配合 keepalive ，减少 keepalive 消息。</p>
+</li>
+<li><p>Keepalive 设计演进：V1 定时 keepalive 消息 -&gt; V2 空闲监测 + 判定为 Idle 时才发keepalive。 </p>
+</li>
+<li><p>V1：keepalive 消息与服务器正常消息交换完全不关联，定时就发送；</p>
+</li>
+<li><p>V2：有其他数据传输的时候，不发送 keepalive ，无数据传输超过一定时间，判定为 Idle，再发 keepalive 。</p>
+</li>
+</ul>
+<h2 id="如何开启keepalive和idle"><a href="#如何开启keepalive和idle" class="headerlink" title="如何开启keepalive和idle"></a>如何开启keepalive和idle</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">在server端： </span><br><span class="line"></span><br><span class="line"><span class="comment">//构造引导器实例ServerBootstrap</span></span><br><span class="line">            ServerBootstrap b = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">            b.group(bossGroup, workerGroup)</span><br><span class="line">             .channel(NioServerSocketChannel.class) <span class="comment">//设置NIO的channel</span></span><br><span class="line">             .option(ChannelOption.SO_BACKLOG, <span class="number">100</span>)</span><br><span class="line">             .handler(<span class="keyword">new</span> LoggingHandler(LogLevel.INFO))</span><br><span class="line">              <span class="comment">//两种设置keepalive风格</span></span><br><span class="line">             .childOption(ChannelOption.SO_KEEPALIVE, <span class="keyword">true</span>)</span><br><span class="line">             .childOption(NioChannelOption.SO_KEEPALIVE, <span class="keyword">true</span>)</span><br></pre></td></tr></table></figure>
+
+</div><div class="article-licensing box"><div class="licensing-title"><p>Netty（四）编解码技术</p><p><a href="http://example.com/2021/05/25/Netty（四）编解码技术/">http://example.com/2021/05/25/Netty（四）编解码技术/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-05-25</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-05-25</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Netty/">Netty</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2021/05/25/Netty%EF%BC%88%E4%BA%94%EF%BC%89%E9%94%81%E5%92%8C%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Netty（五）锁和内存使用</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/05/24/Netty%EF%BC%88%E4%B8%89%EF%BC%89TCP%E7%B2%98%E5%8C%85%E5%92%8C%E5%8D%8A%E5%8C%85/"><span class="level-item">Netty（三）TCP粘包和半包</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">28</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">7</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><ul class="menu-list"><li><a class="level is-mobile" href="#为什么需要二次编码"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">为什么需要二次编码</span></span></a></li><li><a class="level is-mobile" href="#常用的二次编解码方式"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">常用的二次编解码方式</span></span></a></li><li><a class="level is-mobile" href="#选择编解码方式的特点"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">选择编解码方式的特点</span></span></a></li><li><a class="level is-mobile" href="#Protobuf的简介和使用"><span class="level-left"><span class="level-item">1.4</span><span class="level-item">Protobuf的简介和使用</span></span></a></li><li><a class="level is-mobile" href="#源码解读"><span class="level-left"><span class="level-item">1.5</span><span class="level-item">源码解读</span></span></a></li></ul><li><a class="level is-mobile" href="#Keepalive和Idle检测"><span class="level-left"><span class="level-item">2</span><span class="level-item">Keepalive和Idle检测</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#为什么需要keepalive"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">为什么需要keepalive</span></span></a></li><li><a class="level is-mobile" href="#如何设计keepalive？以TCP中为例"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">如何设计keepalive？以TCP中为例</span></span></a></li><li><a class="level is-mobile" href="#为什么应用层还需要keepalive"><span class="level-left"><span class="level-item">2.3</span><span class="level-item">为什么应用层还需要keepalive ?</span></span></a></li><li><a class="level is-mobile" href="#idle检测是什么"><span class="level-left"><span class="level-item">2.4</span><span class="level-item">idle检测是什么</span></span></a></li><li><a class="level is-mobile" href="#如何开启keepalive和idle"><span class="level-left"><span class="level-item">2.5</span><span class="level-item">如何开启keepalive和idle</span></span></a></li></ul></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">25</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-25T13:47:18.000Z">2021-05-25</time></p><p class="title"><a href="/2021/05/25/Netty%EF%BC%88%E5%85%AD%EF%BC%89%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">Netty（六）流程源码解析</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-25T05:41:38.000Z">2021-05-25</time></p><p class="title"><a href="/2021/05/25/Netty%EF%BC%88%E4%BA%94%EF%BC%89%E9%94%81%E5%92%8C%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8/">Netty（五）锁和内存使用</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-25T02:13:16.000Z">2021-05-25</time></p><p class="title"><a href="/2021/05/25/Netty%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8A%80%E6%9C%AF/">Netty（四）编解码技术</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-24T06:12:24.000Z">2021-05-24</time></p><p class="title"><a href="/2021/05/24/Netty%EF%BC%88%E4%B8%89%EF%BC%89TCP%E7%B2%98%E5%8C%85%E5%92%8C%E5%8D%8A%E5%8C%85/">Netty（三）TCP粘包和半包</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-05-24T02:41:26.000Z">2021-05-24</time></p><p class="title"><a href="/2021/05/24/Netty%EF%BC%88%E4%BA%8C%EF%BC%89Reactor%E6%A8%A1%E5%9E%8B/">Netty（二）Reactor模型</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 Binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
