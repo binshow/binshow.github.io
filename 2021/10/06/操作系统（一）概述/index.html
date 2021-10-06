@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>操作系统（一）概述 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="讲一下内核和中断"><meta property="og:type" content="blog"><meta property="og:title" content="操作系统（一）概述"><meta property="og:url" content="http://example.com/2021/10/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%A6%82%E8%BF%B0/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="讲一下内核和中断"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg"><meta property="article:published_time" content="2021-10-06T05:23:49.000Z"><meta property="article:modified_time" content="2021-10-06T05:25:42.536Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="操作系统"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/10/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%A6%82%E8%BF%B0/"},"headline":"操作系统（一）概述","image":[],"datePublished":"2021-10-06T05:23:49.000Z","dateModified":"2021-10-06T05:25:42.536Z","author":{"@type":"Person","name":"binshow"},"description":"讲一下内核和中断"}</script><link rel="canonical" href="http://example.com/2021/10/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%A6%82%E8%BF%B0/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg" alt="操作系统（一）概述"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-10-06T05:23:49.000Z" title="2021/10/6下午1:23:49">2021-10-06</time>发表</span><span class="level-item"><time dateTime="2021-10-06T05:25:42.536Z" title="2021/10/6下午1:25:42">2021-10-06</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">16 分钟读完 (大约2441个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">操作系统（一）概述</h1><div class="content"><p>讲一下内核和中断</p>
+<span id="more"></span>
+
+<h1 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h1><h2 id="由来"><a href="#由来" class="headerlink" title="由来"></a>由来</h2><p>计算机是由各种外部硬件设备组成的，比如CPU、内存和硬盘等，如果让每个应用对和这些硬件设备对接通信协议的话很麻烦，所以就出现了一个<strong>连接硬件设备的桥梁，称为内核</strong>。应用程序只需要关心和内核的交互，而不需要关心硬件的细节了。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211003222528.png" alt="20211003222528" style="zoom:33%;" />
+
+
+
+<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><ol>
+<li><strong>管理进程、线程</strong>，决定哪个进程、线程使⽤ CPU，也就是进程调度的能⼒；</li>
+<li><strong>管理内存</strong>，决定内存的分配和回收，也就是内存管理的能⼒；</li>
+<li><strong>管理硬件设备</strong>，为进程与硬件设备之间提供通信能⼒，也就是硬件通信能⼒；</li>
+<li><strong>提供系统调⽤</strong>，如果应⽤程序要运⾏更⾼权限运⾏的服务，那么就需要有系统调⽤，它是⽤户程序与操作系统之间的接⼝。</li>
+</ol>
+<h2 id="如何工作的"><a href="#如何工作的" class="headerlink" title="如何工作的"></a>如何工作的</h2><p>内核具有很⾼的权限，可以控制 cpu、内存、硬盘等硬件，⽽应⽤程序具有的权限很⼩，因此⼤多数操作系统，把内存分成了两个区域：</p>
+<ul>
+<li><p>内核空间，这个内存空间只有内核程序可以访问；</p>
+</li>
+<li><p>⽤户空间，这个内存空间专⻔给应⽤程序使⽤；</p>
+</li>
+</ul>
+<p>用户空间的代码被限制了只能使用一个局部的内存空间，称为用户态；而内核空间的代码可以访问所有内存，称为内核态。</p>
+<h2 id="系统调用过程"><a href="#系统调用过程" class="headerlink" title="系统调用过程"></a>系统调用过程</h2><p>应⽤程序如果需要进⼊内核空间，就需要通过系统调⽤，下⾯来看看系统调⽤的过程：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211003223031.png" alt="20211003223031" style="zoom:50%;" />
+
+
+
+<p>内核程序执⾏在内核态，⽤户程序执⾏在⽤户态。<span style = "color : red">当应⽤程序使⽤系统调⽤时，会产⽣⼀个中断。发⽣中断后， CPU 会中断当前在执⾏的⽤户程序，转⽽跳转到中断处理程序，也就是开始执⾏内核程序。内核处理完后，主动触发中断，把 CPU 执⾏权限交回给⽤户程序，回到⽤户态继续⼯作。</span></p>
+<h2 id="线程的实现方式"><a href="#线程的实现方式" class="headerlink" title="线程的实现方式"></a>线程的实现方式</h2><p>一个应用程序启动后会在内存中创建一个执行副本，称为进程。</p>
+<p>Linux的内核是一个宏内核，可以看做一个进程。</p>
+<p>用户态进程如果要执行程序，是否也需要向内核申请呢？</p>
+<p>主要有三种线程的实现⽅式：</p>
+<ol>
+<li><p>⽤户线程（<strong>User Thread</strong>）：在⽤户空间实现的线程，不是由内核管理的线程，是由⽤户态的线程库来完成线程的管理；</p>
+</li>
+<li><p>内核线程（<strong>Kernel Thread</strong>）：在内核中实现的线程，是由内核管理的线程；</p>
+</li>
+<li><p>轻量级进程（<strong>LightWeight Process</strong>）：在内核中来⽀持⽤户线程；</p>
+</li>
+</ol>
+<h3 id="用户态线程"><a href="#用户态线程" class="headerlink" title="用户态线程"></a>用户态线程</h3><p>当线程的概念出现时，操作系统厂商可不能直接就去修改操作系统的内核，为了保证系统的稳定性！所以当时研究人员就写了一个<strong>线程函数库</strong>来完成线程的创建，包括线程的创建、终⽌、同步和调度等。</p>
+<p>这个线程函数库是位于用户态的，也就是说操作系统对这个库是一无所知的。</p>
+<p>也就是说：<strong>我用线程库写的一个多线程进程，只能一次在一个 CPU 核心上运行</strong></p>
+<p>同时：如果AB是同一个进程的两个线程的话，A 正在运行的时候，线程 B 想要运行的话，只能等待 A <strong>主动放弃</strong> CPU，也就是主动调用 <code>pthread_yield</code> 函数。（<strong>一个CPU同时只能执行这个进程的一个线程</strong>）</p>
+<p>用户态线程无法做到进程那样的轮转调度。</p>
+<p>如果进程中的某一个线程阻塞了会发生什么？</p>
+<p>在操作系统眼里，是进程阻塞了，那么整个进程就会进入<strong>阻塞态</strong>，在阻塞操作结束前，这个进程都无法得到 CPU 资源。那就相当于，<strong>所有的线程都被阻塞</strong>了</p>
+<p>为了解决这个问题，就出现了一种解决方案：<strong>jacket</strong>：<strong>就是把一个产生阻塞的系统调用转化成一个非阻塞的系统调用</strong>。</p>
+<blockquote>
+<p>小白惊讶地问：“这怎么做得到？该阻塞的调用，还能变得不阻塞？”</p>
+<p>小明答道：“我来举个例子吧，不是直接调用一个系统 I/O 例程，而是调用一个应用级别的 I/O jacket 例程，这个 jacket 例程中的代码会检查并且确定 I/O 设备是不是正忙，如果忙的话，就在<strong>用户态</strong>下将该线程阻塞，然后把控制权交给另一个线程。隔一段时间后再次检查 I/O 设备。就像你说的，最后还是会执行阻塞调用，但使用 jacket 可以缩短被阻塞的时间。不过有些情况下是可以不被阻塞的，取决于具体的实现。</p>
+</blockquote>
+<p>用户线程的优势：</p>
+<ol>
+<li>创建开销小</li>
+<li>切换成本低</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>与内核协作成本高，比如发生IO时需要频繁的在用户态和内核态之间切换</li>
+<li>线程间协作成本高，线程通信需要IO，IO需要系统调用</li>
+<li>无法利用多核优势，<strong>这些线程只能占用一个CPU核，无法并行加速</strong>。</li>
+<li>操作系统是无法感知到用户态线程的，也就不会进行线程的切换。</li>
+</ol>
+<h3 id="内核态线程"><a href="#内核态线程" class="headerlink" title="内核态线程"></a>内核态线程</h3><p>本质上就是操作系统能够看到的线程。</p>
+<p>许多操作系统都已经支持内核级线程了。为了实现线程，内核里就需要有用来记录系统里所有线程的线程表。当需要创建一个新线程的时候，就需要进行一个<strong>系统调用</strong>，然后由<strong>操作系统</strong>进行线程表的更新。</p>
+<p>内核态线程的优点：</p>
+<ol>
+<li>操作系统内核如果知道线程的存在，就可以像调度多个进程一样，把这些线程放在好几个 CPU 核心上，就能做到实际上的<strong>并行</strong></li>
+<li><strong>假如线程 A 阻塞了，与他同属一个进程的线程也不会被阻塞</strong>。这是内核级线程的绝对优势</li>
+</ol>
+<p>内核态线程的缺点：</p>
+<ol>
+<li>让操作系统进行线程调度，那意味着每次切换线程，就需要「<strong>陷入</strong>」内核态，而操作系统从<strong>用户态到内核态</strong>的转变是有开销的，所以说<strong>内核级线程切换的代价要比用户级线程大</strong>。</li>
+<li>线程表是存放在操作系统固定的<strong>表格空间</strong>或者<strong>堆栈空间</strong>里，所以内核级线程的数量是有限的，扩展性比不上用户级线程</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211003230755.png" alt="20211003230755"></p>
+<blockquote>
+<p>java中的线程是内核态线程还是用户态线程呢？</p>
+</blockquote>
+<h1 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h1><h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p>中断（interrupt）是计算机系统中的基本机制之一。即：<strong>在计算机运行过程中，当发生某个事件后，CPU 会停止当前程序流，转而去处理该事件，并在处理完毕后继续执行原程序流。</strong></p>
+<table>
+<thead>
+<tr>
+<th>相关概念</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>中断分类</strong></td>
+<td>硬中断（Hardware Interrupt）&amp; 软中断（Software Interrupt）</td>
+</tr>
+<tr>
+<td><strong>中断向量表（Interrupt Vector Table）</strong></td>
+<td>记录了中断号与中断服务程序内存地址的映射关系</td>
+</tr>
+<tr>
+<td><strong>中断服务程序 / 中断处理程序（Interrupt Service）</strong></td>
+<td>通过中断向量表定位到的特定处理程序</td>
+</tr>
+</tbody></table>
+<p>这样做的好处是化被动为主动，如果没有中断机制的话，就需要CPU轮询来判断某个条件是否成立，增加系统的开销。</p>
+<h2 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h2><p>硬中断：硬中断由外部设备（例如：磁盘，网卡，键盘，时钟）产生，用来通知操作系统外设状态变化</p>
+<blockquote>
+<p><strong>时钟中断：</strong> 一种硬中断，用于定期打断 CPU 执行的线程，以便切换给其他线程以得到执行机会。</p>
+</blockquote>
+<p>处理流程：</p>
+<p>1、<strong>外设</strong> 将中断请求发送给中断控制器；</p>
+<p>2、<strong>中断控制器</strong> 根据中断优先级，有序地将中断传递给 CPU；</p>
+<p>3、<strong>CPU</strong> 终止执行当前程序流，将 CPU 所有寄存器的数值保存到栈中；</p>
+<p>4、<strong>CPU</strong> 根据中断向量，从中断向量表中查找中断处理程序的入口地址，执行中断处理程序；</p>
+<p>5、<strong>CPU</strong> 恢复寄存器中的数值，返回原程序流停止位置继续执行。</p>
+<p>软中断：是一条 CPU 指令，由当前正在运行的进程产生。流程就和上面的345一样。</p>
+<blockquote>
+<p><strong>系统调用：</strong> 是一种软中断处理程序，用于让程序从用户态陷入内核态，以执行相应的操作。</p>
+</blockquote>
+</div><div class="article-licensing box"><div class="licensing-title"><p>操作系统（一）概述</p><p><a href="http://example.com/2021/10/06/操作系统（一）概述/">http://example.com/2021/10/06/操作系统（一）概述/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-10-06</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-10-06</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2021/10/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%BA%8C%EF%BC%89%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">操作系统（二）进程和线程</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/09/29/%E7%AE%97%E6%B3%95%E9%A2%98-%E4%B8%80-%E9%93%BE%E8%A1%A8/"><span class="level-item">算法题(一)链表</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">64</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">15</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#内核"><span class="level-left"><span class="level-item">1</span><span class="level-item">内核</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#由来"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">由来</span></span></a></li><li><a class="level is-mobile" href="#作用"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">作用</span></span></a></li><li><a class="level is-mobile" href="#如何工作的"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">如何工作的</span></span></a></li><li><a class="level is-mobile" href="#系统调用过程"><span class="level-left"><span class="level-item">1.4</span><span class="level-item">系统调用过程</span></span></a></li><li><a class="level is-mobile" href="#线程的实现方式"><span class="level-left"><span class="level-item">1.5</span><span class="level-item">线程的实现方式</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#用户态线程"><span class="level-left"><span class="level-item">1.5.1</span><span class="level-item">用户态线程</span></span></a></li><li><a class="level is-mobile" href="#内核态线程"><span class="level-left"><span class="level-item">1.5.2</span><span class="level-item">内核态线程</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#中断"><span class="level-left"><span class="level-item">2</span><span class="level-item">中断</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#是什么"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">是什么</span></span></a></li><li><a class="level is-mobile" href="#分类"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">分类</span></span></a></li></ul></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">57</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-06T05:26:00.000Z">2021-10-06</time></p><p class="title"><a href="/2021/10/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%BA%8C%EF%BC%89%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/">操作系统（二）进程和线程</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-06T05:23:49.000Z">2021-10-06</time></p><p class="title"><a href="/2021/10/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%A6%82%E8%BF%B0/">操作系统（一）概述</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-09-29T13:24:51.000Z">2021-09-29</time></p><p class="title"><a href="/2021/09/29/%E7%AE%97%E6%B3%95%E9%A2%98-%E4%B8%80-%E9%93%BE%E8%A1%A8/">算法题(一)链表</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-09-06T14:52:13.000Z">2021-09-06</time></p><p class="title"><a href="/2021/09/06/MySQL%EF%BC%88%E4%B8%89%EF%BC%89%E6%96%87%E4%BB%B6%E5%92%8C%E8%A1%A8%E7%BB%93%E6%9E%84/">MySQL（三）文件和表结构</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-08-28T02:24:14.000Z">2021-08-28</time></p><p class="title"><a href="/2021/08/28/Java%E5%B9%B6%E5%8F%91%EF%BC%88%E4%B8%80%EF%BC%89%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%94%81/">Java并发（一）内存模型和锁</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
