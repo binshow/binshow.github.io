@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>MySQL（五）单表和多表查询 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="SQL查询的时候会有表连接，那么单表和多表之间存在不同访问方法。"><meta property="og:type" content="blog"><meta property="og:title" content="MySQL（五）单表和多表查询"><meta property="og:url" content="http://example.com/2021/10/08/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E5%8D%95%E8%A1%A8%E5%92%8C%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="SQL查询的时候会有表连接，那么单表和多表之间存在不同访问方法。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/MySQL5.jpeg"><meta property="article:published_time" content="2021-10-08T12:58:27.000Z"><meta property="article:modified_time" content="2021-10-08T13:54:55.303Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="MySQL"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/MySQL5.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/10/08/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E5%8D%95%E8%A1%A8%E5%92%8C%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2/"},"headline":"MySQL（五）单表和多表查询","image":[],"datePublished":"2021-10-08T12:58:27.000Z","dateModified":"2021-10-08T13:54:55.303Z","author":{"@type":"Person","name":"binshow"},"description":"SQL查询的时候会有表连接，那么单表和多表之间存在不同访问方法。"}</script><link rel="canonical" href="http://example.com/2021/10/08/MySQL%EF%BC%88%E4%BA%94%EF%BC%89%E5%8D%95%E8%A1%A8%E5%92%8C%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/MySQL5.jpeg" alt="MySQL（五）单表和多表查询"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-10-08T12:58:27.000Z" title="2021/10/8下午8:58:27">2021-10-08</time>发表</span><span class="level-item"><time dateTime="2021-10-08T13:54:55.303Z" title="2021/10/8下午9:54:55">2021-10-08</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">2 小时读完 (大约17366个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">MySQL（五）单表和多表查询</h1><div class="content"><p>SQL查询的时候会有表连接，那么单表和多表之间存在不同访问方法。</p>
+<span id="more"></span>
+
+<h1 id="单表访问方法"><a href="#单表访问方法" class="headerlink" title="单表访问方法"></a>单表访问方法</h1><p>MySQL Server中有一个称为<strong>查询优化器</strong>的模块，一条查询语句进行语法解析之后就会被交给查询优化器来进行优化，优化的结果就是生成一个所谓的执行计划，这个执行计划表明了应该使用哪些索引进行查询，表之间的连接顺序是啥样的，最后会按照执行计划中的步骤调用存储引擎提供的方法来真正的执行查询，并将查询结果返回给用户。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> single_table (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">    key1 <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    key2 <span class="type">INT</span>,</span><br><span class="line">    key3 <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    key_part1 <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    key_part2 <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    key_part3 <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    common_field <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    <span class="keyword">PRIMARY</span> KEY (id),</span><br><span class="line">    KEY idx_key1 (key1), <span class="operator">/</span><span class="operator">/</span> 二级索引</span><br><span class="line">    <span class="keyword">UNIQUE</span> KEY idx_key2 (key2), <span class="operator">/</span><span class="operator">/</span> 唯一二级索引</span><br><span class="line">    KEY idx_key3 (key3), <span class="operator">/</span><span class="operator">/</span> 二级索引</span><br><span class="line">    KEY idx_key_part(key_part1, key_part2, key_part3) <span class="operator">/</span><span class="operator">/</span> 联合索引</span><br><span class="line">) Engine<span class="operator">=</span>InnoDB CHARSET<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
+
+<p>我们为这个<code>single_table</code>表建立了1个聚簇索引和4个二级索引，分别是：</p>
+<ul>
+<li><p>为<code>id</code>列建立的聚簇索引。</p>
+</li>
+<li><p>为<code>key1</code>列建立的<code>idx_key1</code>二级索引。</p>
+</li>
+<li><p>为<code>key2</code>列建立的<code>idx_key2</code>二级索引，而且该索引是唯一二级索引。</p>
+</li>
+<li><p>为<code>key3</code>列建立的<code>idx_key3</code>二级索引。</p>
+</li>
+<li><p>为<code>key_part1</code>、<code>key_part2</code>、<code>key_part3</code>列建立的<code>idx_key_part</code>二级索引，这也是一个联合索引。</p>
+</li>
+</ul>
+<h2 id="访问方法（access-method）的概念"><a href="#访问方法（access-method）的概念" class="headerlink" title="访问方法（access method）的概念"></a>访问方法（access method）的概念</h2><p>对于单个表的查询来说，查询的执行方式大致分为下边两种：</p>
+<ul>
+<li><p>使用<strong>全表扫描</strong>进行查询:把表的每一行记录都扫一遍嘛，把符合搜索条件的记录加入到结果集。</p>
+</li>
+<li><p>使用<strong>索引</strong>进行查询</p>
+<p>因为直接使用全表扫描的方式执行查询要遍历好多记录，所以代价可能太大了。如果查询语句中的搜索条件可以使用到某个索引，那直接使用索引来执行查询可能会加快查询执行的时间。使用索引来执行查询的方式五花八门，又可以细分为许多种类：</p>
+<ul>
+<li><p>针对主键或唯一二级索引的等值查询</p>
+</li>
+<li><p>针对普通二级索引的等值查询</p>
+</li>
+<li><p>针对索引列的范围查询</p>
+</li>
+<li><p>直接扫描整个索引</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>MySQL执行查询语句的方式称之为访问方法。同一个查询语句可能可以使用多种不同的访问方法来执行</strong>，虽然最后的查询结果都是一样的，但是执行的时间可能差非常多。</p>
+<h2 id="const常数：主键索引、唯一二级索引"><a href="#const常数：主键索引、唯一二级索引" class="headerlink" title="const常数：主键索引、唯一二级索引"></a>const常数：主键索引、唯一二级索引</h2><p>有的时候我们可以通过主键列来定位一条记录，比方说这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1438</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>MySQL</code>会直接利用主键值在聚簇索引中定位对应的用户记录，就像这样：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002134133.png" alt="20211002134133" style="zoom:50%;" />
+
+<p>对于<code>single_table</code>表的聚簇索引来说，展示的就是<code>id</code>列。我们想突出的重点就是：<code>B+</code>树叶子节点中的记录是按照索引列排序的，对于的聚簇索引来说，它对应的<code>B+</code>树叶子节点中的记录就是按照<code>id</code>列排序的。<code>B+</code>树本来就是一个矮矮的大胖子，所以这样根据主键值定位一条记录的速度贼快。类似的，我们根据<strong>唯一二级索引列</strong>来定位一条记录的速度也是贼快的，比如下边这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">=</span> <span class="number">3841</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询的执行过程的示意图就是这样：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002134322.png" alt="20211002134322" style="zoom:50%;" />
+
+<p>可以看到这个查询的执行分两步：</p>
+<ul>
+<li>第一步先从<code>idx_key2</code>对应的<code>B+</code>树索引中根据<code>key2</code>列与常数的等值比较条件定位到一条二级索引记录</li>
+<li>然后再根据该记录的<code>id</code>值到聚簇索引中获取到完整的用户记录。</li>
+</ul>
+<p><strong>认为通过主键或者唯一二级索引列与常数的等值</strong>比较来定位一条记录是像坐火箭一样快的，所以他们把这种通过主键或者唯一二级索引列来定位一条记录的访问方法定义为：<code>const</code>，意思是常数级别的，代价是可以忽略不计的。</p>
+<p>不过这种<code>const</code>访问方法只能在主键列或者唯一二级索引列和一个常数进行等值比较时才有效，如果主键或者唯一二级索引是由多个列构成的话，索引中的每一个列都需要与常数进行等值比较，这个<code>const</code>访问方法才有效（这是因为只有该索引中全部列都采用等值比较才可以定位唯一的一条记录）。</p>
+<p>对于唯一二级索引来说，查询该列为<code>NULL</code>值的情况比较特殊，比如这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="keyword">IS</span> <span class="keyword">NULL</span>;</span><br></pre></td></tr></table></figure>
+
+<p>因为唯一二级索引列并不限制<code>NULL</code>值的数量，所以上述语句可能访问到多条记录，也就是说上边这个语句不可以使用<code>const</code>访问方法来执行。</p>
+<h2 id="ref：普通二级索引"><a href="#ref：普通二级索引" class="headerlink" title="ref：普通二级索引"></a>ref：普通二级索引</h2><p>有时候我们对某个普通的二级索引列与常数进行等值比较，比如这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>对于这个查询，我们当然可以选择全表扫描来逐一对比搜索条件是否满足要求，我们也可以先使用二级索引找到对应记录的<code>id</code>值，然后再回表到聚簇索引中查找完整的用户记录。由于普通二级索引并不限制索引列值的唯一性，所以可能找到多条对应的记录，也就是说使用二级索引来执行查询的代价取决于等值匹配到的二级索引记录条数。如果匹配的记录较少，则回表的代价还是比较低的，所以<code>MySQL</code>可能选择使用索引而不是全表扫描的方式来执行查询。</p>
+<p><strong>这种搜索条件为二级索引列与常数等值比较，采用二级索引来执行查询的访问方法称为：<code>ref</code></strong></p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211002134502.png" alt="20211002134502"></p>
+<p>从图示中可以看出，对于普通的二级索引来说，通过索引列进行等值比较后可能匹配到多条连续的记录，而不是像主键或者唯一二级索引那样最多只能匹配1条记录，所以这种访问方法比差了那么一丢丢，但是在二级索引等值比较时匹配的记录数较少时的效率还是很高的（如果匹配的二级索引记录太多那么回表的成本就太大了），跟坐高铁差不多。不过需要注意下边两种情况：</p>
+<ul>
+<li><p>二级索引列值为<code>NULL</code>的情况</p>
+<p>不论是普通的二级索引，还是唯一二级索引，它们的索引列对包含<code>NULL</code>值的数量并不限制，所以我们采用<code>key IS NULL</code>这种形式的搜索条件最多只能使用<code>ref</code>的访问方法，而不是<code>const</code>的访问方法。</p>
+</li>
+<li><p>对于某个包含多个索引列的二级索引来说，只要是最左边的连续索引列是与常数的等值比较就可能采用<code>ref</code>的访问方法，比方说下边这几个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;god like&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;god like&#x27;</span> <span class="keyword">AND</span> key_part2 <span class="operator">=</span> <span class="string">&#x27;legendary&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;god like&#x27;</span> <span class="keyword">AND</span> key_part2 <span class="operator">=</span> <span class="string">&#x27;legendary&#x27;</span> <span class="keyword">AND</span> key_part3 <span class="operator">=</span> <span class="string">&#x27;penta kill&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>但是如果最左边的连续索引列并不全部是等值比较的话，它的访问方法就不能称为<code>ref</code>了，比方说这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;god like&#x27;</span> <span class="keyword">AND</span> key_part2 <span class="operator">&gt;</span> <span class="string">&#x27;legendary&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="ref-or-null"><a href="#ref-or-null" class="headerlink" title="ref_or_null"></a>ref_or_null</h2><p>有时候我们不仅想找出某个二级索引列的值等于某个常数的记录，还想把该列的值为<code>NULL</code>的记录也找出来，就像下边这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_demo <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span> <span class="keyword">OR</span> key1 <span class="keyword">IS</span> <span class="keyword">NULL</span>;</span><br></pre></td></tr></table></figure>
+
+<p>当使用二级索引而不是全表扫描的方式执行该查询时，这种类型的查询使用的访问方法就称为<code>ref_or_null</code>，这个<code>ref_or_null</code>访问方法的执行过程如下：<img src="https://raw.githubusercontent.com/binshow/img/master/20211002134649.png" alt="20211002134649" style="zoom:50%;" /></p>
+<p>可以看到，上边的查询相当于先分别从<code>idx_key1</code>索引对应的<code>B+</code>树中找出<code>key1 IS NULL</code>和<code>key1 = &#39;abc&#39;</code>的两个连续的记录范围，然后根据这些二级索引记录中的<code>id</code>值再回表查找完整的用户记录。</p>
+<h2 id="range：利用索引范围匹配"><a href="#range：利用索引范围匹配" class="headerlink" title="range：利用索引范围匹配"></a>range：利用索引范围匹配</h2><p>我们之前介绍的几种访问方法都是在对索引列与某一个常数进行等值比较的时候才可能使用到（<code>ref_or_null</code>比较奇特，还计算了值为<code>NULL</code>的情况），但是有时候我们面对的搜索条件更复杂，比如下边这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="keyword">IN</span> (<span class="number">1438</span>, <span class="number">6328</span>) <span class="keyword">OR</span> (key2 <span class="operator">&gt;=</span> <span class="number">38</span> <span class="keyword">AND</span> key2 <span class="operator">&lt;=</span> <span class="number">79</span>);</span><br></pre></td></tr></table></figure>
+
+<p>我们当然还可以使用全表扫描的方式来执行这个查询，不过也可以使用<code>二级索引 + 回表</code>的方式执行，如果采用<code>二级索引 + 回表</code>的方式来执行的话，那么此时的搜索条件就不只是要求索引列与常数的等值匹配了，而是索引列需要匹配某个或某些范围的值，在本查询中<code>key2</code>列的值只要匹配下列3个范围中的任何一个就算是匹配成功了：</p>
+<ul>
+<li><p><code>key2</code>的值是<code>1438</code></p>
+</li>
+<li><p><code>key2</code>的值是<code>6328</code></p>
+</li>
+<li><p><code>key2</code>的值在<code>38</code>和<code>79</code>之间。</p>
+</li>
+</ul>
+<p>设计<code>MySQL</code>的大叔把这种利用索引进行范围匹配的访问方法称之为：<code>range</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">此处所说的使用索引进行范围匹配中的 `索引` 可以是聚簇索引，也可以是二级索引。</span><br></pre></td></tr></table></figure>
+
+<p>如果把这几个所谓的<code>key2</code>列的值需要满足的<code>范围</code>在数轴上体现出来的话，那应该是这个样子：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002134951.png" alt="20211002134951" style="zoom:50%;" />
+
+<p>也就是从数学的角度看，每一个所谓的范围都是数轴上的一个<code>区间</code>，3个范围也就对应着3个区间：</p>
+<ul>
+<li><p>范围1：<code>key2 = 1438</code></p>
+</li>
+<li><p>范围2：<code>key2 = 6328</code></p>
+</li>
+<li><p>范围3：<code>key2 ∈ [38, 79]</code>，注意这里是闭区间。</p>
+</li>
+</ul>
+<p>我们可以把那种索引列等值匹配的情况称之为<code>单点区间</code>，上边所说的<code>范围1</code>和<code>范围2</code>都可以被称为单点区间，像<code>范围3</code>这种的我们可以称为连续范围区间。</p>
+<h2 id="index：遍历二级索引"><a href="#index：遍历二级索引" class="headerlink" title="index：遍历二级索引"></a>index：遍历二级索引</h2><p>看下边这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> key_part1, key_part2, key_part3 <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key_part2 <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>key_part2</code>并不是联合索引<code>idx_key_part</code>最左索引列，所以我们无法使用<code>ref</code>或者<code>range</code>访问方法来执行这个语句。但是这个查询符合下边这两个条件：</p>
+<ul>
+<li><p>它的查询列表只有3个列：<code>key_part1</code>, <code>key_part2</code>, <code>key_part3</code>，而索引<code>idx_key_part</code>又包含这三个列。</p>
+</li>
+<li><p>搜索条件中只有<code>key_part2</code>列。这个列也包含在索引<code>idx_key_part</code>中。</p>
+</li>
+</ul>
+<p>也就是说我们可以直接通过遍历<code>idx_key_part</code>索引的叶子节点的记录来比较<code>key_part2 = &#39;abc&#39;</code>这个条件是否成立，把匹配成功的二级索引记录的<code>key_part1</code>, <code>key_part2</code>, <code>key_part3</code>列的值直接加到结果集中就行了。由于二级索引记录比聚簇索记录小的多（聚簇索引记录要存储所有用户定义的列以及所谓的隐藏列，而二级索引记录只需要存放索引列和主键），而且这个过程也不用进行回表操作，所以直接遍历二级索引比直接遍历聚簇索引的成本要小很多，设计<code>MySQL</code>的大叔就把这种采用**遍历二级索引记录的执行方式称之为：<code>index</code>**。</p>
+<h2 id="all：全表扫描"><a href="#all：全表扫描" class="headerlink" title="all：全表扫描"></a>all：全表扫描</h2><p>最直接的查询执行方式就是我们已经提了无数遍的全表扫描，对于<code>InnoDB</code>表来说也就是直接扫描聚簇索引，设计<code>MySQL</code>的大叔把这种使用全表扫描执行查询的方式称之为：<code>all</code>。</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="重温-二级索引-回表"><a href="#重温-二级索引-回表" class="headerlink" title="重温 二级索引 + 回表"></a>重温 二级索引 + 回表</h3><p><span style="color:red">一般情况下</span>只能利用单个二级索引执行查询，比方说下边的这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span> <span class="keyword">AND</span> key2 <span class="operator">&gt;</span> <span class="number">1000</span>;</span><br></pre></td></tr></table></figure>
+
+<p>查询优化器会识别到这个查询中的两个搜索条件：</p>
+<ul>
+<li><p><code>key1 = &#39;abc&#39;</code></p>
+</li>
+<li><p><code>key2 &gt; 1000</code></p>
+</li>
+</ul>
+<p>优化器一般会根据<code>single_table</code>表的统计数据来判断到底使用哪个条件到对应的二级索引中查询扫描的行数会更少，选择那个扫描行数较少的条件到对应的二级索引中查询（关于如何比较的细节我们后边的章节中会唠叨）。然后将从该二级索引中查询到的结果经过回表得到完整的用户记录后再根据其余的<code>WHERE</code>条件过滤记录。一般来说，等值查找比范围查找需要扫描的行数更少（也就是<code>ref</code>的访问方法一般比<code>range</code>好，但这也不总是一定的，也可能采用<code>ref</code>访问方法的那个索引列的值为特定值的行数特别多），所以这里假设优化器决定使用<code>idx_key1</code>索引进行查询，那么整个查询过程可以分为两个步骤：</p>
+<ul>
+<li><p>步骤1：使用二级索引定位记录的阶段，也就是根据条件<code>key1 = &#39;abc&#39;</code>从<code>idx_key1</code>索引代表的<code>B+</code>树中找到对应的二级索引记录。</p>
+</li>
+<li><p>步骤2：回表阶段，也就是根据上一步骤中找到的记录的主键值进行<code>回表</code>操作，也就是到聚簇索引中找到对应的完整的用户记录，再根据条件<code>key2 &gt; 1000</code>到完整的用户记录继续过滤。将最终符合过滤条件的记录返回给用户。</p>
+</li>
+</ul>
+<p>这里需要特别提醒大家的一点是，<span style="color:red">因为二级索引的节点中的记录只包含索引列和主键，所以在步骤1中使用<code>idx_key1</code>索引进行查询时只会用到与<code>key1</code>列有关的搜索条件，其余条件，比如<code>key2 &gt; 1000</code>这个条件在步骤1中是用不到的，只有在步骤2完成回表操作后才能继续针对完整的用户记录中继续过滤</span>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：需要注意的是，我们说一般情况下执行一个查询只会用到二级索引，不过还是有特殊情况的，我们后边会详细唠叨的。</span><br></pre></td></tr></table></figure>
+
+<h3 id="明确range访问方法使用的范围区间"><a href="#明确range访问方法使用的范围区间" class="headerlink" title="明确range访问方法使用的范围区间"></a>明确range访问方法使用的范围区间</h3><p>其实对于<code>B+</code>树索引来说，只要索引列和常数使用<code>=</code>、<code>&lt;=&gt;</code>、<code>IN</code>、<code>NOT IN</code>、<code>IS NULL</code>、<code>IS NOT NULL</code>、<code>&gt;</code>、<code>&lt;</code>、<code>&gt;=</code>、<code>&lt;=</code>、<code>BETWEEN</code>、<code>!=</code>（不等于也可以写成<code>&lt;&gt;</code>）或者<code>LIKE</code>操作符连接起来，就可以产生一个所谓的<code>区间</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：LIKE操作符比较特殊，只有在匹配完整字符串或者匹配字符串前缀时才可以利用索引，具体原因我们在前边的章节中唠叨过了，这里就不赘述了。IN操作符的效果和若干个等值匹配操作符`=`之间用`OR`连接起来是一样的，也就是说会产生多个单点区间，比如下边这两个语句的效果是一样的：SELECT * FROM single_table WHERE key2 IN (1438, 6328);    SELECT * FROM single_table WHERE key2 = 1438 OR key2 = 6328;</span><br></pre></td></tr></table></figure>
+
+<p>不过在日常的工作中，一个查询的<code>WHERE</code>子句可能有很多个小的搜索条件，这些搜索条件需要使用<code>AND</code>或者<code>OR</code>操作符连接起来</p>
+<p>当我们想使用<code>range</code>访问方法来执行一个查询语句时，重点就是找出该查询可用的索引以及这些索引对应的范围区间。下边分两种情况看一下怎么从由<code>AND</code>或<code>OR</code>组成的复杂搜索条件中提取出正确的范围区间。</p>
+<h4 id="所有搜索条件都可以使用某个索引的情况"><a href="#所有搜索条件都可以使用某个索引的情况" class="headerlink" title="所有搜索条件都可以使用某个索引的情况"></a>所有搜索条件都可以使用某个索引的情况</h4><p>有时候每个搜索条件都可以使用到某个索引，比如下边这个查询语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">AND</span> key2 <span class="operator">&gt;</span> <span class="number">200</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询中的搜索条件都可以使用到<code>key2</code>，也就是说每个搜索条件都对应着一个<code>idx_key2</code>的范围区间。这两个小的搜索条件使用<code>AND</code>连接起来，也就是要取两个范围区间的交集，在我们使用<code>range</code>访问方法执行查询时，使用的<code>idx_key2</code>索引的范围区间的确定过程就如下图所示：</p>
+<p><code>key2 &gt; 100</code>和<code>key2 &gt; 200</code>交集当然就是<code>key2 &gt; 200</code>了，也就是说上边这个查询使用<code>idx_key2</code>的范围区间就是<code>(200, +∞)</code>。这东西小学都学过吧，再不济初中肯定都学过。我们再看一下使用<code>OR</code>将多个搜索条件连接在一起的情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">OR</span> key2 <span class="operator">&gt;</span> <span class="number">200</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>OR</code>意味着需要取各个范围区间的并集，所以上边这个查询在我们使用<code>range</code>访问方法执行查询时：</p>
+<p>也就是说上边这个查询使用<code>idx_key2</code>的范围区间就是<code>(100， +∞)</code>。</p>
+<h4 id="有的搜索条件无法使用索引的情况"><a href="#有的搜索条件无法使用索引的情况" class="headerlink" title="有的搜索条件无法使用索引的情况"></a>有的搜索条件无法使用索引的情况</h4><p>比如下边这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">AND</span> common_field <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>请注意，这个查询语句中能利用的索引只有<code>idx_key2</code>一个，而<code>idx_key2</code>这个二级索引的记录中又不包含<code>common_field</code>这个字段，所以在使用二级索引<code>idx_key2</code>定位定位记录的阶段用不到<code>common_field = &#39;abc&#39;</code>这个条件，这个条件是在回表获取了完整的用户记录后才使用的，而<code>范围区间</code>是为了到索引中取记录中提出的概念，所以在确定<code>范围区间</code>的时候不需要考虑<code>common_field = &#39;abc&#39;</code>这个条件，我们在为某个索引确定范围区间的时候只需要把用不到相关索引的搜索条件替换为<code>TRUE</code>就好了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：之所以把用不到索引的搜索条件替换为TRUE，是因为我们不打算使用这些条件进行在该索引上进行过滤，所以不管索引的记录满不满足这些条件，我们都把它们选取出来，待到之后回表的时候再使用它们过滤。</span><br></pre></td></tr></table></figure>
+
+<p>我们把上边的查询中用不到<code>idx_key2</code>的搜索条件替换后就是这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">AND</span> <span class="literal">TRUE</span>;</span><br></pre></td></tr></table></figure>
+
+<p>化简之后就是这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说最上边那个查询使用<code>idx_key2</code>的范围区间就是：<code>(100, +∞)</code>。</p>
+<p>再来看一下使用<code>OR</code>的情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">OR</span> common_field <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>同理，我们把使用不到<code>idx_key2</code>索引的搜索条件替换为<code>TRUE</code>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key2 <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">OR</span> <span class="literal">TRUE</span>;</span><br></pre></td></tr></table></figure>
+
+<p>接着化简：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> <span class="literal">TRUE</span>;</span><br></pre></td></tr></table></figure>
+
+<p>额，这也就说说明如果我们强制使用<code>idx_key2</code>执行查询的话，对应的范围区间就是<code>(-∞, +∞)</code>，也就是需要将全部二级索引的记录进行回表，这个代价肯定比直接全表扫描都大了。也就是说<strong>一个使用到索引的搜索条件和没有使用该索引的搜索条件使用<code>OR</code>连接起来后是无法使用该索引的</strong>。</p>
+<h4 id="复杂搜索条件下找出范围匹配的区间"><a href="#复杂搜索条件下找出范围匹配的区间" class="headerlink" title="复杂搜索条件下找出范围匹配的区间"></a>复杂搜索条件下找出范围匹配的区间</h4><p>有的查询的搜索条件可能特别复杂，光是找出范围匹配的各个区间就挺烦的，比方说下边这个：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span>         (key1 <span class="operator">&gt;</span> <span class="string">&#x27;xyz&#x27;</span> <span class="keyword">AND</span> key2 <span class="operator">=</span> <span class="number">748</span> ) <span class="keyword">OR</span>        (key1 <span class="operator">&lt;</span> <span class="string">&#x27;abc&#x27;</span> <span class="keyword">AND</span> key1 <span class="operator">&gt;</span> <span class="string">&#x27;lmn&#x27;</span>) <span class="keyword">OR</span>        (key1 <span class="keyword">LIKE</span> <span class="string">&#x27;%suf&#x27;</span> <span class="keyword">AND</span> key1 <span class="operator">&gt;</span> <span class="string">&#x27;zzz&#x27;</span> <span class="keyword">AND</span> (key2 <span class="operator">&lt;</span> <span class="number">8000</span> <span class="keyword">OR</span> common_field <span class="operator">=</span> <span class="string">&#x27;abc&#x27;</span>)) ;</span><br></pre></td></tr></table></figure>
+
+<p>我滴个神，这个搜索条件真是绝了，不过大家不要被复杂的表象迷住了双眼，按着下边这个套路分析一下：</p>
+<ul>
+<li><p>首先查看<code>WHERE</code>子句中的搜索条件都涉及到了哪些列，哪些列可能使用到索引。</p>
+<p>这个查询的搜索条件涉及到了<code>key1</code>、<code>key2</code>、<code>common_field</code>这3个列，然后<code>key1</code>列有普通的二级索引<code>idx_key1</code>，<code>key2</code>列有唯一二级索引<code>idx_key2</code>。</p>
+</li>
+<li><p>对于那些可能用到的索引，分析它们的范围区间。</p>
+<ul>
+<li><p>假设我们使用<code>idx_key1</code>执行查询</p>
+<ul>
+<li><p>我们需要把那些用不到该索引的搜索条件暂时移除掉，移除方法也简单，直接把它们替换为<code>TRUE</code>就好了。上边的查询中除了有关<code>key2</code>和<code>common_field</code>列不能使用到<code>idx_key1</code>索引外，<code>key1 LIKE &#39;%suf&#39;</code>也使用不到索引，所以把这些搜索条件替换为<code>TRUE</code>之后的样子就是这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(key1 &gt; &#x27;xyz&#x27; AND TRUE ) OR(key1 &lt; &#x27;abc&#x27; AND key1 &gt; &#x27;lmn&#x27;) OR(TRUE AND key1 &gt; &#x27;zzz&#x27; AND (TRUE OR TRUE))</span><br></pre></td></tr></table></figure>
+
+<p>化简一下上边的搜索条件就是下边这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(key1 &gt; &#x27;xyz&#x27;) OR(key1 &lt; &#x27;abc&#x27; AND key1 &gt; &#x27;lmn&#x27;) OR(key1 &gt; &#x27;zzz&#x27;)</span><br></pre></td></tr></table></figure></li>
+<li><p>替换掉永远为<code>TRUE</code>或<code>FALSE</code>的条件</p>
+<p>因为符合<code>key1 &lt; &#39;abc&#39; AND key1 &gt; &#39;lmn&#39;</code>永远为<code>FALSE</code>，所以上边的搜索条件可以被写成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(key1 &gt; &#x27;xyz&#x27;) OR (key1 &gt; &#x27;zzz&#x27;)</span><br></pre></td></tr></table></figure></li>
+<li><p>继续化简区间</p>
+<p><code>key1 &gt; &#39;xyz&#39;</code>和<code>key1 &gt; &#39;zzz&#39;</code>之间使用<code>OR</code>操作符连接起来的，意味着要取并集，所以最终的结果化简的到的区间就是：<code>key1 &gt; xyz</code>。也就是说：<span style="color:red">上边那个有一坨搜索条件的查询语句如果使用 idx_key1 索引执行查询的话，需要把满足<code>key1 &gt; xyz</code>的二级索引记录都取出来，然后拿着这些记录的id再进行回表，得到完整的用户记录之后再使用其他的搜索条件进行过滤</span>。</p>
+</li>
+</ul>
+</li>
+<li><p>假设我们使用<code>idx_key2</code>执行查询</p>
+<ul>
+<li><p>我们需要把那些用不到该索引的搜索条件暂时使用<code>TRUE</code>条件替换掉，其中有关<code>key1</code>和<code>common_field</code>的搜索条件都需要被替换掉，替换结果就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(TRUE AND key2 = 748 ) OR(TRUE AND TRUE) OR(TRUE AND TRUE AND (key2 &lt; 8000 OR TRUE))</span><br></pre></td></tr></table></figure>
+
+<p>哎呀呀，<code>key2 &lt; 8000 OR TRUE</code>的结果肯定是<code>TRUE</code>呀，也就是说化简之后的搜索条件成这样了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">key2 = 748 OR TRUE</span><br></pre></td></tr></table></figure>
+
+<p>这个化简之后的结果就更简单了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TRUE</span><br></pre></td></tr></table></figure>
+
+<p>这个结果也就意味着如果我们要使用<code>idx_key2</code>索引执行查询语句的话，需要扫描<code>idx_key2</code>二级索引的所有记录，然后再回表，这不是得不偿失么，所以这种情况下不会使用<code>idx_key2</code>索引的。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="索引合并"><a href="#索引合并" class="headerlink" title="索引合并"></a>索引合并</h3><p>MySQL在一般情况下执行一个查询时最多只会用到单个二级索引，</p>
+<p>但还是存在有的时候使用了多个二级索引，这种执行方法称为：<strong>索引合并</strong>。</p>
+<h4 id="Intersection合并"><a href="#Intersection合并" class="headerlink" title="Intersection合并"></a>Intersection合并</h4><p><code>Intersection</code>翻译过来的意思是<code>交集</code>。这里是说某个查询可以使用多个二级索引，将从多个二级索引中查询到的结果取交集，比方说下边这个查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key3 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>假设这个查询使用<code>Intersection</code>合并的方式执行的话，那这个过程就是这样的：</p>
+<ul>
+<li><p>从<code>idx_key1</code>二级索引对应的<code>B+</code>树中取出<code>key1 = &#39;a&#39;</code>的相关记录。</p>
+</li>
+<li><p>从<code>idx_key3</code>二级索引对应的<code>B+</code>树中取出<code>key3 = &#39;b&#39;</code>的相关记录。</p>
+</li>
+<li><p>二级索引的记录都是由<code>索引列 + 主键</code>构成的，所以我们可以计算出这两个结果集中<code>id</code>值的交集。</p>
+</li>
+<li><p>按照上一步生成的<code>id</code>值列表进行回表操作，也就是从聚簇索引中把指定<code>id</code>值的完整用户记录取出来，返回给用户。</p>
+</li>
+</ul>
+<p>这里有同学会思考：为啥不直接使用<code>idx_key1</code>或者<code>idx_key2</code>只根据某个搜索条件去读取一个二级索引，然后回表后再过滤另外一个搜索条件呢？这里要分析一下两种查询执行方式之间需要的成本代价。</p>
+<p>只读取一个二级索引的成本：</p>
+<ul>
+<li><p>按照某个搜索条件读取一个二级索引</p>
+</li>
+<li><p>根据从该二级索引得到的主键值进行回表操作，然后再过滤其他的搜索条件</p>
+</li>
+</ul>
+<p>读取多个二级索引之后取交集成本：</p>
+<ul>
+<li><p>按照不同的搜索条件分别读取不同的二级索引</p>
+</li>
+<li><p>将从多个二级索引得到的主键值取交集，然后进行回表操作</p>
+</li>
+</ul>
+<p>虽然读取多个二级索引比读取一个二级索引消耗性能，但是**读取二级索引的操作是<code>顺序I/O</code>，而回表操作是<code>随机I/O</code>**，所以如果只读取一个二级索引时需要回表的记录数特别多，而读取多个二级索引之后取交集的记录数非常少，当节省的因为<code>回表</code>而造成的性能损耗比访问多个二级索引带来的性能损耗更高时，读取多个二级索引后取交集比只读取一个二级索引的成本更低。</p>
+<p><code>MySQL</code>在某些特定的情况下才可能会使用到<code>Intersection</code>索引合并：</p>
+<ul>
+<li><p>情况一：二级索引列是等值匹配的情况，对于联合索引来说，在联合索引中的每个列都必须等值匹配，不能出现只出现匹配部分列的情况。</p>
+<p>比方说下边这个查询可能用到<code>idx_key1</code>和<code>idx_key_part</code>这两个二级索引进行<code>Intersection</code>索引合并的操作：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key_part2 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span> <span class="keyword">AND</span> key_part3 <span class="operator">=</span> <span class="string">&#x27;c&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>而下边这两个查询就不能进行<code>Intersection</code>索引合并：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">&gt;</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key_part2 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span> <span class="keyword">AND</span> key_part3 <span class="operator">=</span> <span class="string">&#x27;c&#x27;</span>;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key_part1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>第一个查询是因为对<code>key1</code>进行了范围匹配，第二个查询是因为联合索引<code>idx_key_part</code>中的<code>key_part2</code>列并没有出现在搜索条件中，所以这两个查询不能进行<code>Intersection</code>索引合并。</p>
+</li>
+<li><p>情况二：主键列可以是范围匹配</p>
+<p>比方说下边这个查询可能用到主键和<code>idx_key_part</code>进行<code>Intersection</code>索引合并的操作：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> id <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">AND</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>为啥呢？凭啥呀？突然冒出这么两个规定让大家一脸懵逼，下边我们慢慢品一品这里头的玄机。这话还得从<code>InnoDB</code>的索引结构说起，你要是记不清麻烦再回头看看。对于<code>InnoDB</code>的二级索引来说，记录先是按照索引列进行排序，如果该二级索引是一个联合索引，那么会按照联合索引中的各个列依次排序。而二级索引的用户记录是由<code>索引列 + 主键</code>构成的，二级索引列的值相同的记录可能会有好多条，这些索引列的值相同的记录又是按照<code>主键</code>的值进行排序的。所以重点来了，之所以在二级索引列都是等值匹配的情况下才可能使用<code>Intersection</code>索引合并，是因为<span style="color:red">只有在这种情况下根据二级索引查询出的结果集是按照主键值排序的</span>。</p>
+<p>so？还是没看懂根据二级索引查询出的结果集是按照主键值排序的对使用<code>Intersection</code>索引合并有啥好处？小伙子，别忘了<code>Intersection</code>索引合并会把从多个二级索引中查询出的主键值求交集，如果从各个二级索引中查询的到的结果集本身就是已经按照主键排好序的，那么求交集的过程就很easy啦。假设某个查询使用<code>Intersection</code>索引合并的方式从<code>idx_key1</code>和<code>idx_key2</code>这两个二级索引中获取到的主键值分别是：</p>
+<ul>
+<li><p>从<code>idx_key1</code>中获取到已经排好序的主键值：1、3、5</p>
+</li>
+<li><p>从<code>idx_key2</code>中获取到已经排好序的主键值：2、3、4</p>
+</li>
+</ul>
+<p>那么求交集的过程就是这样：逐个取出这两个结果集中最小的主键值，如果两个值相等，则加入最后的交集结果中，否则丢弃当前较小的主键值，再取该丢弃的主键值所在结果集的后一个主键值来比较，直到某个结果集中的主键值用完了，如果还是觉得不太明白那继续往下看：</p>
+<ul>
+<li><p>先取出这两个结果集中较小的主键值做比较，因为<code>1 &lt; 2</code>，所以把<code>idx_key1</code>的结果集的主键值<code>1</code>丢弃，取出后边的<code>3</code>来比较。</p>
+</li>
+<li><p>因为<code>3 &gt; 2</code>，所以把<code>idx_key2</code>的结果集的主键值<code>2</code>丢弃，取出后边的<code>3</code>来比较。</p>
+</li>
+<li><p>因为<code>3 = 3</code>，所以把<code>3</code>加入到最后的交集结果中，继续两个结果集后边的主键值来比较。</p>
+</li>
+<li><p>后边的主键值也不相等，所以最后的交集结果中只包含主键值<code>3</code>。</p>
+</li>
+</ul>
+<p>别看我们写的啰嗦，这个过程其实可快了，时间复杂度是<code>O(n)</code>，但是如果从各个二级索引中查询出的结果集并不是按照主键排序的话，那就要先把结果集中的主键值排序完再来做上边的那个过程，就比较耗时了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：按照有序的主键值去回表取记录有个专有名词儿，叫：Rowid Ordered Retrieval，简称ROR，以后大家在某些地方见到这个名词儿就眼熟了。</span><br></pre></td></tr></table></figure>
+
+<p>另外，不仅是多个二级索引之间可以采用<code>Intersection</code>索引合并，索引合并也可以有聚簇索引参加，也就是我们上边写的<code>情况二</code>：在搜索条件中有主键的范围匹配的情况下也可以使用<code>Intersection</code>索引合并索引合并。为啥主键这就可以范围匹配了？还是得回到应用场景里，比如看下边这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM single_table WHERE key1 = &#x27;a&#x27; AND id &gt; 100;</span><br></pre></td></tr></table></figure>
+
+<p>假设这个查询可以采用<code>Intersection</code>索引合并，我们理所当然的以为这个查询会分别按照<code>id &gt; 100</code>这个条件从聚簇索引中获取一些记录，在通过<code>key1 = &#39;a&#39;</code>这个条件从<code>idx_key1</code>二级索引中获取一些记录，然后再求交集，其实这样就把问题复杂化了，没必要从聚簇索引中获取一次记录。别忘了二级索引的记录中都带有主键值的，所以可以在从<code>idx_key1</code>中获取到的主键值上直接运用条件<code>id &gt; 100</code>过滤就行了，这样多简单。所以涉及主键的搜索条件只不过是为了从别的二级索引得到的结果集中过滤记录罢了，是不是等值匹配不重要。</p>
+<p>当然，上边说的<code>情况一</code>和<code>情况二</code>只是发生<code>Intersection</code>索引合并的必要条件，不是充分条件。也就是说即使情况一、情况二成立，也不一定发生<code>Intersection</code>索引合并，这得看优化器的心情。优化器在下边两个条件满足的情况下才趋向于使用<code>Intersection</code>索引合并：</p>
+<ul>
+<li><p>单独根据搜索条件从某个二级索引中获取的记录数太多，导致回表开销太大</p>
+</li>
+<li><p>通过<code>Intersection</code>索引合并后需要回表的记录数大大减少</p>
+</li>
+</ul>
+<h4 id="Union合并"><a href="#Union合并" class="headerlink" title="Union合并"></a>Union合并</h4><p>我们在写查询语句时经常想把既符合某个搜索条件的记录取出来，也把符合另外的某个搜索条件的记录取出来，我们说这些不同的搜索条件之间是<code>OR</code>关系。有时候<code>OR</code>关系的不同搜索条件会使用到同一个索引，比方说这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">OR</span> key3 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Intersection</code>是交集的意思，这适用于使用不同索引的搜索条件之间使用<code>AND</code>连接起来的情况；<code>Union</code>是并集的意思，适用于使用不同索引的搜索条件之间使用<code>OR</code>连接起来的情况。与<code>Intersection</code>索引合并类似，<code>MySQL</code>在某些特定的情况下才可能会使用到<code>Union</code>索引合并：</p>
+<ul>
+<li><p>情况一：二级索引列是等值匹配的情况，对于联合索引来说，在联合索引中的每个列都必须等值匹配，不能出现只出现匹配部分列的情况。</p>
+<p>比方说下边这个查询可能用到<code>idx_key1</code>和<code>idx_key_part</code>这两个二级索引进行<code>Union</code>索引合并的操作：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM single_table WHERE key1 = &#x27;a&#x27; OR ( key_part1 = &#x27;a&#x27; AND key_part2 = &#x27;b&#x27; AND key_part3 = &#x27;c&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>而下边这两个查询就不能进行<code>Union</code>索引合并：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM single_table WHERE key1 &gt; &#x27;a&#x27; OR (key_part1 = &#x27;a&#x27; AND key_part2 = &#x27;b&#x27; AND key_part3 = &#x27;c&#x27;);SELECT * FROM single_table WHERE key1 = &#x27;a&#x27; OR key_part1 = &#x27;a&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>第一个查询是因为对<code>key1</code>进行了范围匹配，第二个查询是因为联合索引<code>idx_key_part</code>中的<code>key_part2</code>列并没有出现在搜索条件中，所以这两个查询不能进行<code>Union</code>索引合并。</p>
+</li>
+<li><p>情况二：主键列可以是范围匹配</p>
+</li>
+<li><p>情况三：使用<code>Intersection</code>索引合并的搜索条件</p>
+<p>这种情况其实也挺好理解，就是搜索条件的某些部分使用<code>Intersection</code>索引合并的方式得到的主键集合和其他方式得到的主键集合取交集，比方说这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM single_table WHERE key_part1 = &#x27;a&#x27; AND key_part2 = &#x27;b&#x27; AND key_part3 = &#x27;c&#x27; OR (key1 = &#x27;a&#x27; AND key3 = &#x27;b&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>优化器可能采用这样的方式来执行这个查询：</p>
+<ul>
+<li><p>先按照搜索条件<code>key1 = &#39;a&#39; AND key3 = &#39;b&#39;</code>从索引<code>idx_key1</code>和<code>idx_key3</code>中使用<code>Intersection</code>索引合并的方式得到一个主键集合。</p>
+</li>
+<li><p>再按照搜索条件<code>key_part1 = &#39;a&#39; AND key_part2 = &#39;b&#39; AND key_part3 = &#39;c&#39;</code>从联合索引<code>idx_key_part</code>中得到另一个主键集合。</p>
+</li>
+<li><p>采用<code>Union</code>索引合并的方式把上述两个主键集合取并集，然后进行回表操作，将结果返回给用户。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>当然，查询条件符合了这些情况也不一定就会采用<code>Union</code>索引合并，也得看优化器的心情。优化器在下边两个条件满足的情况下才趋向于使用<code>Union</code>索引合并：</p>
+<ul>
+<li><p>单独根据搜索条件从某个二级索引中获取的记录数比较少</p>
+</li>
+<li><p>通过<code>Intersection</code>索引合并后需要回表的记录数大大减少</p>
+</li>
+</ul>
+<h4 id="Sort-Union合并"><a href="#Sort-Union合并" class="headerlink" title="Sort-Union合并"></a>Sort-Union合并</h4><p><code>Union</code>索引合并的使用条件太苛刻，必须保证各个二级索引列在进行等值匹配的条件下才可能被用到，比方说下边这个查询就无法使用到<code>Union</code>索引合并：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">&lt;</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">OR</span> key3 <span class="operator">&gt;</span> <span class="string">&#x27;z&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这是因为根据<code>key1 &lt; &#39;a&#39;</code>从<code>idx_key1</code>索引中获取的二级索引记录的主键值不是排好序的，根据<code>key3 &gt; &#39;z&#39;</code>从<code>idx_key3</code>索引中获取的二级索引记录的主键值也不是排好序的，但是<code>key1 &lt; &#39;a&#39;</code>和<code>key3 &gt; &#39;z&#39;</code>这两个条件又特别让我们动心，所以我们可以这样：</p>
+<ul>
+<li><p>先根据<code>key1 &lt; &#39;a&#39;</code>条件从<code>idx_key1</code>二级索引总获取记录，并按照记录的主键值进行排序</p>
+</li>
+<li><p>再根据<code>key3 &gt; &#39;z&#39;</code>条件从<code>idx_key3</code>二级索引总获取记录，并按照记录的主键值进行排序</p>
+</li>
+<li><p>因为上述的两个二级索引主键值都是排好序的，剩下的操作和<code>Union</code>索引合并方式就一样了。</p>
+</li>
+</ul>
+<p>我们把上述这种先按照二级索引记录的主键值进行排序，之后按照<code>Union</code>索引合并方式执行的方式称之为<code>Sort-Union</code>索引合并，很显然，这种<code>Sort-Union</code>索引合并比单纯的<code>Union</code>索引合并多了一步对二级索引记录的主键值排序的过程。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：为啥有Sort-Union索引合并，就没有Sort-Intersection索引合并么？是的，的确没有Sort-Intersection索引合并这么一说，Sort-Union的适用场景是单独根据搜索条件从某个二级索引中获取的记录数比较少，这样即使对这些二级索引记录按照主键值进行排序的成本也不会太高而Intersection索引合并的适用场景是单独根据搜索条件从某个二级索引中获取的记录数太多，导致回表开销太大，合并后可以明显降低回表开销，但是如果加入Sort-Intersection后，就需要为大量的二级索引记录按照主键值进行排序，这个成本可能比回表查询都高了，所以也就没有引入Sort-Intersection这个玩意儿。</span><br></pre></td></tr></table></figure>
+
+<h4 id="索引合并注意事项"><a href="#索引合并注意事项" class="headerlink" title="索引合并注意事项"></a>索引合并注意事项</h4><h4 id="联合索引替代Intersection索引合并"><a href="#联合索引替代Intersection索引合并" class="headerlink" title="联合索引替代Intersection索引合并"></a>联合索引替代Intersection索引合并</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> single_table <span class="keyword">WHERE</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">AND</span> key3 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询之所以可能使用<code>Intersection</code>索引合并的方式执行，还不是因为<code>idx_key1</code>和<code>idx_key2</code>是两个单独的<code>B+</code>树索引，你要是把这两个列搞一个联合索引，那直接使用这个联合索引就把事情搞定了，何必用啥索引合并呢，就像这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> single_table <span class="keyword">drop</span> index idx_key1, idx_key3, <span class="keyword">add</span> index idx_key1_key3(key1, key3);</span><br></pre></td></tr></table></figure>
+
+<p>这样我们把没用的<code>idx_key1</code>、<code>idx_key3</code>都干掉，再添加一个联合索引<code>idx_key1_key3</code>，使用这个联合索引进行查询简直是又快又好，既不用多读一棵<code>B+</code>树，也不用合并结果，何乐而不为？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：不过小心有单独对key3列进行查询的业务场景，这样子不得不再把key3列的单独索引给加上。</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+<h1 id="连接的原理"><a href="#连接的原理" class="headerlink" title="连接的原理"></a>连接的原理</h1><h2 id="连接简介"><a href="#连接简介" class="headerlink" title="连接简介"></a>连接简介</h2><h3 id="连接的本质"><a href="#连接的本质" class="headerlink" title="连接的本质"></a>连接的本质</h3><p>为了故事的顺利发展，我们先建立两个简单的表并给它们填充一点数据：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (m1 <span class="type">int</span>, n1 <span class="type">char</span>(<span class="number">1</span>));Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.02</span> sec)mysql<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t2 (m2 <span class="type">int</span>, n2 <span class="type">char</span>(<span class="number">1</span>));Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.02</span> sec)mysql<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> t1 <span class="keyword">VALUES</span>(<span class="number">1</span>, <span class="string">&#x27;a&#x27;</span>), (<span class="number">2</span>, <span class="string">&#x27;b&#x27;</span>), (<span class="number">3</span>, <span class="string">&#x27;c&#x27;</span>);Query OK, <span class="number">3</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)Records: <span class="number">3</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span>mysql<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> t2 <span class="keyword">VALUES</span>(<span class="number">2</span>, <span class="string">&#x27;b&#x27;</span>), (<span class="number">3</span>, <span class="string">&#x27;c&#x27;</span>), (<span class="number">4</span>, <span class="string">&#x27;d&#x27;</span>);Query OK, <span class="number">3</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)Records: <span class="number">3</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>我们成功建立了<code>t1</code>、<code>t2</code>两个表，这两个表都有两个列，一个是<code>INT</code>类型的，一个是<code>CHAR(1)</code>类型的，填充好数据的两个表长这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t1;<span class="operator">+</span><span class="comment">------+------+| m1   | n1   |+------+------+|    1 | a    ||    2 | b    ||    3 | c    |+------+------+3 rows in set (0.00 sec)mysql&gt; </span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t2;<span class="operator">+</span><span class="comment">------+------+| m2   | n2   |+------+------+|    2 | b    ||    3 | c    ||    4 | d    |+------+------+3 rows in set (0.00 sec)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong><code>连接</code>的本质就是把各个连接表中的记录都取出来依次匹配的组合加入结果集并返回给用户</strong>。所以我们把<code>t1</code>和<code>t2</code>两个表连接起来的过程如下图所示：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002135539.png" alt="20211002135539" style="zoom:50%;" />
+    
+这个过程看起来就是把`t1`表的记录和`t2`的记录连起来组成新的更大的记录，所以这个查询过程称之为连接查询。连接查询的结果集中包含一个表中的每一条记录与另一个表中的每一条记录相互匹配的组合，像这样的结果集就可以称之为`笛卡尔积`。因为表`t1`中有3条记录，表`t2`中也有3条记录，所以这两个表连接之后的笛卡尔积就有`3×3=9`行记录。在`MySQL`中，连接查询的语法也很随意，只要在`FROM`语句后边跟多个表名就好了，比如我们把`t1`表和`t2`表连接起来的查询语句可以写成这样：
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t1, t2;<span class="operator">+</span><span class="comment">------+------+------+------+| m1   | n1   | m2   | n2   |+------+------+------+------+|    1 | a    |    2 | b    ||    2 | b    |    2 | b    ||    3 | c    |    2 | b    ||    1 | a    |    3 | c    ||    2 | b    |    3 | c    ||    3 | c    |    3 | c    ||    1 | a    |    4 | d    ||    2 | b    |    4 | d    ||    3 | c    |    4 | d    |+------+------+------+------+9 rows in set (0.00 sec)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="连接过程简介"><a href="#连接过程简介" class="headerlink" title="连接过程简介"></a>连接过程简介</h3><p>如果我们乐意，我们可以连接任意数量张表，但是如果没有任何限制条件的话，这些表连接起来产生的<code>笛卡尔积</code>可能是非常巨大的。比方说3个100行记录的表连接起来产生的<code>笛卡尔积</code>就有<code>100×100×100=1000000</code>行数据！所以在连接的时候过滤掉特定记录组合是有必要的，在连接查询中的过滤条件可以分成两种：</p>
+<ul>
+<li><p>涉及单表的条件</p>
+<p>这种只设计单表的过滤条件我们之前都提到过一万遍了，我们之前也一直称为<code>搜索条件</code>，比如<code>t1.m1 &gt; 1</code>是只针对<code>t1</code>表的过滤条件，<code>t2.n2 &lt; &#39;d&#39;</code>是只针对<code>t2</code>表的过滤条件。</p>
+</li>
+<li><p>涉及两表的条件</p>
+<p>这种过滤条件我们之前没见过，比如<code>t1.m1 = t2.m2</code>、<code>t1.n1 &gt; t2.n2</code>等，这些条件中涉及到了两个表，我们稍后会仔细分析这种过滤条件是如何使用的哈。</p>
+</li>
+</ul>
+<p>下边我们就要看一下携带过滤条件的连接查询的大致执行过程了，比方说下边这个查询语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t1, t2 <span class="keyword">WHERE</span> t1.m1 <span class="operator">&gt;</span> <span class="number">1</span> <span class="keyword">AND</span> t1.m1 <span class="operator">=</span> t2.m2 <span class="keyword">AND</span> t2.n2 <span class="operator">&lt;</span> <span class="string">&#x27;d&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在这个查询中我们指明了这三个过滤条件：</p>
+<ul>
+<li><p><code>t1.m1 &gt; 1</code></p>
+</li>
+<li><p><code>t1.m1 = t2.m2</code></p>
+</li>
+<li><p><code>t2.n2 &lt; &#39;d&#39;</code></p>
+</li>
+</ul>
+<p>那么这个连接查询的大致执行过程如下：</p>
+<ol>
+<li><p><strong>首先确定第一个需要查询的表，这个表称之为驱动表</strong>。怎样在单表中执行查询语句我们在前一章都唠叨过了，只需要选取代价最小的那种访问方法去执行单表查询语句就好了（就是说从const、ref、ref_or_null、range、index、all这些执行方法中选取代价最小的去执行查询）。此处假设使用<code>t1</code>作为驱动表，那么就需要到<code>t1</code>表中找满足<code>t1.m1  &gt; 1</code>的记录，因为表中的数据太少，我们也没在表上建立二级索引，所以此处查询<code>t1</code>表的访问方法就设定为<code>all</code>吧，也就是采用全表扫描的方式执行单表查询。关于如何提升连接查询的性能我们之后再说，现在先把基本概念捋清楚哈。所以查询过程就如下图所示：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002135747.png" alt="20211002135747" style="zoom:50%;" />
+
+<p>我们可以看到，<code>t1</code>表中符合<code>t1.m1 &gt; 1</code>的记录有两条。</p>
+</li>
+<li><p><strong>针对上一步骤中从驱动表产生的结果集中的每一条记录，分别需要到<code>t2</code>表中查找匹配的记录，所谓<code>匹配的记录</code>，指的是符合过滤条件的记录</strong>。因为是根据<code>t1</code>表中的记录去找<code>t2</code>表中的记录，所以<code>t2</code>表也可以被称之为<code>被驱动表</code>。上一步骤从驱动表中得到了2条记录，所以需要查询2次<code>t2</code>表。此时涉及两个表的列的过滤条件<code>t1.m1 = t2.m2</code>就派上用场了：</p>
+<ul>
+<li><p>当<code>t1.m1 = 2</code>时，过滤条件<code>t1.m1 = t2.m2</code>就相当于<code>t2.m2 = 2</code>，所以此时<code>t2</code>表相当于有了<code>t1.m1 = 2</code>、<code>t2.n2 &lt; &#39;d&#39;</code>这两个过滤条件，然后到<code>t2</code>表中执行单表查询。</p>
+</li>
+<li><p>当<code>t1.m1 = 3</code>时，过滤条件<code>t1.m1 = t2.m2</code>就相当于<code>t2.m2 = 3</code>，所以此时<code>t2</code>表相当于有了<code>t1.m1 = 3</code>、<code>t2.n2 &lt; &#39;d&#39;</code>这两个过滤条件，然后到<code>t2</code>表中执行单表查询。</p>
+</li>
+</ul>
+<p>所以整个连接查询的执行过程就如下图所示：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002135923.png" alt="20211002135923" style="zoom:50%;" />
+
+<p>也就是说整个连接查询最后的结果只有两条符合过滤条件的记录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+------+------+------+------+| m1   | n1   | m2   | n2   |+------+------+------+------+|    2 | b    |    2 | b    ||    3 | c    |    3 | c    |+------+------+------+------+</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>从上边两个步骤可以看出来，我们上边唠叨的这个两表连接查询共需要查询1次<code>t1</code>表，2次<code>t2</code>表。当然这是在特定的过滤条件下的结果，如果我们把<code>t1.m1 &gt; 1</code>这个条件去掉，那么从<code>t1</code>表中查出的记录就有3条，就需要查询3次<code>t3</code>表了。也就是说在<strong>两表连接查询中，驱动表只需要访问一次，被驱动表可能被访问多次</strong>。</p>
+<h3 id="内连接和外连接"><a href="#内连接和外连接" class="headerlink" title="内连接和外连接"></a>内连接和外连接</h3><p>为了大家更好理解后边内容，我们先创建两个有现实意义的表，</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> student (    number <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;学号&#x27;</span>,    name <span class="type">VARCHAR</span>(<span class="number">5</span>) COMMENT <span class="string">&#x27;姓名&#x27;</span>,    major <span class="type">VARCHAR</span>(<span class="number">30</span>) COMMENT <span class="string">&#x27;专业&#x27;</span>,    <span class="keyword">PRIMARY</span> KEY (number)) Engine<span class="operator">=</span>InnoDB CHARSET<span class="operator">=</span>utf8 COMMENT <span class="string">&#x27;学生信息表&#x27;</span>;<span class="keyword">CREATE</span> <span class="keyword">TABLE</span> score (    number <span class="type">INT</span> COMMENT <span class="string">&#x27;学号&#x27;</span>,    subject <span class="type">VARCHAR</span>(<span class="number">30</span>) COMMENT <span class="string">&#x27;科目&#x27;</span>,    score TINYINT COMMENT <span class="string">&#x27;成绩&#x27;</span>,    <span class="keyword">PRIMARY</span> KEY (number, score)) Engine<span class="operator">=</span>InnoDB CHARSET<span class="operator">=</span>utf8 COMMENT <span class="string">&#x27;学生成绩表&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>我们新建了一个学生信息表，一个学生成绩表，然后我们向上述两个表中插入一些数据，为节省篇幅，具体插入过程就不唠叨了，插入后两表中的数据如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student;<span class="operator">+</span><span class="comment">----------+-----------+--------------------------+| number   | name      | major                    |+----------+-----------+--------------------------+| 20180101 | 杜子腾    | 软件学院                 || 20180102 | 范统      | 计算机科学与工程         || 20180103 | 史珍香    | 计算机科学与工程         |+----------+-----------+--------------------------+3 rows in set (0.00 sec)mysql&gt; SELECT * FROM score;+----------+-----------------------------+-------+| number   | subject                     | score |+----------+-----------------------------+-------+| 20180101 | 母猪的产后护理              |    78 || 20180101 | 论萨达姆的战争准备          |    88 || 20180102 | 论萨达姆的战争准备          |    98 || 20180102 | 母猪的产后护理              |   100 |+----------+-----------------------------+-------+4 rows in set (0.00 sec)</span></span><br></pre></td></tr></table></figure>
+
+<p>现在我们想把每个学生的考试成绩都查询出来就需要进行两表连接了（因为<code>score</code>中没有姓名信息，所以不能单纯只查询<code>score</code>表）。连接过程就是从<code>student</code>表中取出记录，在<code>score</code>表中查找<code>number</code>相同的成绩记录，所以过滤条件就是<code>student.number = socre.number</code>，整个查询语句就是这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM student, score WHERE student.number = score.number;+----------+-----------+--------------------------+----------+-----------------------------+-------+| number   | name      | major                    | number   | subject                     | score |+----------+-----------+--------------------------+----------+-----------------------------+-------+| 20180101 | 杜子腾    | 软件学院                 | 20180101 | 母猪的产后护理              |    78 || 20180101 | 杜子腾    | 软件学院                 | 20180101 | 论萨达姆的战争准备          |    88 || 20180102 | 范统      | 计算机科学与工程         | 20180102 | 论萨达姆的战争准备          |    98 || 20180102 | 范统      | 计算机科学与工程         | 20180102 | 母猪的产后护理              |   100 |+----------+-----------+--------------------------+----------+-----------------------------+-------+4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+
+<p>字段有点多哦，我们少查询几个字段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT s1.number, s1.name, s2.subject, s2.score FROM student AS s1, score AS s2 WHERE s1.number = s2.number;+----------+-----------+-----------------------------+-------+| number   | name      | subject                     | score |+----------+-----------+-----------------------------+-------+| 20180101 | 杜子腾    | 母猪的产后护理              |    78 || 20180101 | 杜子腾    | 论萨达姆的战争准备          |    88 || 20180102 | 范统      | 论萨达姆的战争准备          |    98 || 20180102 | 范统      | 母猪的产后护理              |   100 |+----------+-----------+-----------------------------+-------+4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>从上述查询结果中我们可以看到，各个同学对应的各科成绩就都被查出来了，可是有个问题，<code>史珍香</code>同学，也就是学号为<code>20180103</code>的同学因为某些原因没有参加考试，所以在<code>score</code>表中没有对应的成绩记录。那如果老师想查看所有同学的考试成绩，即使是缺考的同学也应该展示出来，但是到目前为止我们介绍的<code>连接查询</code>是无法完成这样的需求的。我们稍微思考一下这个需求，其本质是想：<span style="color:red">驱动表中的记录即使在被驱动表中没有匹配的记录，也仍然需要加入到结果集</span>。为了解决这个问题，就有了<code>内连接</code>和<code>外连接</code>的概念：</p>
+<ul>
+<li><p>对于<code>内连接</code>的两个表，<strong>驱动表中的记录在被驱动表中找不到匹配的记录，该记录不会加入到最后的结果集</strong>，我们上边提到的连接都是所谓的<code>内连接</code>。</p>
+</li>
+<li><p>对于<code>外连接</code>的两个表，<strong>驱动表中的记录即使在被驱动表中没有匹配的记录，也仍然需要加入到结果集</strong>。</p>
+<p>在<code>MySQL</code>中，根据选取驱动表的不同，外连接仍然可以细分为2种：</p>
+<ul>
+<li><p>左外连接:选取左侧的表为驱动表。</p>
+</li>
+<li><p>右外连接:选取右侧的表为驱动表。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>可是这样仍然存在问题，即使对于外连接来说，有时候我们也并不想把驱动表的全部记录都加入到最后的结果集。这就犯难了，有时候匹配失败要加入结果集，有时候又不要加入结果集，这咋办，有点儿愁啊。。。噫，把过滤条件分为两种不就解决了这个问题了么，所以放在不同地方的过滤条件是有不同语义的：</p>
+<ul>
+<li><p><code>WHERE</code>子句中的过滤条件</p>
+<p><code>WHERE</code>子句中的过滤条件就是我们平时见的那种，不论是内连接还是外连接，凡是不符合<code>WHERE</code>子句中的过滤条件的记录都不会被加入最后的结果集。</p>
+</li>
+<li><p><code>ON</code>子句中的过滤条件</p>
+<p>对于外连接的驱动表的记录来说，如果无法在被驱动表中找到匹配<code>ON</code>子句中的过滤条件的记录，那么该记录仍然会被加入到结果集中，对应的被驱动表记录的各个字段使用<code>NULL</code>值填充。</p>
+<p>需要注意的是，这个<code>ON</code>子句是专门为外连接驱动表中的记录在被驱动表找不到匹配记录时应不应该把该记录加入结果集这个场景下提出的，所以如果把<code>ON</code>子句放到内连接中，<code>MySQL</code>会把它和<code>WHERE</code>子句一样对待，也就是说：<span style="color:red">内连接中的WHERE子句和ON子句是等价的</span>。</p>
+</li>
+</ul>
+<p>一般情况下，我们都把只涉及单表的过滤条件放到<code>WHERE</code>子句中，把涉及两表的过滤条件都放到<code>ON</code>子句中，我们也一般把放到<code>ON</code>子句中的过滤条件也称之为<code>连接条件</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：左外连接和右外连接简称左连接和右连接，所以下边提到的左外连接和右外连接中的`外`字都用括号扩起来，以表示这个字儿可有可无。</span><br></pre></td></tr></table></figure>
+
+<h4 id="左（外）连接的语法"><a href="#左（外）连接的语法" class="headerlink" title="左（外）连接的语法"></a>左（外）连接的语法</h4><p>左（外）连接的语法还是挺简单的，比如我们要把<code>t1</code>表和<code>t2</code>表进行左外连接查询可以这么写：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t1 <span class="keyword">LEFT</span> [<span class="keyword">OUTER</span>] <span class="keyword">JOIN</span> t2 <span class="keyword">ON</span> 连接条件 [<span class="keyword">WHERE</span> 普通过滤条件];</span><br></pre></td></tr></table></figure>
+
+<p>其中中括号里的<code>OUTER</code>单词是可以省略的。对于<code>LEFT JOIN</code>类型的连接来说，我们把放在左边的表称之为外表或者驱动表，右边的表称之为内表或者被驱动表。所以上述例子中<code>t1</code>就是外表或者驱动表，<code>t2</code>就是内表或者被驱动表。需要注意的是，<span style="color:red">对于左（外）连接和右（外）连接来说，必须使用<code>ON</code>子句来指出连接条件</span>。了解了左（外）连接的基本语法之后，再次回到我们上边那个现实问题中来，看看怎样写查询语句才能把所有的学生的成绩信息都查询出来，即使是缺考的考生也应该被放到结果集中：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT s1.number, s1.name, s2.subject, s2.score FROM student AS s1 LEFT JOIN score AS s2 ON s1.number = s2.number;+----------+-----------+-----------------------------+-------+| number   | name      | subject                     | score |+----------+-----------+-----------------------------+-------+| 20180101 | 杜子腾    | 母猪的产后护理              |    78 || 20180101 | 杜子腾    | 论萨达姆的战争准备          |    88 || 20180102 | 范统      | 论萨达姆的战争准备          |    98 || 20180102 | 范统      | 母猪的产后护理              |   100 || 20180103 | 史珍香    | NULL                        |  NULL |+----------+-----------+-----------------------------+-------+5 rows in set (0.04 sec)</span><br></pre></td></tr></table></figure>
+
+<p>从结果集中可以看出来，虽然<code>史珍香</code>并没有对应的成绩记录，但是由于采用的是连接类型为左（外）连接，所以仍然把她放到了结果集中，只不过在对应的成绩记录的各列使用<code>NULL</code>值填充而已。</p>
+<h4 id="右（外）连接的语法"><a href="#右（外）连接的语法" class="headerlink" title="右（外）连接的语法"></a>右（外）连接的语法</h4><p>右（外）连接和左（外）连接的原理是一样一样的，语法也只是把<code>LEFT</code>换成<code>RIGHT</code>而已：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t1 <span class="keyword">RIGHT</span> [<span class="keyword">OUTER</span>] <span class="keyword">JOIN</span> t2 <span class="keyword">ON</span> 连接条件 [<span class="keyword">WHERE</span> 普通过滤条件];</span><br></pre></td></tr></table></figure>
+
+<p>只不过驱动表是右边的表，被驱动表是左边的表，具体就不唠叨了。</p>
+<h4 id="内连接的语法"><a href="#内连接的语法" class="headerlink" title="内连接的语法"></a>内连接的语法</h4><p>内连接和外连接的根本区别就是<span style="color:red">在驱动表中的记录不符合<code>ON</code>子句中的连接条件时不会把该记录加入到最后的结果集</span>，我们最开始唠叨的那些连接查询的类型都是内连接。不过之前仅仅提到了一种最简单的内连接语法，就是直接把需要连接的多个表都放到<code>FROM</code>子句后边。其实针对内连接，MySQL提供了好多不同的语法，我们以<code>t1</code>和<code>t2</code>表为例瞅瞅：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t1 [<span class="keyword">INNER</span> <span class="operator">|</span> <span class="keyword">CROSS</span>] <span class="keyword">JOIN</span> t2 [<span class="keyword">ON</span> 连接条件] [<span class="keyword">WHERE</span> 普通过滤条件];</span><br></pre></td></tr></table></figure>
+
+<p>也就是说在<code>MySQL</code>中，下边这几种内连接的写法都是等价的：</p>
+<ul>
+<li><p>SELECT * FROM t1 JOIN t2;</p>
+</li>
+<li><p>SELECT * FROM t1 INNER JOIN t2;</p>
+</li>
+<li><p>SELECT * FROM t1 CROSS JOIN t2;</p>
+</li>
+</ul>
+<p>上边的这些写法和直接把需要连接的表名放到<code>FROM</code>语句之后，用逗号<code>,</code>分隔开的写法是等价的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM t1, t2;</span><br></pre></td></tr></table></figure>
+
+<p>现在我们虽然介绍了很多种<code>内连接</code>的书写方式，不过熟悉一种就好了，这里我们推荐<code>INNER JOIN</code>的形式书写内连接（因为<code>INNER JOIN</code>语义很明确嘛，可以和<code>LEFT JOIN </code>和<code>RIGHT JOIN</code>很轻松的区分开）。这里需要注意的是，<span style="color:red">由于在内连接中ON子句和WHERE子句是等价的，所以内连接中不要求强制写明ON子句</span>。</p>
+<p>我们前边说过，连接的本质就是把各个连接表中的记录都取出来依次匹配的组合加入结果集并返回给用户。不论哪个表作为驱动表，两表连接产生的笛卡尔积肯定是一样的。而对于内连接来说，由于凡是不符合<code>ON</code>子句或<code>WHERE</code>子句中的条件的记录都会被过滤掉，其实也就相当于从两表连接的笛卡尔积中把不符合过滤条件的记录给踢出去，所以<span style="color:red">对于内连接来说，驱动表和被驱动表是可以互换的，并不会影响最后的查询结果</span>。但是对于外连接来说，由于驱动表中的记录即使在被驱动表中找不到符合<code>ON</code>子句连接条件的记录，所以此时驱动表和被驱动表的关系就很重要了，也就是说<span style="color:red">左外连接和右外连接的驱动表和被驱动表不能轻易互换</span>。</p>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>上边说了很多，给大家的感觉不是很直观，我们直接把表<code>t1</code>和<code>t2</code>的三种连接方式写在一起，这样大家理解起来就很easy了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM t1 INNER JOIN t2 ON t1.m1 = t2.m2;+------+------+------+------+| m1   | n1   | m2   | n2   |+------+------+------+------+|    2 | b    |    2 | b    ||    3 | c    |    3 | c    |+------+------+------+------+2 rows in set (0.00 sec)mysql&gt; SELECT * FROM t1 LEFT JOIN t2 ON t1.m1 = t2.m2;+------+------+------+------+| m1   | n1   | m2   | n2   |+------+------+------+------+|    2 | b    |    2 | b    ||    3 | c    |    3 | c    ||    1 | a    | NULL | NULL |+------+------+------+------+3 rows in set (0.00 sec)mysql&gt; SELECT * FROM t1 RIGHT JOIN t2 ON t1.m1 = t2.m2;+------+------+------+------+| m1   | n1   | m2   | n2   |+------+------+------+------+|    2 | b    |    2 | b    ||    3 | c    |    3 | c    || NULL | NULL |    4 | d    |+------+------+------+------+3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<h2 id="连接的原理-1"><a href="#连接的原理-1" class="headerlink" title="连接的原理"></a>连接的原理</h2><p>上边贼啰嗦的介绍都只是为了唤醒大家对<code>连接</code>、<code>内连接</code>、<code>外连接</code>这些概念的记忆，这些基本概念是为了真正进入本章主题做的铺垫。真正的重点是MySQL采用了什么样的算法来进行表与表之间的连接，了解了这个之后，大家才能明白为啥有的连接查询运行的快如闪电，有的却慢如蜗牛。</p>
+<h3 id="嵌套循环连接（Nested-Loop-Join）"><a href="#嵌套循环连接（Nested-Loop-Join）" class="headerlink" title="嵌套循环连接（Nested-Loop Join）"></a>嵌套循环连接（Nested-Loop Join）</h3><p>我们前边说过，对于两表连接来说，<strong>驱动表只会被访问一遍，但被驱动表却要被访问到好多遍</strong>，具体访问几遍取决于对驱动表执行单表查询后的结果集中的记录条数。对于内连接来说，选取哪个表为驱动表都没关系，而外连接的驱动表是固定的，也就是说左（外）连接的驱动表就是左边的那个表，右（外）连接的驱动表就是右边的那个表。我们上边已经大致介绍过<code>t1</code>表和<code>t2</code>表执行内连接查询的大致过程，我们温习一下：</p>
+<ul>
+<li><p>步骤1：选取驱动表，使用与驱动表相关的过滤条件，选取代价最低的单表访问方法来执行对驱动表的单表查询。</p>
+</li>
+<li><p>步骤2：对上一步骤中查询驱动表得到的结果集中每一条记录，都分别到被驱动表中查找匹配的记录。</p>
+</li>
+</ul>
+<p>通用的两表连接过程如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211002140406.png" alt="20211002140406"></p>
+<p>如果有3个表进行连接的话，那么<code>步骤2</code>中得到的结果集就像是新的驱动表，然后第三个表就成为了被驱动表，重复上边过程，也就是<code>步骤2</code>中得到的结果集中的每一条记录都需要到<code>t3</code>表中找一找有没有匹配的记录，用伪代码表示一下这个过程就是这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for each row in t1 &#123;   #此处表示遍历满足对t1单表查询结果集中的每一条记录        for each row in t2 &#123;   #此处表示对于某条t1表的记录来说，遍历满足对t2单表查询结果集中的每一条记录            for each row in t3 &#123;   #此处表示对于某条t1和t2表的记录组合来说，对t3表进行单表查询            if row satisfies join conditions, send to client        &#125;    &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个过程就像是一个嵌套的循环，所以这种<span style="color:red">驱动表只访问一次，但被驱动表却可能被多次访问，访问次数取决于对驱动表执行单表查询后的结果集中的记录条数</span>的连接执行方式称之为<code>嵌套循环连接</code>（<code>Nested-Loop Join</code>），这是最简单，也是最笨拙的一种连接查询算法。</p>
+<h3 id="使用索引加快连接速度"><a href="#使用索引加快连接速度" class="headerlink" title="使用索引加快连接速度"></a>使用索引加快连接速度</h3><p>我们知道在<code>嵌套循环连接</code>的<code>步骤2</code>中可能需要访问多次被驱动表，如果访问被驱动表的方式都是全表扫描的话，妈呀，那得要扫描好多次呀～～～ 但是别忘了，查询<code>t2</code>表其实就相当于一次单表扫描，我们可以利用索引来加快查询速度哦。回顾一下最开始介绍的<code>t1</code>表和<code>t2</code>表进行内连接的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM t1, t2 WHERE t1.m1 &gt; 1 AND t1.m1 = t2.m2 AND t2.n2 &lt; &#x27;d&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>我们使用的其实是<code>嵌套循环连接</code>算法执行的连接查询，再把上边那个查询执行过程表拉下来给大家看一下：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211002140449.png" alt="20211002140449" style="zoom:50%;" />
+
+<p>查询驱动表<code>t1</code>后的结果集中有两条记录，<code>嵌套循环连接</code>算法需要对被驱动表查询2次：</p>
+<ul>
+<li><p>当<code>t1.m1 = 2</code>时，去查询一遍<code>t2</code>表，对<code>t2</code>表的查询语句相当于：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t2 <span class="keyword">WHERE</span> t2.m2 <span class="operator">=</span> <span class="number">2</span> <span class="keyword">AND</span> t2.n2 <span class="operator">&lt;</span> <span class="string">&#x27;d&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p>当<code>t1.m1 = 3</code>时，再去查询一遍<code>t2</code>表，此时对<code>t2</code>表的查询语句相当于：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t2 <span class="keyword">WHERE</span> t2.m2 <span class="operator">=</span> <span class="number">3</span> <span class="keyword">AND</span> t2.n2 <span class="operator">&lt;</span> <span class="string">&#x27;d&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>可以看到，原来的<code>t1.m1 = t2.m2</code>这个涉及两个表的过滤条件在针对<code>t2</code>表做查询时关于<code>t1</code>表的条件就已经确定了，所以我们只需要单单优化对<code>t2</code>表的查询了，上述两个对<code>t2</code>表的查询语句中利用到的列是<code>m2</code>和<code>n2</code>列，我们可以：</p>
+<ul>
+<li><p>在<code>m2</code>列上建立索引，因为对<code>m2</code>列的条件是等值查找，比如<code>t2.m2 = 2</code>、<code>t2.m2 = 3</code>等，所以可能使用到<code>ref</code>的访问方法，假设使用<code>ref</code>的访问方法去执行对<code>t2</code>表的查询的话，需要回表之后再判断<code>t2.n2 &lt; d</code>这个条件是否成立。</p>
+<p>这里有一个比较特殊的情况，就是假设<code>m2</code>列是<code>t2</code>表的主键或者唯一二级索引列，那么使用<code>t2.m2 = 常数值</code>这样的条件从<code>t2</code>表中查找记录的过程的代价就是常数级别的。我们知道在单表中使用主键值或者唯一二级索引列的值进行等值查找的方式称之为<code>const</code>，而设计<code>MySQL</code>的大叔把在连接查询中对被驱动表使用主键值或者唯一二级索引列的值进行等值查找的查询执行方式称之为：<code>eq_ref</code>。</p>
+</li>
+<li><p>在<code>n2</code>列上建立索引，涉及到的条件是<code>t2.n2 &lt; &#39;d&#39;</code>，可能用到<code>range</code>的访问方法，假设使用<code>range</code>的访问方法对<code>t2</code>表的查询的话，需要回表之后再判断在<code>m2</code>列上的条件是否成立。</p>
+</li>
+</ul>
+<p>假设<code>m2</code>和<code>n2</code>列上都存在索引的话，那么就需要从这两个里边儿挑一个代价更低的去执行对<code>t2</code>表的查询。当然，建立了索引不一定使用索引，只有在<code>二级索引 + 回表</code>的代价比全表扫描的代价更低时才会使用索引。</p>
+<p>另外，有时候连接查询的查询列表和过滤条件中可能只涉及被驱动表的部分列，而这些列都是某个索引的一部分，这种情况下即使不能使用<code>eq_ref</code>、<code>ref</code>、<code>ref_or_null</code>或者<code>range</code>这些访问方法执行对被驱动表的查询的话，也可以使用索引扫描，也就是<code>index</code>的访问方法来查询被驱动表。所以我们建议在真实工作中最好不要使用<code>*</code>作为查询列表，最好把真实用到的列作为查询列表。</p>
+<h3 id="基于块的嵌套循环连接（Block-Nested-Loop-Join）"><a href="#基于块的嵌套循环连接（Block-Nested-Loop-Join）" class="headerlink" title="基于块的嵌套循环连接（Block Nested-Loop Join）"></a>基于块的嵌套循环连接（Block Nested-Loop Join）</h3><p>扫描一个表的过程其实是先把这个表从磁盘上加载到内存中，然后从内存中比较匹配条件是否满足。现实生活中的表可不像<code>t1</code>、<code>t2</code>这种只有3条记录，成千上万条记录都是少的，几百万、几千万甚至几亿条记录的表到处都是。内存里可能并不能完全存放的下表中所有的记录，所以在扫描表前边记录的时候后边的记录可能还在磁盘上，等扫描到后边记录的时候可能内存不足，所以需要把前边的记录从内存中释放掉。我们前边又说过，采用<code>嵌套循环连接</code>算法的两表连接过程中，被驱动表可是要被访问好多次的，如果这个被驱动表中的数据特别多而且不能使用索引进行访问，那就相当于要从磁盘上读好几次这个表，这个<code>I/O</code>代价就非常大了，所以我们得想办法：<span style="color:red">尽量减少访问被驱动表的次数</span>。</p>
+<p>当被驱动表中的数据非常多时，每次访问被驱动表，被驱动表的记录会被加载到内存中，在内存中的每一条记录只会和驱动表结果集的一条记录做匹配，之后就会被从内存中清除掉。然后再从驱动表结果集中拿出另一条记录，再一次把被驱动表的记录加载到内存中一遍，周而复始，驱动表结果集中有多少条记录，就得把被驱动表从磁盘上加载到内存中多少次。所以我们可不可以在把被驱动表的记录加载到内存的时候，一次性和多条驱动表中的记录做匹配，这样就可以大大减少重复从磁盘上加载被驱动表的代价了。所以设计<code>MySQL</code>的大叔提出了一个<code>join buffer</code>的概念，<code>join buffer</code>就是执行连接查询前申请的一块固定大小的内存，先把若干条驱动表结果集中的记录装在这个<code>join buffer</code>中，然后开始扫描被驱动表，每一条被驱动表的记录一次性和<code>join buffer</code>中的多条驱动表记录做匹配，因为匹配的过程都是在内存中完成的，所以这样可以显著减少被驱动表的<code>I/O</code>代价。使用<code>join buffer</code>的过程如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211002140526.png" alt="20211002140526"></p>
+<p>最好的情况是<code>join buffer</code>足够大，能容纳驱动表结果集中的所有记录，这样只需要访问一次被驱动表就可以完成连接操作了。设计<code>MySQL</code>的大叔把这种加入了<code>join buffer</code>的嵌套循环连接算法称之为<code>基于块的嵌套连接</code>（Block Nested-Loop Join）算法。</p>
+<p>这个<code>join buffer</code>的大小是可以通过启动参数或者系统变量<code>join_buffer_size</code>进行配置，默认大小为<code>262144字节</code>（也就是<code>256KB</code>），最小可以设置为<code>128字节</code>。当然，对于优化被驱动表的查询来说，最好是为被驱动表加上效率高的索引，如果实在不能使用索引，并且自己的机器的内存也比较大可以尝试调大<code>join_buffer_size</code>的值来对连接查询进行优化。</p>
+<p>另外需要注意的是，驱动表的记录并不是所有列都会被放到<code>join buffer</code>中，只有查询列表中的列和过滤条件中的列才会被放到<code>join buffer</code>中，所以再次提醒我们，最好不要把<code>*</code>作为查询列表，只需要把我们关心的列放到查询列表就好了，这样还可以在<code>join buffer</code>中放置更多的记录呢哈。</p>
+<h1 id="自测总结"><a href="#自测总结" class="headerlink" title="自测总结"></a>自测总结</h1><ol>
+<li>单表访问时的访问方法有哪几种，分别代表什么意思</li>
+<li>范围查找时的范围区间怎么判断</li>
+<li>索引合并是什么？什么时候会发生</li>
+<li>表连接的原理是什么</li>
+<li>内连接和外连接分别是啥意思</li>
+<li>左外连接和右外连接是啥意思</li>
+<li>连接的原理是什么？</li>
+</ol>
+</div><div class="article-licensing box"><div class="licensing-title"><p>MySQL（五）单表和多表查询</p><p><a href="http://example.com/2021/10/08/MySQL（五）单表和多表查询/">http://example.com/2021/10/08/MySQL（五）单表和多表查询/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-10-08</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-10-08</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/MySQL/">MySQL</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2021/10/08/MySQL%EF%BC%88%E5%85%AD%EF%BC%89%E5%86%85%E9%83%A8%E4%BC%98%E5%8C%96/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">MySQL（六）内部优化</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/10/08/MySQL%EF%BC%88%E5%9B%9B%EF%BC%89%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%92%8C%E8%A1%A8%E7%A9%BA%E9%97%B4/"><span class="level-item">MySQL（四）文件系统和表空间</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">77</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">17</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#单表访问方法"><span class="level-left"><span class="level-item">1</span><span class="level-item">单表访问方法</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#访问方法（access-method）的概念"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">访问方法（access method）的概念</span></span></a></li><li><a class="level is-mobile" href="#const常数：主键索引、唯一二级索引"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">const常数：主键索引、唯一二级索引</span></span></a></li><li><a class="level is-mobile" href="#ref：普通二级索引"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">ref：普通二级索引</span></span></a></li><li><a class="level is-mobile" href="#ref-or-null"><span class="level-left"><span class="level-item">1.4</span><span class="level-item">ref_or_null</span></span></a></li><li><a class="level is-mobile" href="#range：利用索引范围匹配"><span class="level-left"><span class="level-item">1.5</span><span class="level-item">range：利用索引范围匹配</span></span></a></li><li><a class="level is-mobile" href="#index：遍历二级索引"><span class="level-left"><span class="level-item">1.6</span><span class="level-item">index：遍历二级索引</span></span></a></li><li><a class="level is-mobile" href="#all：全表扫描"><span class="level-left"><span class="level-item">1.7</span><span class="level-item">all：全表扫描</span></span></a></li><li><a class="level is-mobile" href="#注意事项"><span class="level-left"><span class="level-item">1.8</span><span class="level-item">注意事项</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#重温-二级索引-回表"><span class="level-left"><span class="level-item">1.8.1</span><span class="level-item">重温 二级索引 + 回表</span></span></a></li><li><a class="level is-mobile" href="#明确range访问方法使用的范围区间"><span class="level-left"><span class="level-item">1.8.2</span><span class="level-item">明确range访问方法使用的范围区间</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#所有搜索条件都可以使用某个索引的情况"><span class="level-left"><span class="level-item">1.8.2.1</span><span class="level-item">所有搜索条件都可以使用某个索引的情况</span></span></a></li><li><a class="level is-mobile" href="#有的搜索条件无法使用索引的情况"><span class="level-left"><span class="level-item">1.8.2.2</span><span class="level-item">有的搜索条件无法使用索引的情况</span></span></a></li><li><a class="level is-mobile" href="#复杂搜索条件下找出范围匹配的区间"><span class="level-left"><span class="level-item">1.8.2.3</span><span class="level-item">复杂搜索条件下找出范围匹配的区间</span></span></a></li></ul></li><li><a class="level is-mobile" href="#索引合并"><span class="level-left"><span class="level-item">1.8.3</span><span class="level-item">索引合并</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Intersection合并"><span class="level-left"><span class="level-item">1.8.3.1</span><span class="level-item">Intersection合并</span></span></a></li><li><a class="level is-mobile" href="#Union合并"><span class="level-left"><span class="level-item">1.8.3.2</span><span class="level-item">Union合并</span></span></a></li><li><a class="level is-mobile" href="#Sort-Union合并"><span class="level-left"><span class="level-item">1.8.3.3</span><span class="level-item">Sort-Union合并</span></span></a></li><li><a class="level is-mobile" href="#索引合并注意事项"><span class="level-left"><span class="level-item">1.8.3.4</span><span class="level-item">索引合并注意事项</span></span></a></li><li><a class="level is-mobile" href="#联合索引替代Intersection索引合并"><span class="level-left"><span class="level-item">1.8.3.5</span><span class="level-item">联合索引替代Intersection索引合并</span></span></a></li></ul></li></ul></li></ul></li><li><a class="level is-mobile" href="#连接的原理"><span class="level-left"><span class="level-item">2</span><span class="level-item">连接的原理</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#连接简介"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">连接简介</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#连接的本质"><span class="level-left"><span class="level-item">2.1.1</span><span class="level-item">连接的本质</span></span></a></li><li><a class="level is-mobile" href="#连接过程简介"><span class="level-left"><span class="level-item">2.1.2</span><span class="level-item">连接过程简介</span></span></a></li><li><a class="level is-mobile" href="#内连接和外连接"><span class="level-left"><span class="level-item">2.1.3</span><span class="level-item">内连接和外连接</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#左（外）连接的语法"><span class="level-left"><span class="level-item">2.1.3.1</span><span class="level-item">左（外）连接的语法</span></span></a></li><li><a class="level is-mobile" href="#右（外）连接的语法"><span class="level-left"><span class="level-item">2.1.3.2</span><span class="level-item">右（外）连接的语法</span></span></a></li><li><a class="level is-mobile" href="#内连接的语法"><span class="level-left"><span class="level-item">2.1.3.3</span><span class="level-item">内连接的语法</span></span></a></li><li><a class="level is-mobile" href="#小结"><span class="level-left"><span class="level-item">2.1.3.4</span><span class="level-item">小结</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#连接的原理-1"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">连接的原理</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#嵌套循环连接（Nested-Loop-Join）"><span class="level-left"><span class="level-item">2.2.1</span><span class="level-item">嵌套循环连接（Nested-Loop Join）</span></span></a></li><li><a class="level is-mobile" href="#使用索引加快连接速度"><span class="level-left"><span class="level-item">2.2.2</span><span class="level-item">使用索引加快连接速度</span></span></a></li><li><a class="level is-mobile" href="#基于块的嵌套循环连接（Block-Nested-Loop-Join）"><span class="level-left"><span class="level-item">2.2.3</span><span class="level-item">基于块的嵌套循环连接（Block Nested-Loop Join）</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#自测总结"><span class="level-left"><span class="level-item">3</span><span class="level-item">自测总结</span></span></a></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">68</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:40:04.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89%E9%94%81/">MySQL（十一）锁</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:39:51.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E5%8D%81%EF%BC%89%E5%9B%9E%E6%BB%9A%E6%97%A5%E5%BF%97/">MySQL（十）回滚日志</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:05:58.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E4%B9%9D%EF%BC%89%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97/">MySQL（九）日志详解</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:05:41.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E5%85%AB%EF%BC%89%E4%BA%8B%E5%8A%A1/">MySQL（八）事务</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T12:59:23.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E4%B8%83%EF%BC%89explain%E8%AF%A6%E8%A7%A3/">MySQL（七）explain详解</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

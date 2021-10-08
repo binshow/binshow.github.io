@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>MySQL（三）索引 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="本节主要描述了以下两个方面：  B+树索引的由来 B+树索引的使用建议"><meta property="og:type" content="blog"><meta property="og:title" content="MySQL（三）索引"><meta property="og:url" content="http://example.com/2021/09/06/MySQL%EF%BC%88%E4%B8%89%EF%BC%89%E7%B4%A2%E5%BC%95/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="本节主要描述了以下两个方面：  B+树索引的由来 B+树索引的使用建议"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/MySQL3.jpeg"><meta property="article:published_time" content="2021-09-06T14:52:13.000Z"><meta property="article:modified_time" content="2021-10-07T15:11:35.450Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="MySQL"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/MySQL3.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/09/06/MySQL%EF%BC%88%E4%B8%89%EF%BC%89%E7%B4%A2%E5%BC%95/"},"headline":"MySQL（三）索引","image":[],"datePublished":"2021-09-06T14:52:13.000Z","dateModified":"2021-10-07T15:11:35.450Z","author":{"@type":"Person","name":"binshow"},"description":"本节主要描述了以下两个方面：  B+树索引的由来 B+树索引的使用建议"}</script><link rel="canonical" href="http://example.com/2021/09/06/MySQL%EF%BC%88%E4%B8%89%EF%BC%89%E7%B4%A2%E5%BC%95/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/MySQL3.jpeg" alt="MySQL（三）索引"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-09-06T14:52:13.000Z" title="2021/9/6下午10:52:13">2021-09-06</time>发表</span><span class="level-item"><time dateTime="2021-10-07T15:11:35.450Z" title="2021/10/7下午11:11:35">2021-10-07</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">1 小时读完 (大约11519个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">MySQL（三）索引</h1><div class="content"><p>本节主要描述了以下两个方面：</p>
+<ul>
+<li>B+树索引的由来</li>
+<li>B+树索引的使用建议</li>
+</ul>
+<span id="more"></span>
+
+
+
+<h1 id="B-树索引的由来"><a href="#B-树索引的由来" class="headerlink" title="B+树索引的由来"></a>B+树索引的由来</h1><h2 id="没有索引的查找"><a href="#没有索引的查找" class="headerlink" title="没有索引的查找"></a>没有索引的查找</h2><p>对某个列精确匹配的情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> [列名列表] <span class="keyword">FROM</span> 表名 <span class="keyword">WHERE</span> 列名 <span class="operator">=</span> xxx;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在一个页中的查找：</strong> 表中记录很少，所有的记录都存放在一个数据页中，可以根据搜索条件的不同分为两种情况</p>
+<ul>
+<li><p>以主键为搜索条件：在页目录中使用二分法定位到对应的槽，然后遍历该槽对应分组中的记录即可找到。</p>
+</li>
+<li><p>以其他列作为搜索条件：在数据页中并没有对非主键列建立所谓的页目录，所以无法通过二分快速定位，只能从最小记录遍历，速度很慢。</p>
+</li>
+</ul>
+<p><strong>在很多页中查找</strong></p>
+<p>大部分情况下我们表中存放的记录都是非常多的，需要好多的数据页来存储这些记录。在很多页中查找记录的话可以分为两个步骤：</p>
+<ol>
+<li>定位到记录所在的页。</li>
+<li>从所在的页内中查找相应的记录。</li>
+</ol>
+<p>在没有索引的情况下，不论是根据主键列或者其他列的值进行查找，<span style="color:red">由于我们并不能快速的定位到记录所在的页，所以只能从第一个页沿着双向链表一直往下找，在每一个页中根据我们上述的查找方式去查找指定的记录</span>。这样的方式无疑是很慢的</p>
+<h2 id="索引的建立"><a href="#索引的建立" class="headerlink" title="索引的建立"></a>索引的建立</h2><p>先建一个表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> index_demo(</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>   c1 <span class="type">int</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>   c2 <span class="type">int</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>   c3 <span class="type">char</span>(<span class="number">1</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>   <span class="keyword">primary</span> key(c1)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> ) row_format <span class="operator">=</span> Compact;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.04</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">desc</span> index_demo;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+---------+------+-----+---------+-------+</span></span><br><span class="line"><span class="operator">|</span> Field <span class="operator">|</span> Type    <span class="operator">|</span> <span class="keyword">Null</span> <span class="operator">|</span> Key <span class="operator">|</span> <span class="keyword">Default</span> <span class="operator">|</span> Extra <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+---------+------+-----+---------+-------+</span></span><br><span class="line"><span class="operator">|</span> c1    <span class="operator">|</span> <span class="type">int</span>     <span class="operator">|</span> <span class="keyword">NO</span>   <span class="operator">|</span> PRI <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> c2    <span class="operator">|</span> <span class="type">int</span>     <span class="operator">|</span> YES  <span class="operator">|</span>     <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> c3    <span class="operator">|</span> <span class="type">char</span>(<span class="number">1</span>) <span class="operator">|</span> YES  <span class="operator">|</span>     <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+---------+------+-----+---------+-------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>这个表中c1列是主键，行记录格式如下：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007215213.png" alt="20211007215213" style="zoom:50%;" />
+
+
+
+<p>我们只在示意图里展示记录的这几个部分：</p>
+<ul>
+<li><p><code>record_type</code>：记录头信息的一项属性，表示记录的类型，<code>0</code>表示普通记录、<code>2</code>表示最小记录、<code>3</code>表示最大记录、<code>1</code>我们还没用过，等会再说～</p>
+</li>
+<li><p><code>next_record</code>：记录头信息的一项属性，表示下一条地址相对于本条记录的地址偏移量。</p>
+</li>
+<li><p><code>各个列的值</code>：这里只记录在<code>index_demo</code>表中的三个列，分别是<code>c1</code>、<code>c2</code>和<code>c3</code>。</p>
+</li>
+<li><p><code>其他信息</code>：除了上述3种信息以外的所有信息，包括其他隐藏列的值以及记录的额外信息。</p>
+</li>
+</ul>
+<p>将记录格式示意图的<code>其他信息</code>去掉并把它竖起来的效果就是这样：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007215324.png" alt="20211007215324" style="zoom:50%;" />
+
+<p>把一些记录放到页里边的示意图就是：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007215358.png" alt="20211007215358" style="zoom:50%;" />
+
+<h3 id="一个简单的索引方案"><a href="#一个简单的索引方案" class="headerlink" title="一个简单的索引方案"></a>一个简单的索引方案</h3><p>可以借鉴与上一篇说的如何在一个数据页内快速定位记录的方法，为这些数据页页建立一个目录：</p>
+<ul>
+<li>要为数据页建立目录的话需要对数据页中的数据做一些约束：<strong>下一个数据页中记录的主键值比如大于上一个页中的主键值</strong>。</li>
+</ul>
+<p>假如一个页中存放的记录最多只有3条，那么再放入一个记录时就会出现分配一个新的数据页的情形：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007215739.png" alt="20211007215739" style="zoom:50%;" />
+
+<blockquote>
+<p>这里新分配的数据页编号并不是连续的，他们只是维护者上一个页和下一个页的编号而建立了链表关系。</p>
+</blockquote>
+<p>显然这样分配不满足约束了，需要进行一次记录移动（也称为页分裂）：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007220129.png" alt="20211007220129" style="zoom:50%;" />
+
+
+
+<ul>
+<li><p>给所有的数据页建立一个目录项，每个目录项包含当前页中的主键最小值和页号</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007220351.png" alt="20211007220351" style="zoom:50%;" /></li>
+</ul>
+<p>做完目录项之后：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007220430.png" alt="20211007220430" style="zoom:50%;" />
+
+<p>这个目录项做完之后，将这几个目录项在物理存储器上连续的存储，就可以实现根据主键值快速查找的功能了，比如现在查找主键为20的记录：</p>
+<ol>
+<li>先从目录项中根据二分法快速确定出主键值为<code>20</code>的记录在<code>目录项3</code>中（因为 <code>12 &lt; 20 &lt; 209</code>），它对应的页是<code>页9</code>。</li>
+<li>再根据前边说的在页中查找记录的方式去<code>页9</code>中定位具体的记录。</li>
+</ol>
+<h3 id="InnoDB中的索引方案"><a href="#InnoDB中的索引方案" class="headerlink" title="InnoDB中的索引方案"></a>InnoDB中的索引方案</h3><p>上面简单的索引方案存在了两个问题：</p>
+<ol>
+<li>InnoDB是用数据页来作为管理存储空间的基本单位，也就是说最多只能保证16KB的连续存储空间，如果表中的记录增多，那么要把所有的目录项都存放进去是非常不现实的</li>
+<li>记录会进行删改的，如果我们把某一页的记录全部删除了，那么目录项该页后面的目录都要移动。</li>
+</ol>
+<p>针对上面的两个问题，InnoDB找到了一种灵活管理所有目录项的方式：</p>
+<p>发现这些<code>目录项</code>其实长得跟我们的用户记录差不多，只不过<code>目录项</code>中的两个列是<code>主键</code>和<code>页号</code>而已，所以他们<span style="color:red">复用了之前存储用户记录的数据页来存储目录项，为了和用户记录做一下区分，我们把这些用来表示目录项的记录称为<code>目录项记录</code></span>。那<code>InnoDB</code>怎么区分一条记录是普通的<code>用户记录</code>还是<code>目录项记录</code>呢？别忘了记录头信息里的<code>record_type</code>属性，它的各个取值代表的意思如下：</p>
+<ul>
+<li><code>0</code>：普通的用户记录</li>
+<li><code>1</code>：目录项记录</li>
+<li><code>2</code>：最小记录</li>
+<li><code>3</code>：最大记录</li>
+</ul>
+<p>这样的话，可以用数据页来存放所有的目录项了：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007221131.png" alt="20211007221131" style="zoom:40%;" />
+
+<p>我们新分配了一个页号为30的数据页来存放目录项：</p>
+<ul>
+<li>目录项记录中的 record_type 是 1 ，而普通的用户记录这个值是0</li>
+<li>目录项记录中只有<strong>主键和页编号</strong>两个列，而普通的用户记录可以有很多。</li>
+<li>记录头信息中还有一个 min_rec_mask的属性，只有在存储目录项记录的页的主键最小的目录项记录中这个值是1。</li>
+</ul>
+<p>初次之外，目录项记录和普通用户记录就没区别了，他们存储也是用的一样的数据页。</p>
+<p>现在以查找主键为<code>20</code>的记录为例，根据某个主键值去查找记录的步骤就可以大致拆分成下边两步：</p>
+<ol>
+<li>先到存储<code>目录项记录</code>的页，也就是页<code>30</code>中通过二分法快速定位到对应目录项，因为<code>12 &lt; 20 &lt; 209</code>，所以定位到对应的记录所在的页就是<code>页9</code>。</li>
+<li>再到存储用户记录的<code>页9</code>中根据二分法快速定位到主键值为<code>20</code>的用户记录。</li>
+</ol>
+<p>当存放目录项的数据页满了时，可能需要新的数据页来存放目录项：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211007222028.png" alt="20211007222028"></p>
+<p>那么如果存放目录项的数据页很多的时候，如何快速的定位到时哪个数据页存放了要查找的主键值呢？</p>
+<p>再加一层目录：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007222157.png" alt="20211007222157" style="zoom:50%;" />
+
+<p>以此类推，索引就变成了一棵B+树了：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007222243.png" alt="20211007222243" style="zoom:50%;" />
+
+<p>从图中可以看出来，我们的<span style="color:red">实际用户记录其实都存放在B+树的最底层的节点上</span>，这些节点也被称为<code>叶子节点</code>或<code>叶节点</code>，其余用来存放<code>目录项</code>的节点称为<code>非叶子节点</code>或者<code>内节点</code>，其中<code>B+</code>树最上边的那个节点也称为<code>根节点</code>。</p>
+<p>这种数据结构查找能力就非常牛逼了，假如一个普通数据页存放记录100条，存放目录项记录1000条，那么：</p>
+<ul>
+<li>如果<code>B+</code>树只有1层，也就是只有1个用于存放用户记录的节点，最多能存放<code>100</code>条记录。</li>
+<li>如果<code>B+</code>树有2层，最多能存放<code>1000×100=100000</code>条记录。</li>
+<li>如果<code>B+</code>树有3层，最多能存放<code>1000×1000×100=100000000</code>条记录。</li>
+<li>如果<code>B+</code>树有4层，最多能存放<code>1000×1000×1000×100=100000000000</code>条记录。</li>
+</ul>
+<p>所以一般情况下，我们用到的<code>B+</code>树都不会超过4层，那我们通过主键值去查找某条记录最多只需要做4个页面内的查找（查找3个目录项页和一个用户记录页），又因为在每个页面内有所谓的<code>Page Directory</code>（页目录），所以在页面内也可以通过二分法实现快速定位记录，这不是很牛么，哈哈！</p>
+<h2 id="聚集索引"><a href="#聚集索引" class="headerlink" title="聚集索引"></a>聚集索引</h2><p>上面的B+树索引有两个特点：</p>
+<ol>
+<li>使用<strong>记录主键值</strong>的大小来对记录和数据页进行排序：<ul>
+<li>页内的记录是按照主键的大小顺序排成一个单向链表。</li>
+<li>各个存放用户记录的页也是根据页中用户记录的主键大小顺序排成一个双向链表</li>
+<li>存放目录项记录的页分为不同的层次，在同一层次中的页也是根据页中目录项记录的主键大小顺序排成一个双向链表</li>
+</ul>
+</li>
+<li>B+树的叶子节点存储的是完整的用户记录（<strong>也就是所有列的值</strong>）</li>
+</ol>
+<p><strong>这种完整的用户记录都存放在叶子节点的索引叫做聚集索引</strong>，这种索引的好处就是根据主键找到叶子节点就可以拿到所有的数据。</p>
+<p><code>InnoDB</code>存储引擎会自动为主键（如果没有它会自动帮我们添加）建立<code>聚簇索引</code>，聚簇索引的叶子节点包含完整的用户记录。</p>
+<h2 id="二级索引"><a href="#二级索引" class="headerlink" title="二级索引"></a>二级索引</h2><p>上面的索引只有在索引条件为主键时才会发挥作用？那么如果搜索条件是其他列呢？该怎么处理呢？</p>
+<p>其实不需要，我们可以多建立几颗B+树，不同的B+树排序规则不一样，比如说用c2列的大小作为排序规则：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007223345.png" alt="20211007223345" style="zoom:50%;" />
+
+
+
+<p>这样的B+树叶子节点存放的是C2列 + 主键这一列。</p>
+<p>所以如果我们现在想通过<code>c2</code>列的值查找某些记录的话就可以使用我们刚刚建好的这个<code>B+</code>树了。以查找<code>c2</code>列的值为<code>4</code>的记录为例，查找过程如下：</p>
+<ol>
+<li><p>确定<code>目录项记录</code>页</p>
+<p>根据<code>根页面</code>，也就是<code>页44</code>，可以快速定位到<code>目录项记录</code>所在的页为<code>页42</code>（因为<code>2 &lt; 4 &lt; 9</code>）。</p>
+</li>
+<li><p>通过<code>目录项记录</code>页确定用户记录真实所在的页。</p>
+<p>在<code>页42</code>中可以快速定位到实际存储用户记录的页，但是由于<code>c2</code>列并没有唯一性约束，所以<code>c2</code>列值为<code>4</code>的记录可能分布在多个数据页中，又因为<code>2 &lt; 4 ≤ 4</code>，所以确定实际存储用户记录的页在<code>页34</code>和<code>页35</code>中。</p>
+</li>
+<li><p>在真实存储用户记录的页中定位到具体的记录。</p>
+<p>到<code>页34</code>和<code>页35</code>中定位到具体的记录。</p>
+</li>
+<li><p>但是这个<code>B+</code>树的叶子节点中的记录只存储了<code>c2</code>和<code>c1</code>（也就是<code>主键</code>）两个列，所以<span style="color:red">我们必须再根据主键值去聚簇索引中再查找一遍完整的用户记录</span>。</p>
+</li>
+</ol>
+<p>**我们根据这个以<code>c2</code>列大小排序的<code>B+</code>树只能确定我们要查找记录的主键值，所以如果我们想根据<code>c2</code>列的值查找到完整的用户记录的话，仍然需要到<code>聚簇索引</code>中再查一遍，这个过程也被称为<code>回表</code>**。也就是根据<code>c2</code>列的值查询一条完整的用户记录需要使用到<code>2</code>棵<code>B+</code>树！！！</p>
+<h2 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h2><p>我们也可以同时以多个列的大小作为排序规则，也就是同时为多个列建立索引，比方说我们想让<code>B+</code>树按照<code>c2</code>和<code>c3</code>列的大小进行排序，这个包含两层含义：</p>
+<ul>
+<li>先把各个记录和页按照<code>c2</code>列进行排序。</li>
+<li>在记录的<code>c2</code>列相同的情况下，采用<code>c3</code>列进行排序</li>
+</ul>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007223559.png" alt="20211007223559" style="zoom:50%;" />
+
+<p>如图所示，我们需要注意一下几点：</p>
+<ul>
+<li><p>每条<code>目录项记录</code>都由<code>c2</code>、<code>c3</code>、<code>页号</code>这三个部分组成，各条记录先按照<code>c2</code>列的值进行排序，如果记录的<code>c2</code>列相同，则按照<code>c3</code>列的值进行排序。</p>
+</li>
+<li><p><code>B+</code>树叶子节点处的用户记录由<code>c2</code>、<code>c3</code>和主键<code>c1</code>列组成。</p>
+</li>
+</ul>
+<p>千万要注意一点，<span style="color:red">以c2和c3列的大小为排序规则建立的<code>B+</code>树称为<code>联合索引</code>，它的意思与分别为c2和c3列分别建立索引的表述是不同的</span>：</p>
+<ul>
+<li><p>建立<code>联合索引</code>只会建立如上图一样的1棵<code>B+</code>树。</p>
+</li>
+<li><p>为c2和c3列分别建立索引会分别以<code>c2</code>和<code>c3</code>列的大小为排序规则建立2棵<code>B+</code>树。</p>
+</li>
+</ul>
+<h2 id="一些注意事项"><a href="#一些注意事项" class="headerlink" title="一些注意事项"></a>一些注意事项</h2><h1 id="B-树索引的使用"><a href="#B-树索引的使用" class="headerlink" title="B+树索引的使用"></a>B+树索引的使用</h1><h2 id="索引的代价"><a href="#索引的代价" class="headerlink" title="索引的代价"></a>索引的代价</h2><ol>
+<li>空间上的代价：每建立一个索引都为要它建立一棵<code>B+</code>树，每一棵<code>B+</code>树的每一个节点都是一个数据页，一个页默认会占用<code>16KB</code>的存储空间，一棵很大的<code>B+</code>树由许多数据页组成，那可是很大的一片存储空间呢</li>
+<li>时间上的代价：每次对表中的数据进行增、删、改操作时，都需要去修改各个<code>B+</code>树索引</li>
+</ol>
+<h2 id="索引适用的条件"><a href="#索引适用的条件" class="headerlink" title="索引适用的条件"></a>索引适用的条件</h2><p>新建一个表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person_info(</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> auto_increment,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    birthday <span class="type">DATE</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    phone_number <span class="type">CHAR</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    country <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    <span class="keyword">PRIMARY</span> KEY (id),</span><br><span class="line">    KEY idx_name_birthday_phone_number (name, birthday, phone_number)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>存在两个索引：</p>
+<ul>
+<li>主键索引</li>
+<li>二级索引：还是个联合索引 idx_name_birthday_phone_number</li>
+</ul>
+<p>这个联合索引的B+树如下所示：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007224448-20211007224528032.png" alt="20211007224448" style="zoom:50%;" />
+
+<p>可以看出排序的顺序是：</p>
+<ul>
+<li>先按照<code>name</code>列的值进行排序。</li>
+<li>如果<code>name</code>列的值相同，则按照<code>birthday</code>列的值进行排序。</li>
+<li>如果<code>birthday</code>列的值也相同，则按照<code>phone_number</code>的值进行排序。</li>
+</ul>
+<h3 id="全值匹配"><a href="#全值匹配" class="headerlink" title="全值匹配"></a>全值匹配</h3><p>下面这个SQL就可以用到这个联合索引:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">=</span> <span class="string">&#x27;1990-09-27&#x27;</span> <span class="keyword">AND</span> phone_number <span class="operator">=</span> <span class="string">&#x27;15123983239&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>因为<code>B+</code>树的数据页和记录先是按照<code>name</code>列的值进行排序的，所以先可以很快定位<code>name</code>列的值是<code>Ashburn</code>的记录位置。</p>
+</li>
+<li><p>在<code>name</code>列相同的记录里又是按照<code>birthday</code>列的值进行排序的，所以在<code>name</code>列的值是<code>Ashburn</code>的记录里又可以快速定位<code>birthday</code>列的值是<code>&#39;1990-09-27&#39;</code>的记录。</p>
+</li>
+<li><p>如果很不幸，<code>name</code>和<code>birthday</code>列的值都是相同的，那记录是按照<code>phone_number</code>列的值排序的，所以联合索引中的三个列都可能被用到。</p>
+</li>
+</ul>
+<p>下面这个呢？顺序变换了</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> birthday <span class="operator">=</span> <span class="string">&#x27;1990-09-27&#x27;</span> <span class="keyword">AND</span> phone_number <span class="operator">=</span> <span class="string">&#x27;15123983239&#x27;</span> <span class="keyword">AND</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>其实没有影响，因为<code>MySQL</code>有一个叫查询优化器的东西，会分析这些搜索条件并且按照可以使用的索引中列的顺序来决定先使用哪个搜索条件，后使用哪个搜索条件</p>
+<h3 id="匹配左边的列"><a href="#匹配左边的列" class="headerlink" title="匹配左边的列"></a>匹配左边的列</h3><p>下面的两个SQL是可以用到这个联合索引的：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">=</span> <span class="string">&#x27;1990-09-27&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>下面这个SQL则用不到联合索引了：</p>
+<p>因为<code>B+</code>树的数据页和记录先是按照<code>name</code>列的值排序的，在<code>name</code>列的值相同的情况下才使用<code>birthday</code>列进行排序，也就是说<code>name</code>列的值不同的记录中<code>birthday</code>的值可能是无序的。而现在你跳过<code>name</code>列直接根据<code>birthday</code>的值去查找明显是不行的。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> birthday <span class="operator">=</span> <span class="string">&#x27;1990-09-27&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>但是需要特别注意的一点是，<span style="color:red">如果我们想使用联合索引中尽可能多的列，搜索条件中的各个列必须是联合索引中从最左边连续的列</span>。比方说联合索引<code>idx_name_birthday_phone_number</code>中列的定义顺序是<code>name</code>、<code>birthday</code>、<code>phone_number</code>，如果我们的搜索条件中只有<code>name</code>和<code>phone_number</code>，而没有中间的<code>birthday</code>，比方说这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info WHERE name = &#x27;Ashburn&#x27; AND phone_number = &#x27;15123983239&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>这样只能用到<code>name</code>列的索引，<code>birthday</code>和<code>phone_number</code>的索引就用不上了，因为<code>name</code>值相同的记录先按照<code>birthday</code>的值进行排序，<code>birthday</code>值相同的记录才按照<code>phone_number</code>值进行排序。</p>
+<h3 id="匹配列的前缀"><a href="#匹配列的前缀" class="headerlink" title="匹配列的前缀"></a>匹配列的前缀</h3><p>字符串排序的规则一般是：</p>
+<ul>
+<li>先按照字符串的第一个字符进行排序。</li>
+<li>如果第一个字符相同再按照第二个字符进行排序。</li>
+<li>如果第二个字符相同再按照第三个字符进行排序，依此类推。</li>
+</ul>
+<p>所以如果下面这个模糊查找是可以用到联合索引的：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;As%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>但是如果是给出后缀或重点的某个字符串就不行了：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;%As%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这里有一个小技巧：比如存url这种前面都是www开头的字符串，可以考虑倒过来存在数据库中，这样就可以利用前缀匹配了。</p>
+<h3 id="匹配范围值"><a href="#匹配范围值" class="headerlink" title="匹配范围值"></a>匹配范围值</h3><p><span style="color:red">所有记录都是按照索引列的值从小到大的顺序排好序的</span>，所以这极大的方便我们查找索引列的值在某个范围内的记录。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">&gt;</span> <span class="string">&#x27;Asa&#x27;</span> <span class="keyword">AND</span> name <span class="operator">&lt;</span> <span class="string">&#x27;Barlow&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>B+</code>树中的数据页和记录是先按<code>name</code>列排序的，所以我们上边的查询过程其实是这样的：</p>
+<ul>
+<li>找到<code>name</code>值为<code>Asa</code>的记录。</li>
+<li>找到<code>name</code>值为<code>Barlow</code>的记录。</li>
+<li>哦啦，由于所有记录都是由链表连起来的（记录之间用单链表，数据页之间用双链表），所以他们之间的记录都可以很容易的取出来喽～</li>
+<li>找到这些记录的主键值，再到<code>聚簇索引</code>中<code>回表</code>查找完整的记录。</li>
+</ul>
+<p>不过在使用联合进行范围查找的时候需要注意，<span style="color:red">如果对多个列同时进行范围查找的话，只有对索引最左边的那个列进行范围查找的时候才能用到<code>B+</code>树索引</span>，比方说这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">&gt;</span> <span class="string">&#x27;Asa&#x27;</span> <span class="keyword">AND</span> name <span class="operator">&lt;</span> <span class="string">&#x27;Barlow&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">&gt;</span> <span class="string">&#x27;1980-01-01&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上边这个查询可以分成两个部分：</p>
+<ol>
+<li><p>通过条件<code>name &gt; &#39;Asa&#39; AND name &lt; &#39;Barlow&#39; </code>来对<code>name</code>进行范围，查找的结果可能有多条<code>name</code>值不同的记录，</p>
+</li>
+<li><p>对这些<code>name</code>值不同的记录继续通过<code>birthday &gt; &#39;1980-01-01&#39;</code>条件继续过滤。</p>
+</li>
+</ol>
+<p>这样子对于联合索引<code>idx_name_birthday_phone_number</code>来说，只能用到<code>name</code>列的部分，而用不到<code>birthday</code>列的部分，因为只有<code>name</code>值相同的情况下才能用<code>birthday</code>列的值进行排序，而这个查询中<span style="color:red">通过<code>name</code>进行范围查找的记录中可能并不是按照<code>birthday</code>列进行排序的</span>，所以在搜索条件中继续以<code>birthday</code>列进行查找时是用不到这个<code>B+</code>树索引的</p>
+<h3 id="精确匹配某一列并范围匹配另外一列"><a href="#精确匹配某一列并范围匹配另外一列" class="headerlink" title="精确匹配某一列并范围匹配另外一列"></a>精确匹配某一列并范围匹配另外一列</h3><p>如果左边的列是精确查找，则右边的列可以进行范围查找，比方说这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">&gt;</span> <span class="string">&#x27;1980-01-01&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">&lt;</span> <span class="string">&#x27;2000-12-31&#x27;</span> <span class="keyword">AND</span> phone_number <span class="operator">&gt;</span> <span class="string">&#x27;15100000000&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询的条件可以分为3个部分：</p>
+<ol>
+<li><p><code>name = &#39;Ashburn&#39;</code>，对<code>name</code>列进行精确查找，当然可以使用<code>B+</code>树索引了。</p>
+</li>
+<li><p><code>birthday &gt; &#39;1980-01-01&#39; AND birthday &lt; &#39;2000-12-31&#39;</code>，由于<code>name</code>列是精确查找，所以通过<code>name = &#39;Ashburn&#39;</code>条件查找后得到的结果的<code>name</code>值都是相同的，它们会再按照<code>birthday</code>的值进行排序。所以此时对<code>birthday</code>列进行范围查找是可以用到<code>B+</code>树索引的。</p>
+</li>
+<li><p><code>phone_number &gt; &#39;15100000000&#39;</code>，通过<code>birthday</code>的范围查找的记录的<code>birthday</code>的值可能不同，所以这个条件无法再利用<code>B+</code>树索引了，只能遍历上一步查询得到的记录。</p>
+</li>
+</ol>
+<p>同理，下边的查询也是可能用到这个<code>idx_name_birthday_phone_number</code>联合索引的：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">=</span> <span class="string">&#x27;1980-01-01&#x27;</span> <span class="keyword">AND</span> <span class="keyword">AND</span> phone_number <span class="operator">&gt;</span> <span class="string">&#x27;15100000000&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="用于排序的时候-OrderBy"><a href="#用于排序的时候-OrderBy" class="headerlink" title="用于排序的时候-OrderBy"></a>用于排序的时候-OrderBy</h3><p>有时候的查询语句需要对查出来的记录通过Orderby进行排序操作，一般情况是这样操作的：</p>
+<p><strong>一般情况下，我们只能把记录都加载到内存中，再用一些排序算法，比如快速排序、归并排序、吧啦吧啦排序等等在内存中对这些记录进行排序，有的时候可能查询的结果集太大以至于不能在内存中进行排序的话，还可能暂时借助磁盘的空间来存放中间结果，排序操作完成后再把排好序的结果集返回到客户端。在<code>MySQL</code>中，把这种在内存中或者磁盘上进行排序的方式统称为文件排序</strong>。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">ORDER</span> <span class="keyword">BY</span> name, birthday, phone_number LIMIT <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询的结果集需要先按照<code>name</code>值排序，如果记录的<code>name</code>值相同，则需要按照<code>birthday</code>来排序，如果<code>birthday</code>的值相同，则需要按照<code>phone_number</code>排序。大家可以回过头去看我们建立的<code>idx_name_birthday_phone_number</code>索引的示意图，因为这个<code>B+</code>树索引本身就是按照上述规则排好序的，所以直接从索引中提取数据，然后进行<code>回表</code>操作取出该索引中不包含的列就好了。</p>
+<p>但是如果顺序不对的话就不能了。</p>
+<p>orderBy后面的列的顺序必须和联合索引的顺序一致才行，如果是下面这个sql 就只能用到部分了</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;A&#x27;</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> birthday, phone_number LIMIT <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="不可以用于排序的情况"><a href="#不可以用于排序的情况" class="headerlink" title="不可以用于排序的情况"></a>不可以用于排序的情况</h3><h5 id="ASC、DESC混用"><a href="#ASC、DESC混用" class="headerlink" title="ASC、DESC混用"></a>ASC、DESC混用</h5><p>对于使用联合索引进行排序的场景，我们要求各个排序列的排序顺序是一致的，也就是要么各个列都是<code>ASC</code>规则排序，要么都是<code>DESC</code>规则排序。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小贴士：ORDER BY子句后的列如果不加ASC或者DESC默认是按照ASC排序规则排序的，也就是升序排序的。</span><br></pre></td></tr></table></figure>
+
+<p>为啥会有这种奇葩规定呢？这个还得回头想想这个<code>idx_name_birthday_phone_number</code>联合索引中记录的结构：</p>
+<ul>
+<li><p>先按照记录的<code>name</code>列的值进行升序排列。</p>
+</li>
+<li><p>如果记录的<code>name</code>列的值相同，再按照<code>birthday</code>列的值进行升序排列。</p>
+</li>
+<li><p>如果记录的<code>birthday</code>列的值相同，再按照<code>phone_number</code>列的值进行升序排列。</p>
+</li>
+</ul>
+<p>如果查询中的各个排序列的排序顺序是一致的，比方说下边这两种情况：</p>
+<ul>
+<li><p><code>ORDER BY name, birthday LIMIT 10</code></p>
+<p>这种情况直接从索引的最左边开始往右读10行记录就可以了。</p>
+</li>
+<li><p><code>ORDER BY name DESC, birthday DESC LIMIT 10</code>，</p>
+<p>这种情况直接从索引的最右边开始往左读10行记录就可以了。</p>
+</li>
+</ul>
+<p>但是如果我们查询的需求是先按照<code>name</code>列进行升序排列，再按照<code>birthday</code>列进行降序排列的话，比如说这样的查询语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info ORDER BY name, birthday DESC LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>这样如果使用索引排序的话过程就是这样的：</p>
+<ul>
+<li><p>先从索引的最左边确定<code>name</code>列最小的值，然后找到<code>name</code>列等于该值的所有记录，然后从<code>name</code>列等于该值的最右边的那条记录开始往左找10条记录。</p>
+</li>
+<li><p>如果<code>name</code>列等于最小的值的记录不足10条，再继续往右找<code>name</code>值第二小的记录，重复上边那个过程，直到找到10条记录为止。</p>
+</li>
+</ul>
+<p>累不累？累！重点是这样不能高效使用索引，而要采取更复杂的算法去从索引中取数据，设计<code>MySQL</code>的大叔觉得这样还不如直接文件排序来的快，所以就规定使用联合索引的各个排序列的排序顺序必须是一致的。</p>
+<h5 id="WHERE子句中出现非排序使用到的索引列"><a href="#WHERE子句中出现非排序使用到的索引列" class="headerlink" title="WHERE子句中出现非排序使用到的索引列"></a>WHERE子句中出现非排序使用到的索引列</h5><p>如果WHERE子句中出现了非排序使用到的索引列，那么排序依然是使用不到索引的，比方说这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info WHERE country = &#x27;China&#x27; ORDER BY name LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询只能先把符合搜索条件<code>country = &#39;China&#39;</code>的记录提取出来后再进行排序，是使用不到索引。注意和下边这个查询作区别：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info WHERE name = &#x27;A&#x27; ORDER BY birthday, phone_number LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>虽然这个查询也有搜索条件，但是<code>name = &#39;A&#39;</code>可以使用到索引<code>idx_name_birthday_phone_number</code>，而且过滤剩下的记录还是按照<code>birthday</code>、<code>phone_number</code>列排序的，所以还是可以使用索引进行排序的。</p>
+<h5 id="排序列包含非同一个索引的列"><a href="#排序列包含非同一个索引的列" class="headerlink" title="排序列包含非同一个索引的列"></a>排序列包含非同一个索引的列</h5><p>有时候用来排序的多个列不是一个索引里的，这种情况也不能使用索引进行排序，比方说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info ORDER BY name, country LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p><code>name</code>和<code>country</code>并不属于一个联合索引中的列，所以无法使用索引进行排序，至于为啥我就不想再唠叨了，自己用前边的理论自己捋一捋把～</p>
+<h5 id="排序列使用了复杂的表达式"><a href="#排序列使用了复杂的表达式" class="headerlink" title="排序列使用了复杂的表达式"></a>排序列使用了复杂的表达式</h5><p>要想使用索引进行排序操作，必须保证索引列是以单独列的形式出现，而不是修饰过的形式，比方说这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info ORDER BY UPPER(name) LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>使用了<code>UPPER</code>函数修饰过的列就不是单独的列啦，这样就无法使用索引进行排序啦。</p>
+<h3 id="用于分组的时候-group-by"><a href="#用于分组的时候-group-by" class="headerlink" title="用于分组的时候-group by"></a>用于分组的时候-group by</h3><p>有时候我们为了方便统计表中的一些信息，会把表中的记录按照某些列进行分组。比如下边这个分组查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name, birthday, phone_number, <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> person_info <span class="keyword">GROUP</span> <span class="keyword">BY</span> name, birthday, phone_number</span><br></pre></td></tr></table></figure>
+
+<p>这个查询语句相当于做了3次分组操作：</p>
+<ol>
+<li><p>先把记录按照<code>name</code>值进行分组，所有<code>name</code>值相同的记录划分为一组。</p>
+</li>
+<li><p>将每个<code>name</code>值相同的分组里的记录再按照<code>birthday</code>的值进行分组，将<code>birthday</code>值相同的记录放到一个小分组里，所以看起来就像在一个大分组里又化分了好多小分组。</p>
+</li>
+<li><p>再将上一步中产生的小分组按照<code>phone_number</code>的值分成更小的分组，所以整体上看起来就像是先把记录分成一个大分组，然后把<code>大分组</code>分成若干个<code>小分组</code>，然后把若干个<code>小分组</code>再细分成更多的<code>小小分组</code>。</p>
+</li>
+</ol>
+<p>然后针对那些<code>小小分组</code>进行统计，比如在我们这个查询语句中就是统计每个<code>小小分组</code>包含的记录条数。如果没有索引的话，这个分组过程全部需要在内存里实现，而如果有了索引的话，恰巧这个分组顺序又和我们的<code>B+</code>树中的索引列的顺序是一致的，而我们的<code>B+</code>树索引又是按照索引列排好序的，这不正好么，所以可以直接使用<code>B+</code>树索引进行分组。</p>
+<p>和使用<code>B+</code>树索引进行排序是一个道理，分组列的顺序也需要和索引列的顺序一致，也可以只使用索引列中左边的列进行分组，吧啦吧啦的～</p>
+<h2 id="尽量用覆盖索引"><a href="#尽量用覆盖索引" class="headerlink" title="尽量用覆盖索引"></a>尽量用覆盖索引</h2><p>上边的讨论对<code>回表</code>这个词儿多是一带而过，可能大家没啥深刻的体会，下边我们详细唠叨下。还是用<code>idx_name_birthday_phone_number</code>索引为例，看下边这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info WHERE name &gt; &#x27;Asa&#x27; AND name &lt; &#x27;Barlow&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>在使用<code>idx_name_birthday_phone_number</code>索引进行查询时大致可以分为这两个步骤：</p>
+<ol>
+<li><p>从索引<code>idx_name_birthday_phone_number</code>对应的<code>B+</code>树中取出<code>name</code>值在<code>Asa</code>～<code>Barlow</code>之间的用户记录。</p>
+</li>
+<li><p>由于索引<code>idx_name_birthday_phone_number</code>对应的<code>B+</code>树用户记录中只包含<code>name</code>、<code>age</code>、<code>birthday</code>、<code>id</code>这4个字段，而查询列表是<code>*</code>，意味着要查询表中所有字段，也就是还要包括<code>country</code>字段。这时需要把从上一步中获取到的每一条记录的<code>id</code>字段都到聚簇索引对应的<code>B+</code>树中找到完整的用户记录，也就是我们通常所说的<code>回表</code>，然后把完整的用户记录返回给查询用户。</p>
+</li>
+</ol>
+<p>由于索引<code>idx_name_birthday_phone_number</code>对应的<code>B+</code>树中的记录首先会按照<code>name</code>列的值进行排序，所以值在<code>Asa</code>～<code>Barlow</code>之间的记录在磁盘中的存储是相连的，集中分布在一个或几个数据页中，我们可以很快的把这些连着的记录从磁盘中读出来，这种读取方式我们也可以称为<code>顺序I/O</code>。根据第1步中获取到的记录的<code>id</code>字段的值可能并不相连，而在聚簇索引中记录是根据<code>id</code>（也就是主键）的顺序排列的，所以根据这些并不连续的<code>id</code>值到聚簇索引中访问完整的用户记录可能分布在不同的数据页中，这样读取完整的用户记录可能要访问更多的数据页，这种读取方式我们也可以称为<code>随机I/O</code>。一般情况下，顺序I/O比随机I/O的性能高很多，所以步骤1的执行可能很快，而步骤2就慢一些。所以这个使用索引<code>idx_name_birthday_phone_number</code>的查询有这么两个特点：</p>
+<ul>
+<li><p>会使用到两个<code>B+</code>树索引，一个二级索引，一个聚簇索引。</p>
+</li>
+<li><p>访问二级索引使用<code>顺序I/O</code>，访问聚簇索引使用<code>随机I/O</code>。</p>
+</li>
+</ul>
+<p><span style="color:red">需要回表的记录越多，使用二级索引的性能就越低</span>，甚至让某些查询宁愿使用全表扫描也不使用<code>二级索引</code>。比方说<code>name</code>值在<code>Asa</code>～<code>Barlow</code>之间的用户记录数量占全部记录数量90%以上，那么如果使用<code>idx_name_birthday_phone_number</code>索引的话，有90%多的<code>id</code>值需要回表，这不是吃力不讨好么，还不如直接去扫描聚簇索引（也就是全表扫描）。</p>
+<p>那什么时候采用全表扫描的方式，什么使用采用<code>二级索引 + 回表</code>的方式去执行查询呢？这个就是传说中的查询优化器做的工作，查询优化器会事先对表中的记录计算一些统计数据，然后再利用这些统计数据根据查询的条件来计算一下需要回表的记录数，需要回表的记录数越多，就越倾向于使用全表扫描，反之倾向于使用<code>二级索引 + 回表</code>的方式。当然优化器做的分析工作不仅仅是这么简单，但是大致上是个这个过程。一般情况下，限制查询获取较少的记录数会让优化器更倾向于选择使用<code>二级索引 + 回表</code>的方式进行查询，因为回表的记录越少，性能提升就越高，比方说上边的查询可以改写成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info WHERE name &gt; &#x27;Asa&#x27; AND name &lt; &#x27;Barlow&#x27; LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>添加了<code>LIMIT 10</code>的查询更容易让优化器采用<code>二级索引 + 回表</code>的方式进行查询。</p>
+<p>对于有排序需求的查询，上边讨论的采用<code>全表扫描</code>还是<code>二级索引 + 回表</code>的方式进行查询的条件也是成立的，比方说下边这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM person_info ORDER BY name, birthday, phone_number;</span><br></pre></td></tr></table></figure>
+
+<p>由于查询列表是<code>*</code>，所以如果使用二级索引进行排序的话，需要把排序完的二级索引记录全部进行回表操作，这样操作的成本还不如直接遍历聚簇索引然后再进行文件排序（<code>filesort</code>）低，所以优化器会倾向于使用<code>全表扫描</code>的方式执行查询。如果我们加了<code>LIMIT</code>子句，比如这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">ORDER</span> <span class="keyword">BY</span> name, birthday, phone_number LIMIT <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这样需要回表的记录特别少，优化器就会倾向于使用<code>二级索引 + 回表</code>的方式执行查询。</p>
+<p>为了彻底告别<code>回表</code>操作带来的性能损耗，我们建议：<span style="color:red">最好在查询列表里只包含索引列</span>，比如这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT name, birthday, phone_number FROM person_info WHERE name &gt; &#x27;Asa&#x27; AND name &lt; &#x27;Barlow&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>因为我们只查询<code>name</code>, <code>birthday</code>, <code>phone_number</code>这三个索引列的值，所以在通过<code>idx_name_birthday_phone_number</code>索引得到结果后就不必到<code>聚簇索引</code>中再查找记录的剩余列，也就是<code>country</code>列的值了，这样就省去了<code>回表</code>操作带来的性能损耗。我们把这种只需要用到索引的查询方式称为<code>索引覆盖</code>。排序操作也优先使用<code>覆盖索引</code>的方式进行查询，比方说这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT name, birthday, phone_number  FROM person_info ORDER BY name, birthday, phone_number;</span><br></pre></td></tr></table></figure>
+
+<p>虽然这个查询中没有<code>LIMIT</code>子句，但是采用了<code>覆盖索引</code>，所以查询优化器就会直接使用<code>idx_name_birthday_phone_number</code>索引进行排序而不需要回表操作了。</p>
+<p>当然，如果业务需要查询出索引以外的列，那还是以保证业务需求为重。但是<span style="color:red">我们很不鼓励用<code>*</code>号作为查询列表，最好把我们需要查询的列依次标明</span>。</p>
+<h2 id="建立合适的索引建议"><a href="#建立合适的索引建议" class="headerlink" title="建立合适的索引建议"></a>建立合适的索引建议</h2><h3 id="只为用于搜索、排序或分组的列创建索引"><a href="#只为用于搜索、排序或分组的列创建索引" class="headerlink" title="只为用于搜索、排序或分组的列创建索引"></a>只为用于搜索、排序或分组的列创建索引</h3><p>也就是说，只为出现在<code>WHERE</code>子句中的列、连接子句中的连接列，或者出现在<code>ORDER BY</code>或<code>GROUP BY</code>子句中的列创建索引。而出现在查询列表中的列就没必要建立索引了：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> birthday, country <span class="keyword">FROM</span> person_name <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Ashburn&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>像查询列表中的<code>birthday</code>、<code>country</code>这两个列就不需要建立索引，我们只需要为出现在<code>WHERE</code>子句中的<code>name</code>列创建索引就可以了。</p>
+<h3 id="考虑列的基数"><a href="#考虑列的基数" class="headerlink" title="考虑列的基数"></a>考虑列的基数</h3><p><code>列的基数</code>指的是某一列中不重复数据的个数，比方说某个列包含值<code>2, 5, 8, 2, 5, 8, 2, 5, 8</code>，虽然有<code>9</code>条记录，但该列的基数却是<code>3</code>。也就是说，<span style="color:red">在记录行数一定的情况下，列的基数越大，该列中的值越分散，列的基数越小，该列中的值越集中</span>。这个<code>列的基数</code>指标非常重要，直接影响我们是否能有效的利用索引。假设某个列的基数为<code>1</code>，也就是所有记录在该列中的值都一样，那为该列建立索引是没有用的，因为所有值都一样就无法排序，无法进行快速查找了～ 而且如果某个建立了二级索引的列的重复值特别多，那么使用这个二级索引查出的记录还可能要做回表操作，这样性能损耗就更大了。所以结论就是：<span style="color:red">最好为那些列的基数大的列建立索引，为基数太小列的建立索引效果可能不好</span>。</p>
+<h3 id="索引列的类型尽量小"><a href="#索引列的类型尽量小" class="headerlink" title="索引列的类型尽量小"></a>索引列的类型尽量小</h3><p>我们在定义表结构的时候要显式的指定列的类型，以整数类型为例，有<code>TINYINT</code>、<code>MEDIUMINT</code>、<code>INT</code>、<code>BIGINT</code>这么几种，它们占用的存储空间依次递增，我们这里所说的<code>类型大小</code>指的就是<span style="color:red">该类型表示的数据范围的大小</span>。能表示的整数范围当然也是依次递增，如果我们想要对某个整数列建立索引的话，<span style="color:red">在表示的整数范围允许的情况下，尽量让索引列使用较小的类型</span>，比如我们能使用<code>INT</code>就不要使用<code>BIGINT</code>，能使用<code>MEDIUMINT</code>就不要使用<code>INT</code>～ 这是因为：</p>
+<ul>
+<li><p>数据类型越小，在查询时进行的比较操作越快（这是CPU层次的东东）</p>
+</li>
+<li><p>数据类型越小，索引占用的存储空间就越少，在一个数据页内就可以放下更多的记录，从而减少磁盘<code>I/O</code>带来的性能损耗，也就意味着可以把更多的数据页缓存在内存中，从而加快读写效率。</p>
+</li>
+</ul>
+<p>这个建议对于表的主键来说更加适用，因为不仅是聚簇索引中会存储主键值，其他所有的二级索引的节点处都会存储一份记录的主键值，如果主键适用更小的数据类型，也就意味着节省更多的存储空间和更高效的<code>I/O</code>。</p>
+<h3 id="索引字符串值的前缀"><a href="#索引字符串值的前缀" class="headerlink" title="索引字符串值的前缀"></a>索引字符串值的前缀</h3><p>我们知道一个字符串其实是由若干个字符组成，如果我们在<code>MySQL</code>中使用<code>utf8</code>字符集去存储字符串的话，编码一个字符需要占用<code>1~3</code>个字节。假设我们的字符串很长，那存储一个字符串就需要占用很大的存储空间。在我们需要为这个字符串列建立索引时，那就意味着在对应的<code>B+</code>树中有这么两个问题：</p>
+<ul>
+<li><p><code>B+</code>树索引中的记录需要把该列的完整字符串存储起来，而且字符串越长，在索引中占用的存储空间越大。</p>
+</li>
+<li><p>如果<code>B+</code>树索引中索引列存储的字符串很长，那在做字符串比较时会占用更多的时间。</p>
+</li>
+</ul>
+<p>我们前边儿说过索引列的字符串前缀其实也是排好序的，所以索引的设计者提出了个方案 — <span style="color:red">只对字符串的前几个字符进行索引</span>也就是说在二级索引的记录中只保留字符串前几个字符。这样在查找记录时虽然不能精确的定位到记录的位置，但是能定位到相应前缀所在的位置，然后根据前缀相同的记录的主键值回表查询完整的字符串值，再对比就好了。这样只在<code>B+</code>树中存储字符串的前几个字符的编码，既节约空间，又减少了字符串的比较时间，还大概能解决排序的问题，何乐而不为，比方说我们在建表语句中只对<code>name</code>列的前10个字符进行索引可以这么写：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE person_info(    name VARCHAR(100) NOT NULL,    birthday DATE NOT NULL,    phone_number CHAR(11) NOT NULL,    country varchar(100) NOT NULL,    KEY idx_name_birthday_phone_number (name(10), birthday, phone_number));    </span><br></pre></td></tr></table></figure>
+
+<p><code>name(10)</code>就表示在建立的<code>B+</code>树索引中只保留记录的前<code>10</code>个字符的编码，这种<span style="color:red">只索引字符串值的前缀的策略是我们非常鼓励的，尤其是在字符串类型能存储的字符比较多的时候</span>。</p>
+<h4 id="索引列前缀对排序的影响"><a href="#索引列前缀对排序的影响" class="headerlink" title="索引列前缀对排序的影响"></a>索引列前缀对排序的影响</h4><p>如果使用了索引列前缀，比方说前边只把<code>name</code>列的前10个字符放到了二级索引中，下边这个查询可能就有点儿尴尬了：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> person_info <span class="keyword">ORDER</span> <span class="keyword">BY</span> name LIMIT <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>因为二级索引中不包含完整的<code>name</code>列信息，所以无法对前十个字符相同，后边的字符不同的记录进行排序，也就是使用索引列前缀的方式无法支持使用索引排序，只好乖乖的用文件排序喽。</p>
+<h3 id="让索引列在比较表达式中单独出现"><a href="#让索引列在比较表达式中单独出现" class="headerlink" title="让索引列在比较表达式中单独出现"></a>让索引列在比较表达式中单独出现</h3><p>假设表中有一个整数列<code>my_col</code>，我们为这个列建立了索引。下边的两个<code>WHERE</code>子句虽然语义是一致的，但是在效率上却有差别：</p>
+<ol>
+<li><p><code>WHERE my_col * 2 &lt; 4</code></p>
+</li>
+<li><p><code>WHERE my_col &lt; 4/2</code></p>
+</li>
+</ol>
+<p>第1个<code>WHERE</code>子句中<code>my_col</code>列并<span style="color:red">不是</span>以单独列的形式出现的，而是以<code>my_col * 2</code>这样的表达式的形式出现的，存储引擎<span style="color:red">会依次遍历所有的记录，计算这个表达式的值是不是小于<code>4</code></span>，所以这种情况下是使用不到为<code>my_col</code>列建立的<code>B+</code>树索引的。而第2个<code>WHERE</code>子句中<code>my_col</code>列并<span style="color:red">是</span>以单独列的形式出现的，这样的情况可以直接使用<code>B+</code>树索引。</p>
+<p>所以结论就是：<span style="color:red">如果索引列在比较表达式中不是以单独列的形式出现，而是以某个表达式，或者函数调用形式出现的话，是用不到索引的</span>。</p>
+<h3 id="主键插入顺序"><a href="#主键插入顺序" class="headerlink" title="主键插入顺序"></a>主键插入顺序</h3><p>我们知道，对于一个使用<code>InnoDB</code>存储引擎的表来说，在我们没有显式的创建索引时，表中的数据实际上都是存储在<code>聚簇索引</code>的叶子节点的。而记录又是存储在数据页中的，数据页和记录又是按照记录主键值从小到大的顺序进行排序，所以如果我们插入的记录的主键值是依次增大的话，那我们每插满一个数据页就换到下一个数据页继续插，而如果我们插入的主键值忽大忽小的话，这就比较麻烦了，假设某个数据页存储的记录已经满了，它存储的主键值在<code>1~100</code>之间：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007230545.png" alt="20211007230545" style="zoom:50%;" />
+
+<p>如果此时再插入一条主键值为<code>9</code>的记录，那它插入的位置就如下图：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211007230613.png" alt="20211007230613" style="zoom:50%;" />
+
+<p>可这个数据页已经满了啊，再插进来咋办呢？我们需要把当前页面分裂成两个页面，把本页中的一些记录移动到新创建的这个页中。页面分裂和记录移位意味着什么？意味着：<span style="color:red">性能损耗</span>！所以如果我们想尽量避免这样无谓的性能损耗，最好让插入的记录的主键值依次递增，这样就不会发生这样的性能损耗了。所以我们建议：<span style="color:red">让主键具有<code>AUTO_INCREMENT</code>，让存储引擎自己为表生成主键，而不是我们手动插入 </span>，比方说我们可以这样定义<code>person_info</code>表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE person_info(    id INT UNSIGNED NOT NULL AUTO_INCREMENT,    name VARCHAR(100) NOT NULL,    birthday DATE NOT NULL,    phone_number CHAR(11) NOT NULL,    country varchar(100) NOT NULL,    PRIMARY KEY (id),    KEY idx_name_birthday_phone_number (name(10), birthday, phone_number));    </span><br></pre></td></tr></table></figure>
+
+<p>我们自定义的主键列<code>id</code>拥有<code>AUTO_INCREMENT</code>属性，在插入记录时存储引擎会自动为我们填入自增的主键值。</p>
+<h3 id="冗余和重复索引"><a href="#冗余和重复索引" class="headerlink" title="冗余和重复索引"></a>冗余和重复索引</h3><p>有时候有的同学有意或者无意的就对同一个列创建了多个索引，比方说这样写建表语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person_info(    id <span class="type">INT</span> UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,    name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,    birthday <span class="type">DATE</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,    phone_number <span class="type">CHAR</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,    country <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,    <span class="keyword">PRIMARY</span> KEY (id),    KEY idx_name_birthday_phone_number (name(<span class="number">10</span>), birthday, phone_number),    KEY idx_name (name(<span class="number">10</span>)));    </span><br></pre></td></tr></table></figure>
+
+<p>我们知道，通过<code>idx_name_birthday_phone_number</code>索引就可以对<code>name</code>列进行快速搜索，再创建一个专门针对<code>name</code>列的索引就算是一个<code>冗余</code>索引，维护这个索引只会增加维护的成本，并不会对搜索有什么好处。</p>
+<p>另一种情况，我们可能会对某个列重复建立索引，比方说这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> repeat_index_demo (    c1 <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,    c2 <span class="type">INT</span>,    <span class="keyword">UNIQUE</span> uidx_c1 (c1),    INDEX idx_c1 (c1));  </span><br></pre></td></tr></table></figure>
+
+<p>我们看到，<code>c1</code>既是主键、又给它定义为一个唯一索引，还给它定义了一个普通索引，可是主键本身就会生成聚簇索引，所以定义的唯一索引和普通索引是重复的，这种情况要避免。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2></div><div class="article-licensing box"><div class="licensing-title"><p>MySQL（三）索引</p><p><a href="http://example.com/2021/09/06/MySQL（三）索引/">http://example.com/2021/09/06/MySQL（三）索引/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-09-06</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-10-07</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/MySQL/">MySQL</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2021/09/29/%E7%AE%97%E6%B3%95%E9%A2%98-%E4%B8%80-%E9%93%BE%E8%A1%A8/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">算法题(一)链表</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/08/28/Java%E5%B9%B6%E5%8F%91%EF%BC%88%E4%B8%80%EF%BC%89%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%94%81/"><span class="level-item">Java并发（一）内存模型和锁</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">77</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">17</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#B-树索引的由来"><span class="level-left"><span class="level-item">1</span><span class="level-item">B+树索引的由来</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#没有索引的查找"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">没有索引的查找</span></span></a></li><li><a class="level is-mobile" href="#索引的建立"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">索引的建立</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#一个简单的索引方案"><span class="level-left"><span class="level-item">1.2.1</span><span class="level-item">一个简单的索引方案</span></span></a></li><li><a class="level is-mobile" href="#InnoDB中的索引方案"><span class="level-left"><span class="level-item">1.2.2</span><span class="level-item">InnoDB中的索引方案</span></span></a></li></ul></li><li><a class="level is-mobile" href="#聚集索引"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">聚集索引</span></span></a></li><li><a class="level is-mobile" href="#二级索引"><span class="level-left"><span class="level-item">1.4</span><span class="level-item">二级索引</span></span></a></li><li><a class="level is-mobile" href="#联合索引"><span class="level-left"><span class="level-item">1.5</span><span class="level-item">联合索引</span></span></a></li><li><a class="level is-mobile" href="#一些注意事项"><span class="level-left"><span class="level-item">1.6</span><span class="level-item">一些注意事项</span></span></a></li></ul></li><li><a class="level is-mobile" href="#B-树索引的使用"><span class="level-left"><span class="level-item">2</span><span class="level-item">B+树索引的使用</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#索引的代价"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">索引的代价</span></span></a></li><li><a class="level is-mobile" href="#索引适用的条件"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">索引适用的条件</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#全值匹配"><span class="level-left"><span class="level-item">2.2.1</span><span class="level-item">全值匹配</span></span></a></li><li><a class="level is-mobile" href="#匹配左边的列"><span class="level-left"><span class="level-item">2.2.2</span><span class="level-item">匹配左边的列</span></span></a></li><li><a class="level is-mobile" href="#匹配列的前缀"><span class="level-left"><span class="level-item">2.2.3</span><span class="level-item">匹配列的前缀</span></span></a></li><li><a class="level is-mobile" href="#匹配范围值"><span class="level-left"><span class="level-item">2.2.4</span><span class="level-item">匹配范围值</span></span></a></li><li><a class="level is-mobile" href="#精确匹配某一列并范围匹配另外一列"><span class="level-left"><span class="level-item">2.2.5</span><span class="level-item">精确匹配某一列并范围匹配另外一列</span></span></a></li><li><a class="level is-mobile" href="#用于排序的时候-OrderBy"><span class="level-left"><span class="level-item">2.2.6</span><span class="level-item">用于排序的时候-OrderBy</span></span></a></li><li><a class="level is-mobile" href="#不可以用于排序的情况"><span class="level-left"><span class="level-item">2.2.7</span><span class="level-item">不可以用于排序的情况</span></span></a><ul class="menu-list"><ul class="menu-list"><li><a class="level is-mobile" href="#ASC、DESC混用"><span class="level-left"><span class="level-item">2.2.7.1.1</span><span class="level-item">ASC、DESC混用</span></span></a></li><li><a class="level is-mobile" href="#WHERE子句中出现非排序使用到的索引列"><span class="level-left"><span class="level-item">2.2.7.1.2</span><span class="level-item">WHERE子句中出现非排序使用到的索引列</span></span></a></li><li><a class="level is-mobile" href="#排序列包含非同一个索引的列"><span class="level-left"><span class="level-item">2.2.7.1.3</span><span class="level-item">排序列包含非同一个索引的列</span></span></a></li><li><a class="level is-mobile" href="#排序列使用了复杂的表达式"><span class="level-left"><span class="level-item">2.2.7.1.4</span><span class="level-item">排序列使用了复杂的表达式</span></span></a></li></ul></ul></li><li><a class="level is-mobile" href="#用于分组的时候-group-by"><span class="level-left"><span class="level-item">2.2.8</span><span class="level-item">用于分组的时候-group by</span></span></a></li></ul></li><li><a class="level is-mobile" href="#尽量用覆盖索引"><span class="level-left"><span class="level-item">2.3</span><span class="level-item">尽量用覆盖索引</span></span></a></li><li><a class="level is-mobile" href="#建立合适的索引建议"><span class="level-left"><span class="level-item">2.4</span><span class="level-item">建立合适的索引建议</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#只为用于搜索、排序或分组的列创建索引"><span class="level-left"><span class="level-item">2.4.1</span><span class="level-item">只为用于搜索、排序或分组的列创建索引</span></span></a></li><li><a class="level is-mobile" href="#考虑列的基数"><span class="level-left"><span class="level-item">2.4.2</span><span class="level-item">考虑列的基数</span></span></a></li><li><a class="level is-mobile" href="#索引列的类型尽量小"><span class="level-left"><span class="level-item">2.4.3</span><span class="level-item">索引列的类型尽量小</span></span></a></li><li><a class="level is-mobile" href="#索引字符串值的前缀"><span class="level-left"><span class="level-item">2.4.4</span><span class="level-item">索引字符串值的前缀</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#索引列前缀对排序的影响"><span class="level-left"><span class="level-item">2.4.4.1</span><span class="level-item">索引列前缀对排序的影响</span></span></a></li></ul></li><li><a class="level is-mobile" href="#让索引列在比较表达式中单独出现"><span class="level-left"><span class="level-item">2.4.5</span><span class="level-item">让索引列在比较表达式中单独出现</span></span></a></li><li><a class="level is-mobile" href="#主键插入顺序"><span class="level-left"><span class="level-item">2.4.6</span><span class="level-item">主键插入顺序</span></span></a></li><li><a class="level is-mobile" href="#冗余和重复索引"><span class="level-left"><span class="level-item">2.4.7</span><span class="level-item">冗余和重复索引</span></span></a></li></ul></li><li><a class="level is-mobile" href="#总结"><span class="level-left"><span class="level-item">2.5</span><span class="level-item">总结</span></span></a></li></ul></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">68</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:40:04.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89%E9%94%81/">MySQL（十一）锁</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:39:51.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E5%8D%81%EF%BC%89%E5%9B%9E%E6%BB%9A%E6%97%A5%E5%BF%97/">MySQL（十）回滚日志</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:05:58.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E4%B9%9D%EF%BC%89%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97/">MySQL（九）日志详解</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T14:05:41.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E5%85%AB%EF%BC%89%E4%BA%8B%E5%8A%A1/">MySQL（八）事务</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-08T12:59:23.000Z">2021-10-08</time></p><p class="title"><a href="/2021/10/08/MySQL%EF%BC%88%E4%B8%83%EF%BC%89explain%E8%AF%A6%E8%A7%A3/">MySQL（七）explain详解</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
