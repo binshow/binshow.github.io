@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>操作系统（四）网络管理 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="网络管理：  Linux系统是如何收发网络包 零拷贝是啥 IO多路复用 Reacter"><meta property="og:type" content="blog"><meta property="og:title" content="操作系统（四）网络管理"><meta property="og:url" content="http://example.com/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="网络管理：  Linux系统是如何收发网络包 零拷贝是啥 IO多路复用 Reacter"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F4.jpeg"><meta property="article:published_time" content="2021-10-10T12:51:32.000Z"><meta property="article:modified_time" content="2021-10-10T14:05:43.214Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="操作系统"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F4.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/"},"headline":"操作系统（四）网络管理","image":[],"datePublished":"2021-10-10T12:51:32.000Z","dateModified":"2021-10-10T14:05:43.214Z","author":{"@type":"Person","name":"binshow"},"description":"网络管理：  Linux系统是如何收发网络包 零拷贝是啥 IO多路复用 Reacter"}</script><link rel="canonical" href="http://example.com/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F4.jpeg" alt="操作系统（四）网络管理"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-10-10T12:51:32.000Z" title="2021/10/10下午8:51:32">2021-10-10</time>发表</span><span class="level-item"><time dateTime="2021-10-10T14:05:43.214Z" title="2021/10/10下午10:05:43">2021-10-10</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">31 分钟读完 (大约4580个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">操作系统（四）网络管理</h1><div class="content"><p>网络管理：</p>
+<ul>
+<li>Linux系统是如何收发网络包</li>
+<li>零拷贝是啥</li>
+<li>IO多路复用</li>
+<li>Reacter</li>
+</ul>
+<span id="more"></span>
+
+
+
+
+
+<h1 id="零拷贝是啥"><a href="#零拷贝是啥" class="headerlink" title="零拷贝是啥"></a>零拷贝是啥</h1><p>磁盘可以说是计算机系统最慢的硬件之⼀，读写速度相差内存 10 倍以上。所以对磁盘的读写有很多的优化措施：</p>
+<h2 id="DMA是啥"><a href="#DMA是啥" class="headerlink" title="DMA是啥"></a>DMA是啥</h2><p>在没有 DMA 技术前，I/O 的过程是这样的：</p>
+<ol>
+<li>CPU 发出对应的指令给磁盘控制器，然后返回；</li>
+<li>磁盘控制器收到指令后，于是就开始准备数据，会把数据放⼊到磁盘控制器的内部缓冲区中，然后产⽣⼀个中断；</li>
+<li>CPU 收到中断信号后，停下⼿头的⼯作，接着把磁盘控制器的缓冲区的数据⼀次⼀个字节地读进⾃⼰的寄存器，然后再把寄存器⾥的数据写⼊到内存，⽽在数据传输的期间CPU 是⽆法执⾏其他任务的。</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211010220202.png" alt="20211010220202"></p>
+<p>可以看到，整个数据的传输过程，都要需要 CPU 亲⾃参与搬运数据的过程，⽽且这个过程，CPU 是不能做其他事情的。</p>
+<p>什么是 DMA 技术？</p>
+<p>简单理解就是，在进⾏ <strong>I/O</strong> 设备和内存的数据传输的时候，数据搬运的⼯作全部交给 <strong>DMA</strong> 控制器，⽽ <strong>CPU</strong> 不再参与任何与数据搬运相关的事情，这样 <strong>CPU</strong> 就可以去处理别的事务。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211010220309.png" alt="20211010220309" style="zoom:50%;" />
+
+
+
+
+
+
+
+<h1 id="IO多路复用模型"><a href="#IO多路复用模型" class="headerlink" title="IO多路复用模型"></a>IO多路复用模型</h1><h2 id="基本的Socket模型"><a href="#基本的Socket模型" class="headerlink" title="基本的Socket模型"></a>基本的Socket模型</h2><p>客户端和服务端之间能在网络中通信，就必须要使用Socket变成。那Socket编程的基本流程是啥样的呢：</p>
+<p>服务端的Socket编程流程：</p>
+<ol>
+<li>服务端⾸先调⽤ socket() 函数，创建⽹络协议为 IPv4，以及传输协议为 TCP 的 Socket ，接着调⽤ bind() 函数，给这个 Socket 绑定⼀个 <strong>IP</strong> 地址和端⼝。<ul>
+<li>绑定<code>端⼝</code>的⽬的：当内核收到 TCP 报⽂，通过 TCP 头⾥⾯的端⼝号，来找到我们的应⽤程序，然后把数据传递给我们。</li>
+<li>绑定 <code>IP 地址</code>的⽬的：<strong>⼀台机器是可以有多个⽹卡的，每个⽹卡都有对应的 IP 地址</strong>，当绑定⼀个⽹卡时，内核在收到该⽹卡上的包，才会发给我们；</li>
+</ul>
+</li>
+<li>以调⽤<code> listen()</code> 函数进⾏监听</li>
+<li>服务端进⼊了监听状态后，通过调⽤<code> accept()</code> 函数，来从内核获取客户端的连接，如果没有客户端连接，则会<strong>阻塞等待</strong>客户端连接的到来。</li>
+</ol>
+<p>客户端的Socket编程流程：</p>
+<ol>
+<li>客户端在创建好 Socket 后，调⽤ connect() 函数发起连接，该函数的参数要指明服务端的 IP 地址和端⼝号，</li>
+<li>开始发生<code>TCP三次握手</code>进行TCP连接</li>
+<li>在 TCP 连接的过程中，服务器的内核实际上为每个 Socket 维护了两个队列：<ul>
+<li>⼀个是还没完全建⽴连接的队列，称为 <strong>TCP</strong> 半连接队列，这个队列都是没有完成三次握⼿的连接，此时服务端处于 syn_rcvd 的状态；</li>
+<li>⼀个是⼀件建⽴连接的队列，称为 <strong>TCP</strong> 全连接队列，这个队列都是完成了三次握⼿的连接，此时服务端处于 established 状态；</li>
+</ul>
+</li>
+</ol>
+<p>当 TCP 全连接队列不为空后，服务端的 accept() 函数，就会从内核中的 TCP 全连接队列⾥拿出⼀个已经完成连接的 Socket 返回应⽤程序，后续数据传输都⽤这个 Socket。</p>
+<blockquote>
+<p>注意，监听的 Socket 和真正⽤来传数据的 Socket 是两个：</p>
+<p>⼀个叫作监听 <strong>Socket</strong>；</p>
+<p>⼀个叫作已连接 <strong>Socket</strong>；</p>
+</blockquote>
+<p>连接建⽴后，客户端和服务端就开始相互传输数据了，双⽅都可以通过 read() 和write() 函数来读写数据。如下：</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211010210145.png" alt="20211010210145" style="zoom:50%;" />
+
+
+
+
+
+
+
+<h2 id="服务更多的客户端"><a href="#服务更多的客户端" class="headerlink" title="服务更多的客户端"></a>服务更多的客户端</h2><p>前面的Socket模型只能实现1对1的通信，因为使用的是<code>同步阻塞</code>的方式。当服务端在还没处理完⼀个客户端的⽹络 I/O 时，或者 读写操作发⽣阻塞时，其他客户端是⽆法与服务端连接的。</p>
+<p>你知道服务器单机理论最⼤能连接多少个客户端？</p>
+<p>相信你知道 TCP 连接是由四元组唯⼀确认的，这个四元组就是：<strong>本机IP, 本机端⼝, 对端IP, 对端端⼝</strong>。</p>
+<p>服务器作为服务⽅，通常会在本地固定监听⼀个端⼝，等待客户端的连接。因此服务器的本地 IP 和端⼝是固定的，于是对于服务端 TCP 连接的四元组只有对端 IP 和端⼝是会变化的，所以最⼤ <strong>TCP</strong> 连接数 <strong>=</strong> 客户端 <strong>IP</strong> 数<strong>×</strong>客户端端⼝数。</p>
+<p>对于 IPv4，客户端的 IP 数最多为 2 的 32 次⽅，客户端的端⼝数最多为 2 的 16 次⽅，也就是服务端单机最⼤ <strong>TCP</strong> 连接数约为 <strong>2</strong> 的 <strong>48</strong> 次⽅。</p>
+<p>服务器肯定承载不了那么⼤的连接数，主要会受两个⽅⾯的限制：</p>
+<ul>
+<li><code>⽂件描述符</code>，Socket 实际上是⼀个⽂件，也就会对应⼀个⽂件描述符。在 Linux 下，单个进程打开的⽂件描述符数是有限制的，没有经过修改的值⼀般都是 1024，不过我们可以通过 ulimit 增⼤⽂件描述符的数⽬；</li>
+<li><code>系统内存</code>，每个 TCP 连接在内核中都有对应的数据结构，意味着每个连接都是会占⽤⼀定内存的；</li>
+</ul>
+<p>那如果服务器的内存只有 2 GB，⽹卡是千兆的，能⽀持并发 1 万请求吗？</p>
+<p><strong>并发 1 万请求，也就是经典的 C10K 问题 ，C 是 Client 单词⾸字⺟缩写，C10K 就是单机同时处理 1 万个请求的问题。</strong></p>
+<p>从硬件资源⻆度看，对于 2GB 内存千兆⽹卡的服务器，如果每个请求处理占⽤不到 200KB的内存和 100Kbit 的⽹络带宽就可以满⾜并发 1 万个请求。</p>
+<p>不过，要想真正实现 C10K 的服务器，要考虑的地⽅在于服务器的⽹络 I/O 模型，效率低的模型，会加重系统开销，从⽽会离 C10K 的⽬标越来越远。</p>
+<h2 id="多进程模型"><a href="#多进程模型" class="headerlink" title="多进程模型"></a>多进程模型</h2><p>基于最原始的阻塞⽹络 I/O， 如果服务器要⽀持多个客户端，其中⽐较传统的⽅式，就是使⽤多进程模型，也就是为每个客户端分配⼀个进程来处理请求。</p>
+<p>服务器的主进程负责监听客户的连接，⼀旦与客户端连接完成，accept() 函数就会返回⼀个「已连接 Socket」，这时就通过 fork() 函数创建⼀个⼦进程，实际上就把⽗进程所有相关的东⻄都复制⼀份，包括⽂件描述符、内存地址空间、程序计数器、执⾏的代码等。这两个进程刚复制完的时候，⼏乎⼀摸⼀样。不过，会根据返回值来区分是⽗进程还是⼦进程，如果返回值是 0，则是⼦进程；如果返回值是其他的整数，就是⽗进程。</p>
+<p>正因为⼦进程会复制⽗进程的⽂件描述符，于是就可以直接使⽤「已连接 Socket 」和客户端通信了，可以发现，⼦进程不需要关⼼「监听 Socket」，只需要关⼼「已连接 Socket」；⽗进程则相反，将客户服务交给⼦进程来处理，因此⽗进程不需要关⼼「已连接 Socket」，只需要关⼼「监听 Socket」。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211010210818.png" alt="20211010210818" style="zoom:50%;" />
+
+
+
+<p>因为进程的切换开销太大了，所以当客户端特别多的时候也不够给力。</p>
+<h2 id="多线程模型"><a href="#多线程模型" class="headerlink" title="多线程模型"></a>多线程模型</h2><p>线程是运⾏在进程中的⼀个“逻辑流”，单进程中可以运⾏多个线程，同进程⾥的线程可以共享进程的部分资源的，⽐如⽂件描述符列表、进程空间、代码、全局数据、堆、共享库等，</p>
+<p>当服务器与客户端 TCP 完成连接后，通过 pthread_create() 函数创建线程，然后将「已连接 Socket」的⽂件描述符传递给线程函数，接着在线程⾥和客户端进⾏通信，从⽽达到并发处理的⽬的。</p>
+<p>如果每来⼀个连接就创建⼀个线程，线程运⾏完后，还得操作系统还得销毁线程，虽说线程切换的上写⽂开销不⼤，但是如果频繁创建和销毁线程，系统开销也是不⼩的。那么，我们可以使⽤线程池的⽅式来避免线程的频繁创建和销毁，所谓的线程池，就是提前创建若⼲个线程，这样当由新连接建⽴时，将这个已连接的 Socket 放⼊到⼀个队列⾥，然后线程池⾥的线程负责从队列中取出已连接 Socket 进程处理。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211010211126.png" alt="20211010211126" style="zoom:50%;" />
+
+<p>需要注意的是，这个队列是全局的，每个线程都会操作，为了避免多线程竞争，线程在操作这个队列前要加锁。上⾯基于进程或者线程模型的，其实还是有问题的。新到来⼀个 TCP 连接，就需要分配⼀个进程或者线程，那么如果要达到 C10K，意味着要⼀台机器维护 1 万个连接，相当于要维护 1万个进程/线程，操作系统就算死扛也是扛不住的。</p>
+<h2 id="IO多路复用"><a href="#IO多路复用" class="headerlink" title="IO多路复用"></a>IO多路复用</h2><p>前面说的这些方法最终只有一个结论： <code>给每个请求分配一个进程或者线程是不合理的</code>。</p>
+<p>所以我们需要找到一个方法：<code>只用一个进程来维护多个Socket，这就是IO多路复用</code>。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211010211338.png" alt="20211010211338" style="zoom:50%;" />
+
+<blockquote>
+<p>⼀个进程虽然任⼀时刻只能处理⼀个请求，但是处理每个请求的事件时，耗时控制在 1 毫秒以内，这样 1 秒内就可以处理上千个请求，把时间拉⻓来看，多个请求复⽤了⼀个进程，这就是多路复⽤，这种思想很类似⼀个 CPU 并发多个进程，所以也叫做时分多路复⽤。</p>
+</blockquote>
+<p>而我们所谓的select、poll 和epoll  都是内核提供给用户态的多路复用系统调用，<strong>进程可以通过一个系统调用函数来从内核中获取多个事件</strong>。</p>
+<blockquote>
+<p>select/poll/epoll 是如何获取⽹络事件的呢？</p>
+<p>在获取事件时，先把所有连接（⽂件描述符）传给内核，再由内核返回产⽣了事件的连接，然后在⽤户态中再处理这些连接对应的请求即可。</p>
+</blockquote>
+<h3 id="Select-poll"><a href="#Select-poll" class="headerlink" title="Select/poll"></a>Select/poll</h3><p>select 实现多路复⽤的⽅式是:</p>
+<p><strong>将进程关心的所有Socket放到一个文件描述符集合中去，调用select函数就是将这个集合拷贝到内核中去，让内核来检查是否有网络事件发生，其实就是遍历所有的Socket文件描述符，当有事件发生后，就对那个Socket文件描述符上面打一个标记，遍历完之后再把整个集合拷贝到用户态里面，然后程序在用户态还需要再遍历一遍找到对应可读或可写的Socket，再进行处理。</strong></p>
+<p>所以，对于 select 这种⽅式</p>
+<ul>
+<li>进⾏ <strong>2</strong> 次「遍历」⽂件描述符集合，⼀次是在内核态⾥，⼀个次是在⽤户态⾥ ，</li>
+<li>发⽣ <strong>2</strong> 次「拷⻉」⽂件描述符集合，先从⽤户空间传⼊内核空间，由内核修改后，再传出到⽤户空间中。</li>
+</ul>
+<p>select 使⽤固定⻓度的 BitsMap，表示⽂件描述符集合，⽽且所⽀持的⽂件描述符的个数是有限制的，在 Linux 系统中，由内核中的 FD_SETSIZE 限制， 默认最⼤值为 1024 ，只能监听 0~1023 的⽂件描述符。</p>
+<p>poll 不再⽤ BitsMap 来存储所关注的⽂件描述符，取⽽代之⽤动态数组，以链表形式来组织，突破了 select 的⽂件描述符个数限制，当然还会受到系统⽂件描述符限制。</p>
+<p>但是 poll 和 select 并没有太⼤的本质区别，都是使⽤「线性结构」存储进程关注的 <strong>Socket</strong>集合，因此都需要遍历⽂件描述符集合来找到可读或可写的 <strong>Socket</strong>，时间复杂度为 **O(n)**，⽽且也需要在⽤户态与内核态之间拷⻉⽂件描述符集合，这种⽅式随着并发数上来，性能的损耗会呈指数级增⻓。</p>
+<h3 id="epoll的改进"><a href="#epoll的改进" class="headerlink" title="epoll的改进"></a>epoll的改进</h3><p>第⼀点，epoll 在内核⾥使⽤<code>红⿊树</code>来跟踪进程所有待检测的⽂件描述字，把需要监控的socket 通过 epoll_ctl() 函数加⼊内核中的红⿊树⾥，红⿊树是个⾼效的数据结构，增删查⼀般时间复杂度是 O(logn) ，通过对这棵⿊红树进⾏操作，这样就不需要像 select/poll 每次操作时都传⼊整个 socket 集合，只需要传⼊⼀个待检测的 socket，减少了内核和⽤户空间⼤量的数据拷⻉和内存分配。</p>
+<p>第⼆点， epoll 使⽤事件驱动的机制，内核⾥维护了⼀个链表来记录就绪事件，<strong>当某个socket 有事件发⽣时，通过回调函数内核会将其加⼊到这个就绪事件列表中</strong>，当⽤户调⽤epoll_wait() 函数时，只会返回有事件发⽣的⽂件描述符的个数，不需要像 select/poll 那样轮询扫描整个 socket 集合，⼤⼤提⾼了检测的效率。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211010212530.png" alt="20211010212530" style="zoom:50%;" />
+
+
+
+
+
+<p>epoll ⽀持两种事件触发模式，分别是边缘触发（<strong>edge-triggered</strong>，<strong>ET</strong>）和⽔平触发（<strong>leveltriggered</strong>，<strong>LT</strong>）。这两个术语还挺抽象的，其实它们的区别还是很好理解的。</p>
+<ul>
+<li>使⽤边缘触发模式时，当被监控的 Socket 描述符上有可读事件发⽣时，服务器端只会从<strong>epoll_wait</strong> 中苏醒⼀次，即使进程没有调⽤ read 函数从内核读取数据，也依然只苏醒⼀次，因此我们<strong>程序要保证⼀次性将内核缓冲区的数据读取完</strong>；</li>
+<li>使⽤⽔平触发模式时，当被监控的 Socket 上有可读事件发⽣时，服务器端不断地从<strong>epoll_wait</strong> 中苏醒，直到内核缓冲区数据被 <strong>read</strong> 函数读完才结束，⽬的是告诉我们有数据需要读取；</li>
+</ul>
+<p>举个例⼦，你的快递被放到了⼀个快递箱⾥，如果快递箱只会通过短信通知你⼀次，即使你⼀直没有去取，它也不会再发送第⼆条短信提醒你，这个⽅式就是边缘触发；如果快递箱发现你的快递没有被取出，它就会不停地发短信通知你，直到你取出了快递，它才消停，这个就是⽔平触发的⽅式。</p>
+<p>这就是两者的区别，⽔平触发的意思是只要满⾜事件的条件，⽐如内核中有数据需要读，就⼀直不断地把这个事件传递给⽤户；⽽边缘触发的意思是只有第⼀次满⾜条件的时候才触发，之后就不会再传递同样的事件了。</p>
+<p>如果使⽤⽔平触发模式，当内核通知⽂件描述符可读写时，接下来还可以继续去检测它的状态，看它是否依然可读或可写。所以在收到通知后，没必要⼀次执⾏尽可能多的读写操作。</p>
+<p>如果使⽤边缘触发模式，I/O 事件发⽣时只会通知⼀次，⽽且我们不知道到底能读写多少数据，所以在收到通知后应尽可能地读写数据，以免错失读写的机会。因此，我们会循环从⽂件描述符读写数据，那么如果⽂件描述符是阻塞的，没有数据可读写时，进程会阻塞在读写函数那⾥，程序就没办法继续往下执⾏。</p>
+<p>所以，边缘触发模式⼀般和⾮阻塞 <strong>I/O</strong> 搭配使⽤，程序会⼀直执⾏ I/O 操作，直到系统调⽤（如 read 和 write ）返回错误，错误类型为EAGAIN 或EWOULDBLOCK 。</p>
+<p>⼀般来说，边缘触发的效率⽐⽔平触发的效率要⾼，因为<strong>边缘触发可以减少 epoll_wait 的系统调⽤次数</strong>，系统调⽤也是有⼀定的开销的的，毕竟也存在上下⽂的切换。</p>
+<p><strong>select/poll 只有⽔平触发模式，epoll 默认的触发模式是⽔平触发</strong>，但是可以根据应⽤场景设置为边缘触发模式。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>操作系统（四）网络管理</p><p><a href="http://example.com/2021/10/10/操作系统（四）网络管理/">http://example.com/2021/10/10/操作系统（四）网络管理/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-10-10</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-10-10</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%89%EF%BC%89%E6%96%87%E4%BB%B6%E5%92%8C%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/"><span class="level-item">操作系统（三）文件和设备管理</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">87</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">18</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#零拷贝是啥"><span class="level-left"><span class="level-item">1</span><span class="level-item">零拷贝是啥</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#DMA是啥"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">DMA是啥</span></span></a></li></ul></li><li><a class="level is-mobile" href="#IO多路复用模型"><span class="level-left"><span class="level-item">2</span><span class="level-item">IO多路复用模型</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#基本的Socket模型"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">基本的Socket模型</span></span></a></li><li><a class="level is-mobile" href="#服务更多的客户端"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">服务更多的客户端</span></span></a></li><li><a class="level is-mobile" href="#多进程模型"><span class="level-left"><span class="level-item">2.3</span><span class="level-item">多进程模型</span></span></a></li><li><a class="level is-mobile" href="#多线程模型"><span class="level-left"><span class="level-item">2.4</span><span class="level-item">多线程模型</span></span></a></li><li><a class="level is-mobile" href="#IO多路复用"><span class="level-left"><span class="level-item">2.5</span><span class="level-item">IO多路复用</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Select-poll"><span class="level-left"><span class="level-item">2.5.1</span><span class="level-item">Select/poll</span></span></a></li><li><a class="level is-mobile" href="#epoll的改进"><span class="level-left"><span class="level-item">2.5.2</span><span class="level-item">epoll的改进</span></span></a></li></ul></li></ul></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">77</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T12:51:32.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/">操作系统（四）网络管理</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T12:51:21.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%89%EF%BC%89%E6%96%87%E4%BB%B6%E5%92%8C%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/">操作系统（三）文件和设备管理</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T06:17:47.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%88%E5%85%AB%EF%BC%89%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/">算法题（八）滑动窗口</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-09T16:27:01.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%88%E4%B8%83%EF%BC%89%E6%95%B0%E7%BB%84/">算法题（七）数组</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-09T16:26:54.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%88%E5%85%AD%EF%BC%89%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">算法题（六）动态规划</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
