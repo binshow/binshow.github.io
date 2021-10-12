@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Redis（八）缓存问题 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Redis最常用的就是缓存，但是缓存会带来一系列问题：  缓存雪崩 缓存击穿 缓存穿透 缓存一致性"><meta property="og:type" content="blog"><meta property="og:title" content="Redis（八）缓存问题"><meta property="og:url" content="http://example.com/2021/10/11/Redis%EF%BC%88%E5%85%AB%EF%BC%89%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="Redis最常用的就是缓存，但是缓存会带来一系列问题：  缓存雪崩 缓存击穿 缓存穿透 缓存一致性"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/Redis8.jpeg"><meta property="article:published_time" content="2021-10-10T16:43:12.000Z"><meta property="article:modified_time" content="2021-10-11T01:18:54.750Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="Redis"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/Redis8.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/10/11/Redis%EF%BC%88%E5%85%AB%EF%BC%89%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98/"},"headline":"Redis（八）缓存问题","image":[],"datePublished":"2021-10-10T16:43:12.000Z","dateModified":"2021-10-11T01:18:54.750Z","author":{"@type":"Person","name":"binshow"},"description":"Redis最常用的就是缓存，但是缓存会带来一系列问题：  缓存雪崩 缓存击穿 缓存穿透 缓存一致性"}</script><link rel="canonical" href="http://example.com/2021/10/11/Redis%EF%BC%88%E5%85%AB%EF%BC%89%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/Redis8.jpeg" alt="Redis（八）缓存问题"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-10-10T16:43:12.000Z" title="2021/10/11上午12:43:12">2021-10-11</time>发表</span><span class="level-item"><time dateTime="2021-10-11T01:18:54.750Z" title="2021/10/11上午9:18:54">2021-10-11</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">17 分钟读完 (大约2494个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Redis（八）缓存问题</h1><div class="content"><p>Redis最常用的就是缓存，但是缓存会带来一系列问题：</p>
+<ul>
+<li>缓存雪崩</li>
+<li>缓存击穿</li>
+<li>缓存穿透</li>
+<li>缓存一致性</li>
+</ul>
+<span id="more"></span>
+
+
+
+
+
+<h1 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h1><h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p><strong>大量缓存数据在同一时间过期（失效）或者 Redis 故障宕机</strong>时，如果此时有大量的用户请求直接访问数据库。</p>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211011004606.png" alt="20211011004606" style="zoom:50%;" />
+
+
+
+<h2 id="怎么解决"><a href="#怎么解决" class="headerlink" title="怎么解决"></a>怎么解决</h2><p>针对<strong>大量数据同时过期</strong>而引发的缓存雪崩问题，常见的应对方法有下面这几种：</p>
+<ul>
+<li>均匀设置过期时间：给过期时间加上随机数，避免同一时间过期。</li>
+<li>互斥锁：当业务线程在处理用户请求时，<strong>如果发现访问的数据不在 Redis 里，就加个互斥锁，保证同一时间内只有一个请求来构建缓存</strong>（从数据库读取数据，再将数据更新到 Redis 里），当缓存构建完成后，再释放锁</li>
+<li>双 key 策略；我们对缓存数据可以使用两个 key，一个是<strong>主 key，会设置过期时间</strong>，一个是<strong>备 key，不会设置过期。</strong></li>
+<li>后台更新缓存：将更新缓存的工作交由后台线程定时更新。</li>
+</ul>
+<p>针对Redis宕机了：构建高可用集群。</p>
+<h1 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h1><h2 id="是什么-1"><a href="#是什么-1" class="headerlink" title="是什么"></a>是什么</h2><p>如果缓存中的<strong>某个热点数据过期</strong>了，此时大量的请求访问了该热点数据，就无法从缓存中读取，直接访问数据库，</p>
+<h2 id="怎么解决-1"><a href="#怎么解决-1" class="headerlink" title="怎么解决"></a>怎么解决</h2><ul>
+<li>互斥锁方案，保证同一时间只有一个业务线程更新缓存，未能获取互斥锁的请求，要么等待锁释放后重新读取缓存，要么就返回空值或者默认值。</li>
+<li>不给热点数据设置过期时间，由后台异步更新缓存，或者在热点数据准备要过期前，提前通知后台线程更新缓存以及重新设置过期时间</li>
+</ul>
+<h1 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h1><h2 id="是什么-2"><a href="#是什么-2" class="headerlink" title="是什么"></a>是什么</h2><p>当用户访问的数据，<strong>既不在缓存中，也不在数据库中</strong>，导致请求在访问缓存时，发现缓存缺失，再去访问数据库时，发现数据库中也没有要访问的数据，没办法构建缓存数据，来服务后续的请求。那么当有大量这样的请求到来时，数据库的压力骤增，这就是<strong>缓存穿透</strong>的问题</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211011005113.png" alt="20211011005113"></p>
+<h2 id="怎么解决-2"><a href="#怎么解决-2" class="headerlink" title="怎么解决"></a>怎么解决</h2><ul>
+<li>缓存空对象</li>
+<li>布隆过滤器</li>
+</ul>
+<h2 id="布隆过滤器介绍"><a href="#布隆过滤器介绍" class="headerlink" title="布隆过滤器介绍"></a>布隆过滤器介绍</h2><p>布隆过滤器由「初始值都为 0 的位图数组」和「 N 个哈希函数」两部分组成。当我们在写入数据库数据时，在布隆过滤器里做个标记，这样下次查询数据是否在数据库时，只需要查询布隆过滤器，如果查询到数据没有被标记，说明不在数据库中。</p>
+<p>布隆过滤器会通过 3 个操作完成标记：</p>
+<ul>
+<li>第一步，使用 N 个哈希函数分别对数据做哈希计算，得到 N 个哈希值；</li>
+<li>第二步，将第一步得到的 N 个哈希值对位图数组的长度取模，得到每个哈希值在位图数组的对应位置。</li>
+<li>第三步，将每个哈希值在位图数组的对应位置的值设置为 1；</li>
+</ul>
+<p>举个例子，假设有一个位图数组长度为 8，哈希函数 3 个的布隆过滤器。</p>
+<p>在数据库写入数据 x 后，把数据 x 标记在布隆过滤器时，数据 x 会被 3 个哈希函数分别计算出 3 个哈希值，然后在对这 3 个哈希值对 8 取模，假设取模的结果为 1、4、6，然后把位图数组的第 1、4、6 位置的值设置为 1。<strong>当应用要查询数据 x 是否数据库时，通过布隆过滤器只要查到位图数组的第 1、4、6 位置的值是否全为 1，只要有一个为 0，就认为数据 x 不在数据库中</strong>。</p>
+<p>布隆过滤器由于是基于哈希函数实现查找的，高效查找的同时<strong>存在哈希冲突的可能性</strong>，比如数据 x 和数据 y 可能都落在第 1、4、6 位置，而事实上，可能数据库中并不存在数据 y，存在误判的情况。</p>
+<p>所以，<strong>查询布隆过滤器说数据存在，并不一定证明数据库中存在这个数据，但是查询到数据不存在，数据库中一定就不存在这个数据</strong>。</p>
+<h1 id="缓存一致性问题"><a href="#缓存一致性问题" class="headerlink" title="缓存一致性问题"></a>缓存一致性问题</h1><p><strong>由于引入了缓存，那么在数据更新时，不仅要更新数据库，而且要更新缓存，这两个更新操作存在前后的问题</strong>：</p>
+<ul>
+<li>先更新数据库，再更新缓存；</li>
+<li>先更新缓存，再更新数据库；</li>
+</ul>
+<p>如果是第一种：</p>
+<p>比如「请求 A 」和「请求 B 」两个请求，同时更新「同一条」数据，则可能出现这样的顺序：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211011005356.png" alt="20211011005356"></p>
+<p>第二种其实也不行。</p>
+<p>在更新数据时，<strong>不更新缓存，而是删除缓存中的数据。然后，到读取数据时，发现缓存中没了数据之后，再从数据库中读取数据，更新到缓存中。</strong></p>
+<p>这就是所谓的cache aside策略。旁路缓存。</p>
+<ul>
+<li>先删除缓存再更新数据库</li>
+<li>先更新数据库再删除缓存</li>
+</ul>
+<p>如果是第一种的方式：</p>
+<p>假设某个用户的年龄是 20，请求 A 要更新用户年龄为 21，所以它会删除缓存中的内容。这时，另一个请求 B 要读取这个用户的年龄，它查询缓存发现未命中后，会从数据库中读取到年龄为 20，并且写入到缓存中，然后请求 A 继续更改数据库，将用户的年龄更新为 21。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211011090827.png" alt="20211011090827"></p>
+<p>最终，该用户年龄在缓存中是 20（旧值），在数据库中是 21（新值），缓存和数据库的数据不一致。</p>
+<p>如果是第二种方式：</p>
+<p>假如某个用户数据在缓存中不存在，请求 A 读取数据时从数据库中查询到年龄为 20，在未写入缓存中时另一个请求 B 更新数据。它更新数据库中的年龄为 21，并且清空缓存。这时请求 A 把从数据库中读到的年龄为 20 的数据写入到缓存中。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211011091025.png" alt="20211011091025"></p>
+<p>最终，该用户年龄在缓存中是 20（旧值），在数据库中是 21（新值），缓存和数据库数据不一致。</p>
+<p>从上面的理论上分析，先更新数据库，再删除缓存也是会出现数据不一致性的问题，<strong>但是在实际中，这个问题出现的概率并不高</strong>。</p>
+<p><strong>因为缓存的写入通常要远远快于数据库的写入</strong>，所以在实际中很难出现请求 B 已经更新了数据库并且删除了缓存，请求 A 才更新完缓存的情况。</p>
+<p>而一旦请求 A 早于请求 B 删除缓存之前更新了缓存，那么接下来的请求就会因为缓存不命中而从数据库中重新读取数据，所以不会出现这种不一致的情况。</p>
+<p>所以，<strong>「先更新数据库 + 再删除缓存」的方案，是可以保证数据一致性的</strong>。</p>
+<p>而且阿旺为了确保万无一失，还给缓存数据加上了「<strong>过期时间</strong>」，就算在这期间存在缓存数据不一致，有过期时间来兜底，这样也能达到最终一致。</p>
+<p>「先更新数据库， 再删除缓存」其实是两个操作，前面的所有分析都是建立在这两个操作都能同时执行成功，而这次客户投诉的问题就在于，在删除缓存（第二个操作）的时候失败了，导致缓存中的数据是旧值。<strong>如何保证「先更新数据库 ，再删除缓存」这两个操作能执行成功？</strong></p>
+<ul>
+<li><p>重试机制：将第二个删除缓存的操作加入到消息队列里面去，由消费者来操作数据。如果删除缓存失败，可以从MQ中重新读取数据，然后再删除缓存。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211011091706.png" alt="20211011091706"></p>
+</li>
+<li><p>订阅 MySQL binlog，再操作缓存：<strong>更新数据库，那么更新数据库成功，就会产生一条变更日志，记录在 binlog 里</strong>。我们就可以通过订阅 binlog 日志，拿到具体要操作的数据，然后再执行缓存删除，阿里巴巴开源的 Canal 中间件就是基于这个实现的。Canal <strong>模拟 MySQL 主从复制的交互协议</strong>，把自己伪装成一个 MySQL 的从节点，向 MySQL 主节点发送 dump 请求，MySQL 收到请求后，就会开始推送 Binlog 给 Canal，Canal 解析 Binlog 字节流之后，转换为便于读取的结构化数据，供下游程序订阅使用。</p>
+</li>
+</ul>
+<p>思想都是异步操作缓存。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Redis（八）缓存问题</p><p><a href="http://example.com/2021/10/11/Redis（八）缓存问题/">http://example.com/2021/10/11/Redis（八）缓存问题/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-10-11</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-10-11</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Redis/">Redis</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2021/10/11/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%88%E4%B9%9D%EF%BC%89%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">算法题（九）栈和队列</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/"><span class="level-item">操作系统（四）网络管理</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">89</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">18</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#缓存雪崩"><span class="level-left"><span class="level-item">1</span><span class="level-item">缓存雪崩</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#是什么"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">是什么</span></span></a></li><li><a class="level is-mobile" href="#怎么解决"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">怎么解决</span></span></a></li></ul></li><li><a class="level is-mobile" href="#缓存击穿"><span class="level-left"><span class="level-item">2</span><span class="level-item">缓存击穿</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#是什么-1"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">是什么</span></span></a></li><li><a class="level is-mobile" href="#怎么解决-1"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">怎么解决</span></span></a></li></ul></li><li><a class="level is-mobile" href="#缓存穿透"><span class="level-left"><span class="level-item">3</span><span class="level-item">缓存穿透</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#是什么-2"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">是什么</span></span></a></li><li><a class="level is-mobile" href="#怎么解决-2"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">怎么解决</span></span></a></li><li><a class="level is-mobile" href="#布隆过滤器介绍"><span class="level-left"><span class="level-item">3.3</span><span class="level-item">布隆过滤器介绍</span></span></a></li></ul></li><li><a class="level is-mobile" href="#缓存一致性问题"><span class="level-left"><span class="level-item">4</span><span class="level-item">缓存一致性问题</span></span></a></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">79</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-11T02:36:47.000Z">2021-10-11</time></p><p class="title"><a href="/2021/10/11/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%88%E4%B9%9D%EF%BC%89%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/">算法题（九）栈和队列</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T16:43:12.000Z">2021-10-11</time></p><p class="title"><a href="/2021/10/11/Redis%EF%BC%88%E5%85%AB%EF%BC%89%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98/">Redis（八）缓存问题</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T12:51:32.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%9B%9B%EF%BC%89%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/">操作系统（四）网络管理</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T12:51:21.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%89%EF%BC%89%E6%96%87%E4%BB%B6%E5%92%8C%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/">操作系统（三）文件和设备管理</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-10-10T06:17:47.000Z">2021-10-10</time></p><p class="title"><a href="/2021/10/10/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%88%E5%85%AB%EF%BC%89%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/">算法题（八）滑动窗口</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2021 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
