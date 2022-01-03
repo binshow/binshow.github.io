@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Docker（一）入门介绍 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="容器化技术Docker"><meta property="og:type" content="blog"><meta property="og:title" content="Docker（一）入门介绍"><meta property="og:url" content="http://example.com/2021/12/24/Docker%EF%BC%88%E4%B8%80%EF%BC%89%E5%85%A5%E9%97%A8%E4%BB%8B%E7%BB%8D/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="容器化技术Docker"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://raw.githubusercontent.com/binshow/img/master/20211224105231.png"><meta property="og:image" content="https://raw.githubusercontent.com/binshow/img/master/20211224105340.png"><meta property="og:image" content="https://raw.githubusercontent.com/binshow/img/master/20211224105347.png"><meta property="article:published_time" content="2021-12-24T02:47:05.000Z"><meta property="article:modified_time" content="2021-12-24T07:52:30.259Z"><meta property="article:author" content="binshow"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="https://raw.githubusercontent.com/binshow/img/master/20211224105231.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/12/24/Docker%EF%BC%88%E4%B8%80%EF%BC%89%E5%85%A5%E9%97%A8%E4%BB%8B%E7%BB%8D/"},"headline":"Docker（一）入门介绍","image":["https://raw.githubusercontent.com/binshow/img/master/20211224105231.png","https://raw.githubusercontent.com/binshow/img/master/20211224105340.png","https://raw.githubusercontent.com/binshow/img/master/20211224105347.png"],"datePublished":"2021-12-24T02:47:05.000Z","dateModified":"2021-12-24T07:52:30.259Z","author":{"@type":"Person","name":"binshow"},"description":"容器化技术Docker"}</script><link rel="canonical" href="http://example.com/2021/12/24/Docker%EF%BC%88%E4%B8%80%EF%BC%89%E5%85%A5%E9%97%A8%E4%BB%8B%E7%BB%8D/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2021-12-24T02:47:05.000Z" title="2021/12/24 上午10:47:05">2021-12-24</time>发表</span><span class="level-item"><time dateTime="2021-12-24T07:52:30.259Z" title="2021/12/24 下午3:52:30">2021-12-24</time>更新</span><span class="level-item">6 分钟读完 (大约940个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Docker（一）入门介绍</h1><div class="content"><p>容器化技术Docker</p>
+<span id="more"></span>
+
+
+
+<h1 id="Docker的历史"><a href="#Docker的历史" class="headerlink" title="Docker的历史"></a>Docker的历史</h1><h2 id="容器化时代的发展"><a href="#容器化时代的发展" class="headerlink" title="容器化时代的发展"></a>容器化时代的发展</h2><p>应用部署在机器上的发展可以分为下面三个阶段：</p>
+<ol>
+<li><strong>物理机时代</strong>：多个应用程序可能会跑在一台机器上</li>
+</ol>
+<img src="https://raw.githubusercontent.com/binshow/img/master/20211224105231.png" alt="20211224105231" style="zoom:100%;" />
+
+
+
+<ol start="2">
+<li><strong>虚拟机时代</strong>：一台物理机器安装多个虚拟机（VM），一个虚拟机跑多个程序</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211224105340.png" alt="20211224105340"></p>
+<ol start="3">
+<li><strong>容器化时代</strong>：一台物理机安装多个容器实例（container），一个容器跑多个程序。</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20211224105347.png" alt="20211224105347"></p>
+<p>那么Docker相对于虚拟化技术有什么优点呢？</p>
+<ul>
+<li>虚拟机技术是在一台物理机器上，<strong>通过中间虚拟软件层<code>Hypervisor</code>隔离<code>CPU</code>、内存等硬件资源，虚拟出多台虚拟服务器</strong>，这样做的话，一台物理服务器便可以安装多个应用程序，达到资源利用的最大化，而且多个应用之间相互隔离。</li>
+<li><strong><code>Docker</code>是在操作系统进程层面的隔离，而虚拟机是在物理资源层面的隔离！</strong></li>
+</ul>
+<h2 id="Docker出现的背景"><a href="#Docker出现的背景" class="headerlink" title="Docker出现的背景"></a>Docker出现的背景</h2><p>主要是为了解决开发环境和生产环境的不一致问题。</p>
+<p>可能这个项目在开发人员的电脑中可以运行，但是到了运维人员的电脑中就无法运行了。因为开发的项目需要的依赖越多，安装的环境就越复杂。针对于此，容器就是一个不错的解决方案，容器能成为开发与运维之间沟通的语言，<strong>因为容器就像一个集装箱一样，提供了软件运行的最小化环境，将应用与其需要的环境一起打包成为镜像，便可以在开发与运维之间沟通与传输</strong>。</p>
+<h1 id="Docker的基本概念"><a href="#Docker的基本概念" class="headerlink" title="Docker的基本概念"></a>Docker的基本概念</h1><h2 id="镜像Image"><a href="#镜像Image" class="headerlink" title="镜像Image"></a>镜像Image</h2><p><strong><code>Docker</code>本质上是一个运行在<code>Linux</code>操作系统上的应用</strong>，而<code>Linux</code>操作系统分为内核和用户空间，无论是<code>Centos</code>还是<code>Ubuntu</code>，都是在启动内核之后，通过挂载<code>Root</code>文件系统来提供用户空间的,<strong>而Docker镜像就是一个Root文件系统</strong>。</p>
+<p><code>Docker</code>镜像是一个特殊的文件系统，提供容器运行时所需的程序、库、资源、配置等文件，另外还包含了一些为运行时准备的一些配置参数（如匿名卷、环境变量、用户等）。</p>
+<p>镜像是一个静态的概念，不包含任何动态数据，其内容在构建之后也不会被改变。</p>
+<p>// 可以查看本地的镜像列表</p>
+<figure class="highlight zsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># shengbinbin @ binshow in ~/Documents/MacBookHexoBlog/blog [11:03:28]</span></span><br><span class="line">$ docker images</span><br><span class="line">REPOSITORY               TAG       IMAGE ID       CREATED       SIZE</span><br><span class="line">docker/getting-started   latest    720f449e5af2   3 weeks ago   27.2MB</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="容器Container"><a href="#容器Container" class="headerlink" title="容器Container"></a>容器Container</h2><p><strong>镜像与容器的关系，就是面向对象编程中类与对象的关系，我们定好每一个类，然后使用类创建对象，对应到<code>Docker</code>的使用上，则是构建好每一个镜像，然后使用镜像创建我们需要的容器。</strong></p>
+<blockquote>
+<p>基于某个镜像运行一次就是生成一个程序实例，这个程序实例就被称为一个容器。这个容器是可读可写的！</p>
+</blockquote>
+<h2 id="仓库Repository"><a href="#仓库Repository" class="headerlink" title="仓库Repository"></a>仓库Repository</h2><p>用于存储docker中的所有镜像具体位置。</p>
+<p>又分为远程仓库和本地仓库。</p>
+<ul>
+<li>远程仓库是值docker在世界范围内维护的唯一远程仓库</li>
+<li>本地仓库是值当前自己机器中下载的镜像存储位置</li>
+</ul>
+<h1 id="Docker的组成和架构"><a href="#Docker的组成和架构" class="headerlink" title="Docker的组成和架构"></a>Docker的组成和架构</h1></div><div class="article-licensing box"><div class="licensing-title"><p>Docker（一）入门介绍</p><p><a href="http://example.com/2021/12/24/Docker（一）入门介绍/">http://example.com/2021/12/24/Docker（一）入门介绍/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2021-12-24</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2021-12-24</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2021/12/24/Docker%EF%BC%88%E4%BA%8C%EF%BC%89%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Docker（二）常见命令</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2021/12/21/Kafka%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%BA%8C%EF%BC%89/"><span class="level-item">Kafka学习（二）</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">103</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">21</p></a></div></div></nav></div></div><!--!--><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">88</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-02T13:31:23.000Z">2022-01-02</time></p><p class="title"><a href="/2022/01/02/Go%E6%93%8D%E4%BD%9CElasticsearch/">Go操作Elasticsearch</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-12-30T14:21:57.000Z">2021-12-30</time></p><p class="title"><a href="/2021/12/30/Go-Learning%EF%BC%88%E5%8D%81%EF%BC%89Web/">Go_Learning（十）Web</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-12-30T14:21:42.000Z">2021-12-30</time></p><p class="title"><a href="/2021/12/30/Go-Learning%EF%BC%88%E4%B9%9D%EF%BC%89%E6%B5%8B%E8%AF%95/">Go_Learning（九）测试</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-12-24T12:21:56.000Z">2021-12-24</time></p><p class="title"><a href="/2021/12/24/Docker%EF%BC%88%E5%9B%9B%EF%BC%89%E5%B8%B8%E8%A7%81%E6%9C%8D%E5%8A%A1/">Docker（四）常见服务</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2021-12-24T12:21:43.000Z">2021-12-24</time></p><p class="title"><a href="/2021/12/24/Docker%EF%BC%88%E4%B8%89%EF%BC%89%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Docker（三）原理解析</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2022 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
