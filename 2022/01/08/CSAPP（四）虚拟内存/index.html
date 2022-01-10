@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>CSAPP（四）虚拟内存 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="来自于CSAPP书籍第9章内容"><meta property="og:type" content="blog"><meta property="og:title" content="CSAPP（四）虚拟内存"><meta property="og:url" content="http://example.com/2022/01/08/CSAPP%EF%BC%88%E5%9B%9B%EF%BC%89%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="来自于CSAPP书籍第9章内容"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg"><meta property="article:published_time" content="2022-01-08T13:06:43.000Z"><meta property="article:modified_time" content="2022-01-09T14:48:12.062Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="操作系统"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/01/08/CSAPP%EF%BC%88%E5%9B%9B%EF%BC%89%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/"},"headline":"CSAPP（四）虚拟内存","image":[],"datePublished":"2022-01-08T13:06:43.000Z","dateModified":"2022-01-09T14:48:12.062Z","author":{"@type":"Person","name":"binshow"},"description":"来自于CSAPP书籍第9章内容"}</script><link rel="canonical" href="http://example.com/2022/01/08/CSAPP%EF%BC%88%E5%9B%9B%EF%BC%89%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg" alt="CSAPP（四）虚拟内存"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-01-08T13:06:43.000Z" title="2022/1/8 下午9:06:43">2022-01-08</time>发表</span><span class="level-item"><time dateTime="2022-01-09T14:48:12.062Z" title="2022/1/9 下午10:48:12">2022-01-09</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">27 分钟读完 (大约4108个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">CSAPP（四）虚拟内存</h1><div class="content"><p>来自于CSAPP书籍第9章内容</p>
+<span id="more"></span>
+
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>前面说过，一个系统的进程和其他进程是共享CPU和主存的资源的。当进程太多时就需要太多的内存了，当一个进程没有足够的内存空间可用时，就会出现各种各样的问题。</p>
+<p>因此，为了有效的管理内存，并且少出错，现代系统提供了<strong>主存的抽象概念：虚拟内存</strong>，虚拟内存为每个进程提供了一个大的、一致的和私有的地址空间，主要提供了三个重要的能力：</p>
+<ol>
+<li><strong>将主存看成是一个存储在磁盘上的地址空间的高速缓存，在主存中保存活动区域，并根据需要在磁盘和主存之间来回传送数据，通过这种方式高效的使用主存。</strong></li>
+<li><strong>为每个进程提供一致的地址空间，从而简化了内存管理。</strong></li>
+<li><strong>保护了每个进程的地址空间不被其他进程破坏。</strong></li>
+</ol>
+<p>为什么虚拟内存这么成功的，主要的原因是因为它是默默工作的，不需要程序员的任何干涉，那为什么要理解它呢？</p>
+<ul>
+<li>虚拟内存是核心的</li>
+<li>虚拟内存是强大的，赋予了程序强大的能力，可以创建和销毁内存片、将内存片映射到磁盘文件的某个部分、和其他进程共享内存。比如说：你可以通过读写内存位置来实现读或修改磁盘文件的内容、你可以加载一个文件的内容到内存中，而不需要任何显式的复制。</li>
+<li>虚拟内存是危险的，</li>
+</ul>
+<h1 id="物理寻址和虚拟寻址"><a href="#物理寻址和虚拟寻址" class="headerlink" title="物理寻址和虚拟寻址"></a>物理寻址和虚拟寻址</h1><p>计算机的主存被组织成一个由M个连续的字节大小的单元组成的数组，每个字节都有一个唯一的物理地址。第一个字节的地址为0，后面一次为1，2…。</p>
+<p>CPU访问内存的最自然的方式就是物理寻址：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220108211700.png" alt="20220108211700"></p>
+<ol>
+<li>执行一个加载指令，它读取从物理地址4处开始的4字节数据</li>
+<li>CPU执行这个加载指令时，会生成一个有效的物理地址，<strong>通过内存总线传递给主存</strong></li>
+<li>主存取出物理地址4处开始的4字节数据返回给CPU</li>
+<li>CPU将这些数据放到寄存器中</li>
+</ol>
+<p>虚拟地址的寻址过程就不一样了：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220108211923.png" alt="20220108211923"></p>
+<ol>
+<li>CPU通过生成一个虚拟地址来访问主存，这个虚拟地址在被传递到主存之前先转换成物理地址</li>
+<li>地址翻译需要CPU芯片上的一个<strong>内存管理单元（Memory Management Unit）</strong>的专用硬件，利用存放在主存中的查询表来动态翻译。该表的内容由操作系统管理</li>
+</ol>
+<h1 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h1><h1 id="虚拟内存作为缓存的工具"><a href="#虚拟内存作为缓存的工具" class="headerlink" title="虚拟内存作为缓存的工具"></a>虚拟内存作为缓存的工具</h1><p>从概念上来看，虚拟内存被组织为一个由存放在磁盘上的N个连续的字节大小的单元组成的数组。每字节都有一个唯一的虚拟地址，作为到数组的索引。</p>
+<p><strong>磁盘上数组的内容被缓存在主存中。和存储器层次结构中其他缓存一样</strong>，磁盘(较低层)上的数据被分割成块，这些块作为磁盘和主存(较高层)之间的传输单元。</p>
+<p>VM系统通过将虚拟内存分割为称为虚拟页(Virtual Page，VP)的 大小固定的块来处理这个问题。每个虚拟页的大小为P=2*字节。</p>
+<p>类似地，物理内存被分割为物理页(Physical Page，PP)， 大小也为P字节(物理页也被称为页(page frame))。</p>
+<p>在任意时刻，虚拟页面的集合都分为三个不相交的子集:</p>
+<ul>
+<li><p>未分配的:VM系统还未分配(或者创建)的页。未分配的块没有任何数据和它们相关联，因此也就不占用任何磁盘空间。</p>
+</li>
+<li><p>缓存的:当前已缓存在物理内存中的已分配页。</p>
+</li>
+<li><p>未缓存的:未缓存在物理内存中的已分配页。</p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220108213746.png" alt="20220108213746"></p>
+<h2 id="DRAM缓存的组织结构"><a href="#DRAM缓存的组织结构" class="headerlink" title="DRAM缓存的组织结构"></a>DRAM缓存的组织结构</h2><p>在存储结构中，</p>
+<p>SRAM缓存用于表示位于CPU和主存之间的L1、L2和L3高速缓存。</p>
+<p>DRAM缓存表示虚拟内存系统的缓存，在主存中缓存虚拟页</p>
+<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h2><p>和其他缓存一样，虚拟内存系统必要有一种方法来判断一个虚拟页是否缓存再DRAM中的某个地方。如果是，系统还必须要确定这个虚拟页存放在哪个物理页中，如果未命中，系统必须判断这个虚拟页存放在磁盘的哪个位置，在物理内存中选择一个需要牺牲的页，并将虚拟页从磁盘复制到DRAM中，替换这个牺牲页</p>
+<p>这些功能是由软硬件联合提供的，比如<strong>操作系统、MMU中的地址翻译硬件、和存放在物理内存中叫做页表（page table）</strong>的数据结构。</p>
+<p>页表将虚拟页映射到物理页，每次地址翻译硬件将一个虚拟地址转换成物理地址时，都会去读取页表。</p>
+<p>操作系统负责维护页表的内容，以及在磁盘和DRAM之间来回传送页</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109100202.png" alt="20220109100202"></p>
+<p>页表就是一个<strong>页表条目</strong>的数组（Page Table Entry），虚拟地址空间中的每个页在页表中一个固定偏移量处都有一个PTE。</p>
+<p>可以认为每个PTE是由一个有效位（valid bit）和一个n位地址字段组成的。</p>
+<ul>
+<li>有效位表示该虚拟页当前是否被缓存在DRAM中</li>
+<li>如果设置了有效位，那么地址字段就表示DRAM中相应的物理页的起始位置</li>
+</ul>
+<h2 id="页命中"><a href="#页命中" class="headerlink" title="页命中"></a>页命中</h2><p>比如说CPU想要读取包含在VP2中的虚拟内存中的数据：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109142343.png" alt="20220109142343"></p>
+<ol>
+<li>地址翻译硬件将虚拟地址作为一个索引来定位到PTE2，并从内存中读取</li>
+<li>因为设置了有效位，地址翻译硬件就知道VP2是缓存再内存中，就使用PET中的物理内存地址</li>
+</ol>
+<h2 id="缺页"><a href="#缺页" class="headerlink" title="缺页"></a>缺页</h2><p><strong>缺页（page fault）的意思是：DRAM缓存未命中的情况。</strong></p>
+<p>比如说：CPU读取VP3中的数据，而VP3并未缓存再DRAM中</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109143215.png" alt="20220109143215"></p>
+<ul>
+<li>地址翻译硬件从内存中读取PTE3，从有效位判断出VP3并未被缓存，触发了缺页异常</li>
+<li>缺页异常调用内核中的缺页异常处理程序，该程序会选择一个牺牲页（VP4）</li>
+<li>如果VP4已经被修改了，那么内核就会将它复制回磁盘</li>
+<li>最终内核都会修改VP4的页表条目，反映出VP4不再缓存在主存中的事实</li>
+<li>内核从磁盘复制VP3到内存中的PP3，更新PTE3，随后返回</li>
+<li>当异常处理程序返回时，它会重新启动导致缺页的指令，该指令会把导致缺页的虚拟地址重新发送到地址翻译硬件</li>
+<li>此时VP3已经缓存再主存中了，那么页命中也能被地址翻译硬件正常处理了。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109143915.png" alt="20220109143915"></p>
+<h2 id="分配页面"><a href="#分配页面" class="headerlink" title="分配页面"></a>分配页面</h2><p>如下图所示，调用malloc的过程分配VP5：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109144148.png" alt="20220109144148"></p>
+<p>你可能会觉得缓存页未命中的影响相当大，但实际上虚拟内存工作的非常好，主要还是局部性的原理！</p>
+<p>.尽管在整个运行过程中程序引用的不同页面的总数可能超出物理内存总的大小，但是局部<br>性原则保证了在任意时刻，程序将趋向于在- -个较小的活动页面(active page)集合上工作，这个<br>集合叫做工作集(workingset)或者常驻集合(residentset)。在初始开销，也就是将工作集页面调<br>度到内存中之后，接下来对这个工作集的引用将导致命中，而不会产生额外的磁盘流量。<br>只要我们的程序有好的时间局部性，虚拟内存系统就能工作得相当好。但是，当然不<br>是所有的程序都能展现良好的时间局部性。如果工作集的大小超出了物理内存的大小，那<br>么程序将产生-.种不幸的状态，叫做抖动(thrashing)，这时页面将不断地换进换出。虽然<br>虚拟内存通常是有效的，但是如果-一个程序性能慢得像爬- -样，那么聪明的程序员会考虑<br>是不是发生了抖动。</p>
+<h1 id="虚拟内存作为内存管理的工具"><a href="#虚拟内存作为内存管理的工具" class="headerlink" title="虚拟内存作为内存管理的工具"></a>虚拟内存作为内存管理的工具</h1><p>实际上，<strong>操作系统为每个进程都提供了一个独立的页表</strong>，也就是一个独立的虚拟地址空间。</p>
+<p>按需页面调度和独立的虚拟地址空间的结合，对系统中内存的使用和管理造成了深远的影响。特别VM简化了链接和加载、代码和数据共享，以及应用程序的内存分配：</p>
+<ul>
+<li><strong>简化链接</strong>：独立的地址空间允许每个进程的内存映射都使用相同的基本格式，而不管代码和数据实际存放在物理内存的何处</li>
+<li><strong>简化加载</strong>：</li>
+<li><strong>简化共享</strong>：</li>
+<li><strong>简化内存分配</strong>：虚拟内存向用户进程提供了一个简单的分配额外内存的机制，当一个运行在用户进程中的程序要求额外的堆空间时（比如调用malloc的结构），操作系统就会分配一个k个连续的虚拟内存页面，并将它们隐射到物理内存中任意位置的k个任意的物理页面。由于页表的存在，<strong>操作系统没必要分配k个连续的物理内存页面</strong>，可以随机的分散在物理内存中。</li>
+</ul>
+<h1 id="虚拟内存作为内存保护的工具"><a href="#虚拟内存作为内存保护的工具" class="headerlink" title="虚拟内存作为内存保护的工具"></a>虚拟内存作为内存保护的工具</h1><p>现代计算机系统必须为操作系统提供手段来控制对内存系统的访问：</p>
+<ul>
+<li><p>不应该允许一个用户进程修改它的只读代码段。</p>
+</li>
+<li><p>不应该允许它读或修改任何内核中的代码和数据结构。</p>
+</li>
+<li><p>不应该允许它读或者写其他进程的私有内存，</p>
+</li>
+<li><p>并且<strong>不允许它修改任何与其他进程共享的虚拟页面</strong>，除非所有的共享者都显式地允许它这么做(通过调用明确的进程间通信<br>系统调用)。</p>
+</li>
+</ul>
+<p>提供独立的地址空间使得区分不同进程的私有内存变得容易。但是，地址翻译机制可以以一种自然的方式扩展到提供更好的访问控制。因为每次CPU生成一个地址时，地址翻译硬件都会读一个PTE，所以通过在PTE上添加一些额外的许可位来控制对一个虚拟页面内容的访问十分简单。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109145828.png" alt="20220109145828"></p>
+<p>在这个示例中，每个PTE中已经添加了三个许可位：</p>
+<ul>
+<li>SUP位表示进程是否必须运行在内核模式下才能访问该页</li>
+<li>READ位和WRITE位控制对页面的读和写范围</li>
+</ul>
+<h1 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h1><h1 id="Linux内存系统"><a href="#Linux内存系统" class="headerlink" title="Linux内存系统"></a>Linux内存系统</h1><p>Linux为每个进程维护了一个单独的虚拟地址空间</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109155650.png" alt="20220109155650"></p>
+<ul>
+<li>内核虚拟内存<ul>
+<li>内核代码和数据：被映射到所有进程共享的物理页面。例如所有进程都共享内核的代码和全局数据结构。</li>
+<li></li>
+</ul>
+</li>
+</ul>
+<p>Linux将一组连续的虚拟页面（大小为系统中DRAM的总量）映射到相应的一组连续的物理页面，这就为内核提供了一种便利的方法来访问物理内存中任何特定的位置。比如当它需要访问页表或在一些设备上执行内存映射的IO操作时，而这些设备被映射到特定的物理内存位置时。</p>
+<p>区域划分：Linux将虚拟内存划分成不同段的集合，比如代码段、数据段、堆、共享库段以及用户栈。每个存在的虚拟页面都保存在某个区域中，而不属于某个区域的虚拟页是不存在的，且不能被进程引用。这些区域的划分允许虚拟地址空间之间又间隙，内核不用记录那些不存在的虚拟页。</p>
+<p>如下图所示，内核为系统中的每个进程维护一个单独的任务结构（task_struct）:任务结构中的元素包含或者指向内核运行该进程所需要的所有信息</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220109160341.png" alt="20220109160341"></p>
+<p>任务结构中的一个条目指向mm_struct ，它描述了虚拟内存的当前状态。其中有两个参数为pgd和mmap：</p>
+<ul>
+<li>pgd指向第一级页表（页全局目录）的基址。</li>
+<li>mmap指向一个vm_area_struct的区域结构的链表，其中每个vm_area_struct都描述了当前虚拟地址空间的一个区域：<ul>
+<li>vm_start:区域起始处</li>
+<li>vm_end:区域结束处</li>
+<li>vm_prot:描述这个区域内包含的所有页的读写许可权限</li>
+<li>vm_flags:描述这个区域的页面是与其他进程共享的，还是这个进程私有的</li>
+<li>vm_next: 指向链表中的下一个区域结构</li>
+</ul>
+</li>
+</ul>
+<p>假设MMU在视图翻译某个虚拟地址A时，触发了一个缺页异常：</p>
+<ol>
+<li><p>首先需要判断虚拟地址A是合法的吗？缺页处理程序需要搜索区域结构的链表，把A和每个区域结构的vm_start 和 vm_end 做比较，如果这个指令是不合法的，那么就会触发一个错误终止这个进程</p>
+<blockquote>
+<p>因为一个进程可以创建任意数量的新的虚拟内存区域，所有顺序搜索区域结构的链表开销比较大，所有实际上Linux在链表中构建了一棵树，并在这颗树上进行查找</p>
+</blockquote>
+</li>
+<li><p>试图访问的内存是否合法：也就是说进程是否有读、写或者指向这个区域内页面的权限？</p>
+</li>
+<li><p>到了这里，内核知道了这个缺页异常是由于对合法的虚拟地址进行合法的操作造成的，就开始处理这个缺页异常了。<strong>选择一个牺牲页面， 如果这个牺牲页面被修改过，那么就将它交换出去，换人新的页面并更新页表。当缺页处理程序返回时，CPU重新启动引起缺页的指令，这条指令将再次发送A到MMU。这次，MMU就能正常地翻译A,而不会再产生缺页中断了。</strong></p>
+</li>
+</ol>
+<h1 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h1><p><strong>Linux通过将一个虚拟内存区域与一个磁盘上的对象关联起来，以初始化这个虚拟内存区域的内容，这个过程称为内存映射（memory mapping）。</strong></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>CSAPP（四）虚拟内存</p><p><a href="http://example.com/2022/01/08/CSAPP（四）虚拟内存/">http://example.com/2022/01/08/CSAPP（四）虚拟内存/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2022-01-08</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2022-01-09</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2022/01/09/Go-%E5%8D%8F%E7%A8%8B%E7%9A%84%E5%8E%86%E5%8F%B2%E5%92%8C%E5%8F%91%E5%B1%95/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Go_协程的历史和发展</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2022/01/06/CSAPP%EF%BC%88%E4%B8%89%EF%BC%89%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/"><span class="level-item">CSAPP（三）存储结构</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">108</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">21</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#背景"><span class="level-left"><span class="level-item">1</span><span class="level-item">背景</span></span></a></li><li><a class="level is-mobile" href="#物理寻址和虚拟寻址"><span class="level-left"><span class="level-item">2</span><span class="level-item">物理寻址和虚拟寻址</span></span></a></li><li><a class="level is-mobile" href="#地址空间"><span class="level-left"><span class="level-item">3</span><span class="level-item">地址空间</span></span></a></li><li><a class="level is-mobile" href="#虚拟内存作为缓存的工具"><span class="level-left"><span class="level-item">4</span><span class="level-item">虚拟内存作为缓存的工具</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#DRAM缓存的组织结构"><span class="level-left"><span class="level-item">4.1</span><span class="level-item">DRAM缓存的组织结构</span></span></a></li><li><a class="level is-mobile" href="#页表"><span class="level-left"><span class="level-item">4.2</span><span class="level-item">页表</span></span></a></li><li><a class="level is-mobile" href="#页命中"><span class="level-left"><span class="level-item">4.3</span><span class="level-item">页命中</span></span></a></li><li><a class="level is-mobile" href="#缺页"><span class="level-left"><span class="level-item">4.4</span><span class="level-item">缺页</span></span></a></li><li><a class="level is-mobile" href="#分配页面"><span class="level-left"><span class="level-item">4.5</span><span class="level-item">分配页面</span></span></a></li></ul></li><li><a class="level is-mobile" href="#虚拟内存作为内存管理的工具"><span class="level-left"><span class="level-item">5</span><span class="level-item">虚拟内存作为内存管理的工具</span></span></a></li><li><a class="level is-mobile" href="#虚拟内存作为内存保护的工具"><span class="level-left"><span class="level-item">6</span><span class="level-item">虚拟内存作为内存保护的工具</span></span></a></li><li><a class="level is-mobile" href="#地址翻译"><span class="level-left"><span class="level-item">7</span><span class="level-item">地址翻译</span></span></a></li><li><a class="level is-mobile" href="#Linux内存系统"><span class="level-left"><span class="level-item">8</span><span class="level-item">Linux内存系统</span></span></a></li><li><a class="level is-mobile" href="#内存映射"><span class="level-left"><span class="level-item">9</span><span class="level-item">内存映射</span></span></a></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">92</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-09T15:07:17.000Z">2022-01-09</time></p><p class="title"><a href="/2022/01/09/Go-%E5%8D%8F%E7%A8%8B%E7%9A%84%E5%8E%86%E5%8F%B2%E5%92%8C%E5%8F%91%E5%B1%95/">Go_协程的历史和发展</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-08T13:06:43.000Z">2022-01-08</time></p><p class="title"><a href="/2022/01/08/CSAPP%EF%BC%88%E5%9B%9B%EF%BC%89%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">CSAPP（四）虚拟内存</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-06T15:25:41.000Z">2022-01-06</time></p><p class="title"><a href="/2022/01/06/CSAPP%EF%BC%88%E4%B8%89%EF%BC%89%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/">CSAPP（三）存储结构</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-06T15:25:30.000Z">2022-01-06</time></p><p class="title"><a href="/2022/01/06/CSAPP%EF%BC%88%E4%BA%8C%EF%BC%89%E4%BF%A1%E6%81%AF%E8%A1%A8%E7%A4%BA/">CSAPP（二）信息表示</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-06T15:25:21.000Z">2022-01-06</time></p><p class="title"><a href="/2022/01/06/CSAPP%EF%BC%88%E4%B8%80%EF%BC%89%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/">CSAPP（一）系统漫游</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2022 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

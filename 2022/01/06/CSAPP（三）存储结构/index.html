@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>CSAPP（三）存储结构 - 漫漫转码路</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="漫漫转码路"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="漫漫转码路"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="来自于CSAPP书籍第6章内容"><meta property="og:type" content="blog"><meta property="og:title" content="CSAPP（三）存储结构"><meta property="og:url" content="http://example.com/2022/01/06/CSAPP%EF%BC%88%E4%B8%89%EF%BC%89%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/"><meta property="og:site_name" content="漫漫转码路"><meta property="og:description" content="来自于CSAPP书籍第6章内容"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg"><meta property="article:published_time" content="2022-01-06T15:25:41.000Z"><meta property="article:modified_time" content="2022-01-08T13:06:28.331Z"><meta property="article:author" content="binshow"><meta property="article:tag" content="操作系统"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/01/06/CSAPP%EF%BC%88%E4%B8%89%EF%BC%89%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/"},"headline":"CSAPP（三）存储结构","image":[],"datePublished":"2022-01-06T15:25:41.000Z","dateModified":"2022-01-08T13:06:28.331Z","author":{"@type":"Person","name":"binshow"},"description":"来自于CSAPP书籍第6章内容"}</script><link rel="canonical" href="http://example.com/2022/01/06/CSAPP%EF%BC%88%E4%B8%89%EF%BC%89%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.12.0/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/gallery/covers/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F1.jpeg" alt="CSAPP（三）存储结构"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-01-06T15:25:41.000Z" title="2022/1/6 下午11:25:41">2022-01-06</time>发表</span><span class="level-item"><time dateTime="2022-01-08T13:06:28.331Z" title="2022/1/8 下午9:06:28">2022-01-08</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><span class="level-item">25 分钟读完 (大约3676个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">CSAPP（三）存储结构</h1><div class="content"><p>来自于CSAPP书籍第6章内容</p>
+<span id="more"></span>
+
+
+
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>memory system 是一个具有不同容量、成本和访问时间的层次结构：</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220104225701.png" alt="20220104225701"></p>
+<ul>
+<li>CPU寄存器保存着最常用的数据。</li>
+<li>靠近CPU的很小的高速缓存（一般分为L1、L2、L3）</li>
+<li>主存（Main Memory）</li>
+<li>磁盘</li>
+</ul>
+<p>从上到下，访问速度越来越慢，但是价格越来越便宜，容量越来越大！</p>
+<blockquote>
+<p>如果你的程序需要的数据</p>
+<p>是存储在CPU寄存器中的，那么在指令的执行期间，在0个周期内就能访问到它们。</p>
+<p>如果存储在高速缓存中，需要4~75个周期。</p>
+<p>如果存储在主存中，需要上百个周期。</p>
+<p>如果存储在磁盘上，需要大约几千万个周期!</p>
+</blockquote>
+<p>为什么要采用这种分层结构呢？</p>
+<p>局部性原理（locality），一个良好的程序更加倾向于一次又一次的访问相同的数据项集合，或者是倾向于访问相邻的数据项集合，换句话说就是更倾向于从层次结构中较高的层次出访问数据项，因此运行的更快</p>
+<h1 id="存储技术"><a href="#存储技术" class="headerlink" title="存储技术"></a>存储技术</h1><h2 id="随机访问存储器RAM"><a href="#随机访问存储器RAM" class="headerlink" title="随机访问存储器RAM"></a>随机访问存储器RAM</h2><p>Random-Access Memory , 分为两类：<strong>SRAM 和 DRAM</strong></p>
+<h3 id="SRAM"><a href="#SRAM" class="headerlink" title="SRAM"></a>SRAM</h3><p>静态RAM，将每个位(bit)存储在一个双稳态的(bistable)存储器单元里。每个单元是用一个<strong>六晶体管电路</strong>来实现的。</p>
+<p>这个电路有这样一个属性，它可以无限期地保持在<strong>两个不同的电压配置(configuration)或状态(state)之一</strong>。<strong>意思就是计算机中的0和1两个状态？</strong></p>
+<p>其他任何状态都是不稳定的，从不稳定状态开始，电路会迅速地转移到两个稳定状态中的一个。这样一个存储器单元类似于图6-1中画出的倒转的钟摆。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220104232030.png" alt="20220104232030"></p>
+<p>由于具有双稳态，只要有电，就会永远保持它的值。</p>
+<h3 id="DRAM"><a href="#DRAM" class="headerlink" title="DRAM"></a>DRAM</h3><p>动态RAM将每个位(bit)存储为一个电容的充电。</p>
+<p>DRAM存储器可以制造得非常密集-一-每 个单元由一个电容和一一个访问晶体管组成。但是，与SRAM不同，DRAM存储器单元对干扰非常敏感。当电容的电压被扰乱之后，它就永远不会恢复了。暴露在光线下会导致电容电压改变。实际上，数码照相机和摄像机中的传感器本质上就是DRAM单元的阵列。</p>
+<h3 id="传统DRAM"><a href="#传统DRAM" class="headerlink" title="传统DRAM"></a>传统DRAM</h3><h3 id="内存模块"><a href="#内存模块" class="headerlink" title="内存模块"></a>内存模块</h3><h3 id="增强的DRAM"><a href="#增强的DRAM" class="headerlink" title="增强的DRAM"></a>增强的DRAM</h3><h3 id="非易失性存储器"><a href="#非易失性存储器" class="headerlink" title="非易失性存储器"></a>非易失性存储器</h3><p>前面说的SRAM和DRAM一旦断电，内部的信息就会丢失。</p>
+<p>闪存flash memory 就是一种非易失性存储器，</p>
+<p>固态硬盘SSD就是基于闪存的磁盘驱动器。</p>
+<h3 id="访问主存"><a href="#访问主存" class="headerlink" title="访问主存"></a>访问主存</h3><p>数据流通过称为**总线(bus)**的共享电子电路在处理器和DRAM主存之间来来回回。每次CPU和主存之间的数据传送都是通过一系列步骤来完成的，这些步骤称为总线事务。</p>
+<p>读事务从主存传送数据到CPU。 写事务从CPU传送数据到主存。</p>
+<p>总线是一组并行的导线，能携带地址、数据和控制信号。取决于总线的设计，数据和地址信号可以共享同一组导线，也可以使用不同的。同时，两个以上的设备也能共享同一总线。控制线携带的信号会同步事务，并标识出当前正在被执行的事务的类型。</p>
+<p>如下图：CPU芯片、I/O 桥接器(I/O bridge)的芯片组(其中包括内存控制器)、以及组成主存的DRAM内存模块。这些部件由一对总线连接起来，其中</p>
+<ul>
+<li><p>一条总线是<strong>系统总线(system bus)，它连接CPU和I/O桥接器</strong>，</p>
+</li>
+<li><p>另一条总线是<strong>内存总线(memory bus)，它连接I/O桥接器和主存。</strong></p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220104235912.png" alt="20220104235912"></p>
+<p>I/O 桥接器将系统总线的电子信号翻译成内存总线的电子信号。正如我们看到的那样，I/O桥也将系统总线和内存总线连接到I/O总线，像磁盘和图形卡这样的I/O设备共享I/O总线。不过现在，我们将注意力集中在内存总线上。</p>
+<p>CPU执行下面这条汇编指令时：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">movq A,%rax       // 将地址A的内容加载到寄存器 %rax中</span><br></pre></td></tr></table></figure>
+
+<p>CPU芯片上的<strong>总线接口</strong>会在<strong>系统总线</strong>上发起<strong>读事务</strong>：</p>
+<ol>
+<li>CPU将地址A放到系统总线上，I/O桥将信号传递到内存总线</li>
+<li>主存感受到了内存总线上的地址信号，从内存总线上读取地址，从DRAM取出数据，并将数据写入到内存总线</li>
+<li>I/O桥将内存总线的信号翻译成系统总线信号，传递到系统总线上</li>
+<li>CPU感受到了系统总线上的数据，从总线上读取数据，并将数据复制到寄存器 %rax中</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220105000501.png" alt="20220105000501"></p>
+<p>如果是下面的<strong>写事务</strong>呢：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">movq %rax,A  // 将寄存器 %rax中的内容写入到地址A中</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>CPU将地址放入到系统总线上，内存从内存总线上读出地址，并等待数据到达</li>
+<li>CPU将寄存器 %rax中的数据复制到系统总线</li>
+<li>主存从内存总线读出数据，并这些bit存储到DRAM中</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220105000737.png" alt="20220105000737"></p>
+<h2 id="磁盘存储"><a href="#磁盘存储" class="headerlink" title="磁盘存储"></a>磁盘存储</h2><h1 id="局部性"><a href="#局部性" class="headerlink" title="局部性"></a>局部性</h1><p>局部性的英文是 <strong>locality</strong>，通常有两种不同的形式：</p>
+<ul>
+<li>时间局部性 <strong>temporal locality</strong> ： 被引用过一次的内存位置很可能会在不远的将来被多次引用。</li>
+<li>空间局部性 <strong>spatial locality</strong>：一个内存位置被引用了，那么不远的将来回来引用附近的一个内存位置。</li>
+</ul>
+<p><strong>一般而言，有良好局部性的程序比局部性差的程序运行得更快。</strong></p>
+<p>现代计算机系统的各个层次，从硬件到操作系统、再到应用程序，它们的设计都利用了局部性。</p>
+<ul>
+<li>在硬件层，局部性原理允许计算机设计者通过引入称为高速缓存存储器的小而快速的存储器来保存最近被引用的指令和数据项，从而提高对主存的访问速度。</li>
+<li>在操作系统级，局部性原理允许系统使用主存作为虚拟地址空间最近破引用块的高速缓存。类似地，操作系统用主存来缓存磁盘文件系统中最近被使用的磁盘块。</li>
+<li>局部性原理在应用程序的设计中也扮演着重要的角色。例如，Web浏览器将最近被引用的文档放在本地磁盘上，利用的就是时间局部性。大容量的Web服务器将最近被请求的文档放在前端磁盘高速缓存中，这些缓存能满足对这些文档的请求，而不需要服务器的任何干预。</li>
+</ul>
+<h2 id="数据引用的局部性"><a href="#数据引用的局部性" class="headerlink" title="数据引用的局部性"></a>数据引用的局部性</h2><p>比如下面这个函数具有良好的局部性吗？</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sumvec</span><span class="params">(<span class="keyword">int</span> v[N])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i , sum = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">0</span> ; i &lt; N ; i++) sum += v[i];</span><br><span class="line">  <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>变量sum在每次循环中被引用一次，因此具有良好的时间局部性</li>
+<li>对数组v的元素访问是顺序读取的，因此具有良好的空间局部性。但是v中的每个元素都只访问一次，所以这里的时间局部性很差</li>
+</ul>
+<p>ps ： 像<code>sumvec</code> 这种顺序访问一个向量每个元素的函数，具有<strong>步长为1的引用模式</strong>。如果在一个连续向量中，每隔k个元素进行访问，则称为步长为k的引用模式。</p>
+<p>下面对二元数组的访问：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sumarrayrows</span><span class="params">(<span class="keyword">int</span> a[M][N])</span></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i , j , sum = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">0</span> ; i &lt; M ; i++)&#123;</span><br><span class="line">    <span class="keyword">for</span>(j = <span class="number">0</span> ; j &lt; N ; j++)&#123;</span><br><span class="line">      sum += a[i][j];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>内层循环读第一行的元素，然后读第二行，这个函数也是具有良好的空间局部性，因为它按照数据被存储的行优先顺序来访问这个数组的。这个结果是<strong>步长为1的引用模式</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220107000838.png" alt="20220107000838"></p>
+<p>如果交换i和j的顺序，变成先按照列的顺序来扫描数组，会发生什么呢？因为C数组在内存中是按照行顺序来存放的，结果得到的是<strong>步长为N的引用模式</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220107001032.png" alt="20220107001032"></p>
+<h2 id="取指令的局部性"><a href="#取指令的局部性" class="headerlink" title="取指令的局部性"></a>取指令的局部性</h2><h1 id="存储器层次结构"><a href="#存储器层次结构" class="headerlink" title="存储器层次结构"></a>存储器层次结构</h1><h2 id="层次结构中的缓存"><a href="#层次结构中的缓存" class="headerlink" title="层次结构中的缓存"></a>层次结构中的缓存</h2><p>一般而言，高速缓存(cache， 读作“cash”)是-一个小而快速的存储设备，它作为存储在更大、也更慢的设备中的数据对象的缓冲区域。使用高速缓存的过程称为缓存(caching,读作“cashing”)。</p>
+<p>存储器层次结构的中心思想是，<strong>位于k层的更快更小的存储设备作为位于k+1层的更大更慢的存储设备的缓存</strong>。换句话说，层次结构中的每一层都缓存来自较低一层的数据对象。</p>
+<p>例如，本地磁盘作为通过网络从远程磁盘取出的文件(例如Web页面)的缓存，主存作为本地磁盘上数据的缓存，依此类推，直到最小的缓存是CPU 寄存器组。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220108183946.png" alt="20220108183946"></p>
+<p>图6-22展示了存储器层次结构中缓存的一般性概念。第k+1层的存储器被划分成连.续的数据对象组块(chunk)，称为块(block)。每个块都有一个唯一的地址或名字，使之区别于其他的块。块可以是固定大小的(通常是这样的)，也可以是可变大小的(例如存储在Web服务器上的远程HTML文件)。例如，图6-22中第k+1层存储器被划分成16个大小固定的块，编号为0~15。</p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220104225701.png" alt="20220104225701"></p>
+<p>在CPU三级高速缓存中来说：</p>
+<ul>
+<li>L1和L0之间的传送通常使用的是一个字大小的块</li>
+<li>L2和L1之间（L2和L3、L3和L4之间）的传送通常使用的是几十个字节的块</li>
+<li>L4和L5之间传送的是大小为几百或几千字节的块。</li>
+</ul>
+<p>一般来说，层次结构中较低层的设备的访问时间较长，因此倾向于使用较大的块</p>
+<p>程序运行过程中会遇到一下的几种情况：</p>
+<ol>
+<li><p><strong>缓存命中</strong>：当程序需要第K+1层的某个数据对象d时，它首先在当前存储在第K层的一个块中查找d。如果d刚好缓存再低K层中，那么就是所谓的缓存命中。（cache hit）</p>
+</li>
+<li><p>缓存未命中：如果第K层没有缓存数据对象d，那么就是所说的缓存未命中（cache miss），当发生cache miss时。第K层的缓存就要从第K+1层缓存中取出包含d的数据块，如果第K层的缓存已经满了，那么则会覆盖现在存在的一个数据块。</p>
+<blockquote>
+<p>决定替换哪个数据块是由缓存的replacement-policy来决定的，比如：一个随机替换策略的缓存会随机选择一个数据块，一个LRU替换策略的缓存会选择最后被访问的事件距现在最远的数据块。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="缓存管理"><a href="#缓存管理" class="headerlink" title="缓存管理"></a>缓存管理</h2><p><strong>存储器层次结构的本质是，每一层存储设备都是较低一层的缓存。</strong>在每一层上，某种形式的逻辑必须管理缓存。这里，我们的意思是指某个东西要将缓存划分成块，在不同的层之间传送块，判定是命中还是不命中，并处理它们。管理缓存的逻辑可以是硬件、软件，或是两者的结合。</p>
+<p>例如，编译器管理寄存器文件，缓存层次结构的最高层。它决定当发生不命中时何时发射加载，以及确定哪个寄存器来存放数据。Ll、L2和L3层的缓存完全是由内置在缓存.中的硬件逻辑来管理的。在一个有虚拟内存的系统中，DRAM主存作为存储在磁盘上的数据块的缓存，是由操作系统软件和CPU上的地址翻译硬件共同管理的。对于一个具有像AFS这样的分布式文件系统的机器来说，本地磁盘作为缓存，它是由运行在本地机器上的AFS客户端进程管理的。在大多数时候，缓存都是自动运行的，不需要程序采取特殊的或显式的行动。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><h1 id="高速缓存存储器"><a href="#高速缓存存储器" class="headerlink" title="高速缓存存储器"></a>高速缓存存储器</h1><p>早期计算机系统存储器层次只有三次：CPU寄存器、DRAM主存和磁盘。<strong>随着CPU和主存之间逐渐增大的差距，被迫在CPU寄存器文件和主存之间插入了一个小的SRAM高速缓存存储器，称为L1高速缓存。L1高速缓存的访问速度几乎和寄存器一样块，大约4个时钟周期。</strong></p>
+<p><img src="https://raw.githubusercontent.com/binshow/img/master/20220108201746.png" alt="20220108201746"></p>
+<p>随着CPU和主存之间的性能差距不断增大，L1缓存和主存之间又插入了更大的高速缓存：</p>
+<ul>
+<li>L2高速缓存，大约10个时钟周期内访问</li>
+<li>L3高速缓存，大约50个时钟周期内访问</li>
+</ul>
+<h1 id="编写高速缓存友好的代码"><a href="#编写高速缓存友好的代码" class="headerlink" title="编写高速缓存友好的代码"></a>编写高速缓存友好的代码</h1></div><div class="article-licensing box"><div class="licensing-title"><p>CSAPP（三）存储结构</p><p><a href="http://example.com/2022/01/06/CSAPP（三）存储结构/">http://example.com/2022/01/06/CSAPP（三）存储结构/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>binshow</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2022-01-06</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2022-01-08</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a class="icon" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a><a class="icon" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2022/01/08/CSAPP%EF%BC%88%E5%9B%9B%EF%BC%89%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">CSAPP（四）虚拟内存</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2022/01/06/CSAPP%EF%BC%88%E4%BA%8C%EF%BC%89%E4%BF%A1%E6%81%AF%E8%A1%A8%E7%A4%BA/"><span class="level-item">CSAPP（二）信息表示</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="binshow"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">binshow</p><p class="is-size-6 is-block">后台开发工程师</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>安徽</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">108</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">21</p></a></div></div></nav></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#背景"><span class="level-left"><span class="level-item">1</span><span class="level-item">背景</span></span></a></li><li><a class="level is-mobile" href="#存储技术"><span class="level-left"><span class="level-item">2</span><span class="level-item">存储技术</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#随机访问存储器RAM"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">随机访问存储器RAM</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#SRAM"><span class="level-left"><span class="level-item">2.1.1</span><span class="level-item">SRAM</span></span></a></li><li><a class="level is-mobile" href="#DRAM"><span class="level-left"><span class="level-item">2.1.2</span><span class="level-item">DRAM</span></span></a></li><li><a class="level is-mobile" href="#传统DRAM"><span class="level-left"><span class="level-item">2.1.3</span><span class="level-item">传统DRAM</span></span></a></li><li><a class="level is-mobile" href="#内存模块"><span class="level-left"><span class="level-item">2.1.4</span><span class="level-item">内存模块</span></span></a></li><li><a class="level is-mobile" href="#增强的DRAM"><span class="level-left"><span class="level-item">2.1.5</span><span class="level-item">增强的DRAM</span></span></a></li><li><a class="level is-mobile" href="#非易失性存储器"><span class="level-left"><span class="level-item">2.1.6</span><span class="level-item">非易失性存储器</span></span></a></li><li><a class="level is-mobile" href="#访问主存"><span class="level-left"><span class="level-item">2.1.7</span><span class="level-item">访问主存</span></span></a></li></ul></li><li><a class="level is-mobile" href="#磁盘存储"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">磁盘存储</span></span></a></li></ul></li><li><a class="level is-mobile" href="#局部性"><span class="level-left"><span class="level-item">3</span><span class="level-item">局部性</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#数据引用的局部性"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">数据引用的局部性</span></span></a></li><li><a class="level is-mobile" href="#取指令的局部性"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">取指令的局部性</span></span></a></li></ul></li><li><a class="level is-mobile" href="#存储器层次结构"><span class="level-left"><span class="level-item">4</span><span class="level-item">存储器层次结构</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#层次结构中的缓存"><span class="level-left"><span class="level-item">4.1</span><span class="level-item">层次结构中的缓存</span></span></a></li><li><a class="level is-mobile" href="#缓存管理"><span class="level-left"><span class="level-item">4.2</span><span class="level-item">缓存管理</span></span></a></li><li><a class="level is-mobile" href="#小结"><span class="level-left"><span class="level-item">4.3</span><span class="level-item">小结</span></span></a></li></ul></li><li><a class="level is-mobile" href="#高速缓存存储器"><span class="level-left"><span class="level-item">5</span><span class="level-item">高速缓存存储器</span></span></a></li><li><a class="level is-mobile" href="#编写高速缓存友好的代码"><span class="level-left"><span class="level-item">6</span><span class="level-item">编写高速缓存友好的代码</span></span></a></li></ul></div></div><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">92</span></span></a></li></ul></div></div></div><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-09T15:07:17.000Z">2022-01-09</time></p><p class="title"><a href="/2022/01/09/Go-%E5%8D%8F%E7%A8%8B%E7%9A%84%E5%8E%86%E5%8F%B2%E5%92%8C%E5%8F%91%E5%B1%95/">Go_协程的历史和发展</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-08T13:06:43.000Z">2022-01-08</time></p><p class="title"><a href="/2022/01/08/CSAPP%EF%BC%88%E5%9B%9B%EF%BC%89%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">CSAPP（四）虚拟内存</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-06T15:25:41.000Z">2022-01-06</time></p><p class="title"><a href="/2022/01/06/CSAPP%EF%BC%88%E4%B8%89%EF%BC%89%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/">CSAPP（三）存储结构</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-06T15:25:30.000Z">2022-01-06</time></p><p class="title"><a href="/2022/01/06/CSAPP%EF%BC%88%E4%BA%8C%EF%BC%89%E4%BF%A1%E6%81%AF%E8%A1%A8%E7%A4%BA/">CSAPP（二）信息表示</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-01-06T15:25:21.000Z">2022-01-06</time></p><p class="title"><a href="/2022/01/06/CSAPP%EF%BC%88%E4%B8%80%EF%BC%89%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/">CSAPP（一）系统漫游</a></p></div></article></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="漫漫转码路" height="28"></a><p class="is-size-7"><span>&copy; 2022 binshow</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
